@@ -1,0 +1,24 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Lens Studio generated state
+Cache/
+Support/
+PluginsUserPreferences/
+Workspaces/
+
+# Web tooling
+node_modules/
+.next/
+dist/
+coverage/
+playwright-report/
+test-results/
+.playwright-mcp/
+
+# Local captures and exports
+captures/
+exports/
+*.log

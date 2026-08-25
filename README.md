@@ -4,9 +4,12 @@ One player paints a clue in midair on Spectacles. A friend joins from a
 browser, watches the stroke arrive live, and taps the answer that turns the
 scribble into a shared session glyph.
 
-> **Current status — approved design and implementation plan.** No Lens Studio
+> **Current status — approved design; reconciled plan awaiting approval.** No Lens Studio
 > project, web application, or realtime connection has been implemented yet.
-> The plan is awaiting independent adversarial review before Task 1 begins; the
+> Fable 5's independent review returned APPROVE WITH REQUIRED CHANGES; the
+> verified corrections and additional protocol audit are reconciled for the
+> owner's final plan approval. Task 1 then starts once the fresh Specs Base
+> Template project is open; the
 > first build activity remains a hard Lens-to-browser feasibility spike.
 
 ## The five-second read

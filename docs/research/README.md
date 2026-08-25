@@ -32,10 +32,12 @@ synced-state implication must not be implemented or repeated.
 - Sync Kit limits are 100 KB per message and 350 messages per rolling five
   seconds:
   <https://developers.snap.com/spectacles/spectacles-frameworks/spectacles-sync-kit/features/payload-and-rate-limits>
-- Snap Cloud Realtime documents bidirectional Lens↔web communication:
+- Snap Cloud Realtime documents Lens↔web Broadcast primitives:
   <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/realtime>
-- Snap's basic Realtime Cursor example sends tracked Lens coordinates to a web
-  client and receives web cursor changes:
+- Snap's deprecated basic Realtime Cursor example is mode-switched: it sends
+  tracked Lens coordinates **or** follows web cursor changes at 10 Hz, but does
+  not prove simultaneous two-way exchange in current SPECS. Gate 0 must prove
+  WORDLESS's simultaneous point stream plus browser responses:
   <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/examples/basic-setup>
 - Snap documents another Lens-plus-web application pattern:
   <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/examples/web-app>

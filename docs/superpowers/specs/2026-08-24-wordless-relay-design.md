@@ -5,6 +5,12 @@
 **Theme:** Connect
 **Decision:** Build a Spectacles-to-browser relay, gated by a realtime spike
 
+**Technical amendment — 2026-08-25:** Independent plan review corrected
+message sizing, non-replayed readiness, timeout/rejection signaling,
+connection-instance sequencing, and web tooling. These changes preserve the
+approved product and authority model; the reconciled implementation plan is
+the exact contract.
+
 ## 1. Product sentence
 
 One player paints a clue in midair on Spectacles; a friend watches the stroke
@@ -74,7 +80,8 @@ session glyph, not from claiming invention of air drawing or charades.
 - **WordlessEngine** owns the round state machine, word choice, decoys, timer,
   and answer validation.
 - **RoundStore** exposes immutable snapshots to Lens views and accepts only
-  validated engine or transport events.
+  engine-owned transitions; the composition root maps validated transport
+  messages to `WordlessEngine` commands.
 - **LensHUD** renders prompt, countdown, connection state, and result using
   bright additive-safe primitives.
 - **GlyphMedallion** freezes the exact path, normalizes its bounds, and scales
@@ -89,15 +96,18 @@ session glyph, not from claiming invention of air drawing or charades.
 - **WebRelayAdapter** handles connection, protocol validation, sequence gaps,
   and reconnect state.
 - **WebRoundStore** is the browser-side state source consumed by all views.
-- **ResultView** applies mint/coral feedback and shows the same normalized glyph
-  medallion published by the Lens.
+- **ResultView** applies mint/coral feedback and independently derives the same
+  normalized glyph from its received public points after the Lens publishes a
+  correct result and final point count.
 
 ### Realtime service boundary
 
 `RelayTransport` is an adapter boundary, not game logic. Snap Cloud Realtime is
-the preferred first adapter because its official examples document
-bidirectional Lens↔web cursor exchange. The spike decides whether access,
-runtime compatibility, latency, and capture quality are sufficient.
+the preferred first adapter because an official deprecated sample documents a
+mode-switched Lens↔web cursor exchange at 10 Hz. It does not prove simultaneous
+two-way behavior in the current SPECS runtime; the spike decides whether access,
+runtime compatibility, true simultaneous traffic, latency, and capture quality
+are sufficient.
 
 No second transport may be introduced without recording an architecture
 amendment in the prompt log and confirming that its use complies with the
@@ -109,60 +119,173 @@ contest and Lens runtime requirements.
 
 1. Lens creates or selects a short session code.
 2. Browser enters the code and joins the matching realtime channel.
-3. Both surfaces display a literal connected state only after receiving a
-   counterpart-presence event.
+3. Each subscription gets a short connection ID and sends readiness. A peer
+   returns one targeted presence ack; acks never echo, duplicate readiness only
+   re-acks, and bounded ready retries tolerate non-replayed/lost first sends.
+   If retries exhaust after counterpart presence was already observed, only
+   that local adapter performs one single-flight re-subscribe; before any peer
+   was observed it simply remains waiting for later readiness. A later peer
+   ready restarts the local bounded burst.
+4. Ready binds peer receive authority and liveness but does not let Lens emit
+   product traffic. Lens requires an ack targeted to its current local
+   connection before starting. Before the initial start it sends a fresh ack
+   targeted to the browser and then the start through one FIFO. Normally the
+   browser sees `READY` before `ACTIVE`; if that fresh ack alone is lost, the
+   first policy-approved start from the already bound painter, correctly
+   targeted to the browser's current local connection, is the browser's final
+   readiness proof, cancels ready retries, and may activate directly. An
+   accepted authoritative reset may confirm the browser tuple the same way only
+   when its target equals that browser's current local connection.
+   App-level ping/ack detects peer loss even while
+   the local channel remains subscribed. Its six-second loss timer is armed
+   only after first accepted counterpart presence, so initial waiting can last
+   indefinitely without reconnect churn; recovery disarms it until presence
+   binds again.
+
+Readiness acknowledgment is scoped to local connection, peer sender, and peer
+connection together. A peer transition invalidates the old tuple and restarts
+one bounded local ready burst without reopening the healthy local channel.
+While that tuple is still unacknowledged, same-connection ready/targeted-ack
+retries may bridge missing lobby-control sequences; after acknowledgment,
+ordinary strict gap handling resumes.
 
 ### Round start
 
-1. `applyRound` resets both local stores through the engine.
-2. Lens chooses one word from a curated deck and constructs four choices.
-3. Lens keeps the correct index local and publishes the choices, round ID, and
+1. Lens `applyRound` resets its authoritative `RoundStore` and creates an
+   epoch-qualified round ID. It never reaches into the browser store.
+2. For a noninitial round, Lens emits an old-ID-enveloped authoritative reset;
+   the browser resets its own store only after accepting that message, acks the
+   advertised new ID, and Lens withholds the new start until that ack.
+3. Lens chooses one word from a curated deck and constructs four choices.
+4. Lens keeps the correct index local and publishes the choices, round ID, and
    duration.
-4. Lens shows `DRAW: <WORD>`; browser shows `GUESS THE CLUE` and the choices.
+5. Lens shows `DRAW: <WORD>`; browser shows `GUESS THE CLUE` and the choices.
 
 ### Drawing
 
 1. Lens renders every accepted world-space sample locally.
-2. StrokeSampler emits bounded batches of normalized `{x, y}` points with a
+2. StrokeSampler emits bounded batches of normalized integer `[x, y]` tuples with a
    monotonically increasing sequence number.
 3. Browser ignores stale duplicates, detects gaps, and renders accepted points.
-4. A stroke-end message freezes drawing input; the round remains active for
-   guesses while time remains.
+   A browser-observed painter gap performs one local re-subscribe with no
+   pre-close request; the connection-ID transition makes Lens apply a new
+   round. A Lens-observed guesser gap applies/sends the reset in place. Neither
+   invents missing geometry.
+4. A stroke-end message freezes drawing input; exactly one stroke is allowed
+   per round, while guessing remains active until terminal state.
 
 ### Guess and result
 
 1. Browser may guess while the stroke is arriving or after it ends. It sends
-   `{roundId, choiceIndex}` and disables that card while awaiting the result.
+   `{roundId, guessId, choiceIndex}` and makes the four-card grid single-flight while
+   awaiting that correlated result; only the selected card reads `SUBMITTED`.
 2. Lens rejects stale, malformed, or duplicate guesses.
 3. WordlessEngine compares the choice against its local correct index.
-4. Lens publishes a literal `correct` or `incorrect` result.
-5. Incorrect feedback uses coral, keeps that card disabled, and leaves the
+4. The first terminal decision is immutable. At `now >= deadline`, timeout is
+   advanced before a guess is evaluated; a correct guess accepted before the
+   deadline cannot later be overwritten while draining.
+5. On correct or timeout, Lens first drains the final batch and publishes one
+   stroke end only if a stroke is active. It then publishes the respective
+   result/timeout message plus final point count, never glyph geometry.
+6. Incorrect feedback uses coral, keeps that card disabled, and leaves the
    remaining choices active while time remains.
-6. Correct feedback uses mint, reveals the word on both surfaces, freezes the
-   exact path, and normalizes it into the shared session glyph medallion.
+7. Correct feedback uses mint, reveals the word on both surfaces, freezes the
+   exact path, and independently normalizes each surface's identical public
+   points into the shared session glyph medallion.
 
 ## 7. Protocol contract
 
 Every message carries:
 
-- `version`
+- `v` (protocol version)
 - `type`
 - `sessionId`
 - `roundId`
 - `senderId`
 - `sequence`
+- `sentAtMs`
 - type-specific payload
+
+`senderId` identifies one full client instance: it remains stable across
+transient channel re-subscriptions and changes on a full browser/Lens restart.
+Sequence high-water marks are scoped to that instance; the same sender never
+resets its sequence by sending readiness again.
+Each local subscription also has a new `connectionId`. Because Broadcast does
+not replay pre-subscription traffic, the first valid ready/targeted ack from an
+unbound or genuine replacement sender may establish a
+positive sequence baseline greater than one. Wrong-session/role traffic cannot
+bind or baseline it. Once bound, that sender—including later re-subscription
+traffic—uses ordinary contiguous/gap rules, except that a distinct peer
+connection ID or an ack targeted to the receiver's locally new subscription
+may act as a reconnect barrier and forces a new authoritative round rather
+than merging missed product state. A peer connection-ID change is acknowledged
+over the receiver's existing healthy subscription and never forces a
+reciprocal re-subscribe. Recovery waits for the peer's ack targeted to that
+unchanged local subscription before applying or resending a reset. The Lens
+creates at most one reset transition per recovery token. If a disconnecting
+local channel/status failure or a peer transition occurs while that token's
+reset is pending, the token becomes
+carryover-settlement-only: readiness may resend the cached reset after the
+presence gate, its matching ack closes the token without starting, and exactly
+one successor token performs the fresh recovery reset/ack/start. A reset
+inherited from outside recovery is first adopted by the same settlement-only
+form. Overlapping signals coalesce and cannot create extra successors.
+A Lens-observed sequence gap while a reset is already pending is deliberately
+not such a disconnect: it invalidates queued stale application drafts, resends
+the cached reset, completes local policy resync, and allocates no successor.
+
+Every `round.start` carries the exact browser `targetConnectionId` whose
+confirmed tuple released it. The first painter start binds the browser's
+product round only after painter presence and only when that target equals the
+browser's current local subscription. Because its immediately preceding
+targeted ack can be the one lost lobby-control message, that first valid start
+may bridge the gap only while no product round exists; a start targeted to a
+prior browser subscription is `STALE_CONNECTION`, consumes only an otherwise-
+contiguous sequence, and cannot confirm or bind. The exception is disabled
+permanently after binding. Every later transition is Lens-authoritative:
+`round.reset` is enveloped with the current old round and carries a distinct
+next round ID plus the exact current browser `targetConnectionId`. Browser
+acceptance requires that target, resets its local store, and emits
+`round.reset.ack`; a stale-target reset may consume only an otherwise-contiguous
+sequence and cannot confirm, bind, dispatch, or ack. Lens retries the same
+semantic old/new transition with fresh sequences, refreshing the delivery
+target only after a new peer-tuple gate, and cannot start the new round before
+a matching ack. On a sequence gap,
+ordinary messages remain blocked until an authorized reset (or matching ack in
+the reverse direction) acts as the replay-safe transition barrier. A reset
+that is itself the first gapped message is valid when its sequence equals the
+latest observation and exceeds accepted high-water. No partial old round is
+merged or republished.
+
+Each client has one outbound FIFO for both adapter-authored liveness/control
+traffic and app-authored gameplay traffic. Entries retain non-wire ownership
+and application-generation metadata. On any round invalidation/recovery
+barrier, not-yet-started stale application entries are synchronously cancelled
+without consuming sequence, while adapter controls and at most one already-
+started send survive. A reconnecting receiver consumes but suppresses that one
+possible old gameplay payload until a correctly targeted reset/start; no old
+payload is merged. The transport assigns sequence and send time only at
+dequeue, awaits each channel send, and enforces at least 100 ms between actual
+`stroke.points` send starts. A full client restart gets a new sender epoch; a
+full Lens restart also gets a new bounded round nonce.
 
 Minimum message types:
 
 - `presence.ready`
+- `presence.ack`
 - `round.start`
 - `stroke.begin`
 - `stroke.points`
 - `stroke.end`
 - `guess.submit`
+- `guess.rejected`
 - `round.result`
+- `round.timeout`
+- `round.resync.request` (`POINT_COUNT_MISMATCH` only)
 - `round.reset`
+- `round.reset.ack`
+- `transport.ping`
+- `transport.ack`
 
 Payload limits are configured from measured spike evidence. Until those
 measurements exist, the conservative probe uses one stroke, no more than 128
@@ -177,26 +300,44 @@ DISCONNECTED
   -> JOINING
   -> READY
   -> ACTIVE
-  -> INCORRECT -> ACTIVE
-  -> CORRECT
-  -> GLYPH_LOCKED
-  -> READY
+       -> wrong feedback remains ACTIVE
+       -> CORRECT -> GLYPH_LOCKED -- PLAY AGAIN / applyRound --> READY
+       -> TIMED_OUT -- PLAY AGAIN / applyRound --> READY
 ```
 
-Connection loss moves either participant to `DISCONNECTED`. A reconnect during
-the first implementation resets through `applyRound`; it does not attempt to
-merge partial strokes. `ACTIVE` permits drawing and guessing concurrently;
-stroke end closes only drawing input. Timeout ends the round without creating a
-glyph.
+`GLYPH_LOCKED` is a deterministic local completion state on both surfaces, not
+a wire message. After an accepted correct result, each captures the current
+round ID plus its local round generation and transitions `CORRECT ->
+GLYPH_LOCKED` at the 450 ms completion boundary. A reset/reconnect increments
+generation, so a stale completion callback is a no-op. Task 13 may refine the
+tween or complete immediately for reduced motion, but it cannot introduce or
+redefine this pre-Gate-1 state behavior.
+
+Actual local connection loss moves that participant to `DISCONNECTED`. A peer
+rejoin observed on a healthy local channel invalidates partial gameplay but
+keeps that channel and local connection ID; recovery runs once through the
+Lens-authoritative reset/ack/start barrier. No reconnect path attempts to merge
+partial strokes. `ACTIVE` permits drawing and guessing concurrently;
+stroke end closes only drawing input and a second stroke is rejected until the
+next `applyRound`. Timeout ends the round without creating a glyph. Incorrect
+feedback is stored/rendered while the authoritative phase remains `ACTIVE`; it
+is not a separate wire phase. Correct/glyph and timeout remain visible until
+the wearer activates `PLAY AGAIN`; only that callback routes to the next
+`applyRound`. Reset/disconnect advances an engine generation
+and invalidates every pending old-round close or terminal callback.
 
 ## 9. Error handling and honesty
 
 - Invalid session code: remain on JoinView with a short literal error.
 - Counterpart absent: show `WAITING FOR PLAYER`, not `CONNECTED`.
-- Network interruption: stop accepting new guesses, preserve the local drawing
-  for display, and offer a round reset after reconnection.
-- Sequence gap: log expected and received numbers; request/reset the current
-  round rather than invent missing geometry.
+- Network interruption: stop accepting new guesses. Lens may preserve its local
+  ribbon inertly; browser hides/clears an incomplete public projection. Neither
+  merges it after recovery, which enters a new `applyRound` after reconnection.
+- Sequence gap: log expected and received numbers. A browser-observed painter
+  gap closes/re-subscribes so its new connection ID triggers authoritative
+  recovery; a Lens-observed browser gap applies/sends one reset in place and
+  completes receive-policy resync. `round.resync.request` is reserved for a
+  healthy-channel point-count mismatch. No path invents missing geometry.
 - Rate or payload warning: stop the probe, record the evidence, and reduce the
   cap before continuing.
 - Unsupported Snap Cloud access: the spike fails. Do not hide the failure with

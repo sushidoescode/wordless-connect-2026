@@ -30,15 +30,26 @@ committed.
 
 - `WordlessEngine` is the pure owner of round transitions and answer
   validation. Views render state; they do not infer it.
-- `RoundStore` is the single runtime source of truth. Network adapters emit
-  typed events into it and serialize events out of it.
+- Lens `RoundStore` is the authoritative Lens runtime source of truth. Network
+  adapters parse and route sanitized typed events to the composition root;
+  they never mutate either store. The root dispatches accepted commands into
+  `WordlessEngine`, serializes its effects, and renders store snapshots. The
+  browser owns a separate public projection in `WebRoundStore`.
 - The Lens keeps world-space stroke points locally. Only bounded,
   quantized normalized coordinates cross to the browser.
 - The selected answer and correct index remain Lens-local until the Lens
   publishes a result. This is game concealment, not cryptographic privacy.
 - The browser submits an answer choice; it never declares that an answer is
   correct.
-- `applyRound` is the single reset/start door for every UI surface and test.
+- Lens `applyRound` is the single authoritative round creation/reset door;
+  only `setCounterpartReady` may release that already-applied round's one start
+  after the presence/reset-ack gate. Browser
+  transport recovery may invalidate/hide an incomplete display projection and
+  mark it reconnecting; it cannot authorize or populate a round. Only an
+  accepted Lens-authored `round.reset` may authorize/bind a successor round ID.
+  A policy-approved Lens-authored `round.start` may populate and activate that
+  reset-authorized ID, or establish the initial/new-painter-epoch round when no
+  product round is bound. No UI or adapter invents a playable round.
 - Protocol messages are versioned, sequence-numbered, bounded, and validated
   before changing state.
 
@@ -74,6 +85,10 @@ committed.
 - Once the Lens Studio project exists, author user resources only under
   `Assets/`. Never modify `Cache/`; do not commit generated `Support/`,
   `PluginsUserPreferences/`, or `Workspaces/` state.
+- Commit the complete Lens-authored project dependency baseline under
+  `Packages/` and every adjacent `.meta` for `Assets/`/`Packages/` primary
+  files. Missing metadata breaks resource identity in a clone; Cache is never
+  a substitute for package artifacts.
 - Use Lens Studio MCP tools for editor inspection and mutation. Never use
   `curl`, `fetch`, `wget`, raw HTTP, or direct REST calls against Lens Studio.
   If the Lens Studio MCP tools are unavailable, stop and report the failure.

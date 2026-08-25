@@ -7,10 +7,10 @@ You are the independent adversarial reviewer for WORDLESS Relay, the private
 Week-3 Connect project for the 2026 CLAD Summer Hackathon.
 
 Work read-only in the implementation repository:
-/Users/sushantsrikrish/CLAD-Hackathon/CONNECT-2026
+the `CONNECT-2026` repository selected as this session's working directory
 
-Write only your final review memo to:
-/Users/sushantsrikrish/CLAD-Hackathon/Connect-2026-prep/fable-implementation-plan-review.md
+Write only your final review memo to the sibling path:
+../Connect-2026-prep/fable-implementation-plan-review.md
 
 Do not edit, commit, stage, push, install packages, create cloud resources,
 open Lens Studio, or mutate either repository. Do not modify GUIDE-2026; it is
@@ -53,10 +53,12 @@ Important environment correction to scrutinize:
   project.
 - This machine has Lens Studio 5.23.1 and the prior project used Specs Base
   Template with targetPlatform: Spectacles.
-- This machine has Node 22.14: TypeScript stripping requires
-  `--experimental-strip-types`, and `node:module` exposes asynchronous
-  `register` but not the newer `registerHooks`. Verify the documented loader
-  and every direct Node invocation against that exact runtime.
+- This machine has Node 22.14, 24.16, and 25.8.1 installed. Run
+  `command -v node` and `node --version`, record which executable the review
+  shell resolves, and verify the documented loader and every direct Node
+  invocation against that runtime. The 22.14 lane requires
+  `--experimental-strip-types` and exposes asynchronous `register` rather than
+  the newer `registerHooks`; do not assume PATH resolves that lane.
 - Some public Snap Cloud examples and documentation still mention Lens Studio
   5.15 / Spectacles (2024), while current sample branches target 5.22+.
 - The plan therefore treats installed Asset Library packages and generated

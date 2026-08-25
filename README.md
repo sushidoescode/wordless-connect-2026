@@ -4,10 +4,10 @@ One player paints a clue in midair on Spectacles. A friend joins from a
 browser, watches the stroke arrive live, and taps the answer that turns the
 scribble into a shared session glyph.
 
-> **Current status — design only.** The architecture was approved on
-> 2026-08-24. No Lens Studio project, web application, or realtime connection
-> has been implemented yet. The first build activity is a hard Lens-to-browser
-> feasibility spike.
+> **Current status — approved design and implementation plan.** No Lens Studio
+> project, web application, or realtime connection has been implemented yet.
+> The plan is awaiting independent adversarial review before Task 1 begins; the
+> first build activity remains a hard Lens-to-browser feasibility spike.
 
 ## The five-second read
 
@@ -41,12 +41,18 @@ fallbacks, and scope are in the
 - [`AGENTS.md`](AGENTS.md) — non-negotiable build and honesty contract.
 - [`docs/superpowers/specs/2026-08-24-wordless-relay-design.md`](docs/superpowers/specs/2026-08-24-wordless-relay-design.md)
   — approved product and technical design.
+- [`docs/superpowers/plans/2026-08-24-wordless-relay-implementation.md`](docs/superpowers/plans/2026-08-24-wordless-relay-implementation.md)
+  — agent-native implementation, verification, polish, and submission plan.
 - [`docs/research/README.md`](docs/research/README.md) — research authority,
   corrections, competitive evidence, and source links.
 - [`docs/references/README.md`](docs/references/README.md) — visual-reference
   ranking, provenance, checksums, and the production visual contract.
 - [`docs/prompts/visual-reference-prompt.md`](docs/prompts/visual-reference-prompt.md)
   — the prompt used to create the three reference images.
+- [`docs/prompts/fable-implementation-plan-review.md`](docs/prompts/fable-implementation-plan-review.md)
+  — copy-ready adversarial review prompt.
+- [`docs/prompts/implementation-session-kickoff.md`](docs/prompts/implementation-session-kickoff.md)
+  — copy-ready fresh-session execution prompt after reconciliation.
 - [`docs/prompt-log.md`](docs/prompt-log.md) — annotated planning and build log.
 
 ## Visual north star

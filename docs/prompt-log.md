@@ -1447,4 +1447,46 @@ Lens MCP recompile succeeded and its required refreshed Preview returned
 `CHANNEL SUBSCRIBED`, and 54 continuing numeric point starts with no new
 channel error; Preview was paused afterward. No credential or forbidden local
 artifact entered the worktree, and the repository remained private. Task 5
-remains uncommitted until both reviewers confirm this reconciled state.
+was subsequently approved by both reviewers and committed as `8cbc8e9`.
+
+## 2026-08-26 — Task 6 authoritative round engine and store
+
+Task 6 followed the approved engine contract without changing product scope.
+The focused test command first failed with `ERR_MODULE_NOT_FOUND` for the
+not-yet-created round modules. The first implementation then passed all 26
+planned state-transition tests. It keeps the answer and correct index private,
+uses `applyRound` as the only full reset, releases one start only through the
+counterpart-ready gate, permits drawing and guesses together in `ACTIVE`, and
+orders terminal stroke drain before its correct/timeout effect. Every effect
+is tagged with its exact round ID and generation, and stale reset, disconnect,
+and delayed glyph-lock work fails closed.
+
+The first contract review found that a new guess ID aimed at an already-tried
+choice was being inserted into the private duplicate set even though the guess
+was rejected. The regression proved the later retry could receive the wrong
+reason. Moving the insertion after the already-tried guard preserved repeated
+`CHOICE_ALREADY_TRIED` behavior without mutating public state.
+
+The independent quality pass then identified six adversarial gaps: a throwing
+store listener could abort engine effect production; a reentrant listener could
+misorder snapshot delivery; non-finite or reversing clocks could corrupt or
+stall deadlines; point-effect tuples were only shallowly immutable; and deck
+cards and their choice tuples remained mutable at runtime. Six focused
+regressions produced the required red state at 26 pass / 6 fail. `RoundStore`
+now queues frozen replacement transactions in FIFO order, captures each exact
+snapshot and listener copy, and isolates listener exceptions. The engine uses
+one finite, non-reversing per-round clock gate, resets that baseline only at an
+accepted `applyRound`, and deeply freezes copied stroke-point effects. The
+eight-card local deck is deeply frozen as well.
+
+The remediated focused suite passed 32/32 and the integrated core suite passed
+110/110. The Lens preflight typecheck and scoped diff checks passed. A fresh
+Lens Studio MCP TypeScript recompile also succeeded; the required refreshed
+Preview returned `errors=[]`, then the replacement epoch logged
+`CLIENT_CONFIGURED`, `CHANNEL SUBSCRIBED`, and continuing point traffic. One
+`CHANNEL_ERROR` print immediately preceded that new epoch at the refresh
+boundary and belonged to the canceled prior spike channel; it is retained
+here rather than hidden. Preview was paused afterward. Final independent
+contract and quality re-reviews each returned PASS with no Critical,
+Important, or Minor findings. This is Preview/runtime compatibility evidence,
+not hardware, production, security, persistence, scale, or latency evidence.

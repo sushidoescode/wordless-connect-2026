@@ -1849,7 +1849,7 @@ core lanes integrate.
 - Produces: `RoundStore`, `WordlessEngine`, `WordCard`, `EngineEffect`, and the
   single `applyRound` reset path used by Lens composition.
 
-- [ ] **Step 1: Write failing engine tests**
+- [x] **Step 1: Write failing engine tests**
 
 Cover the complete state contract:
 
@@ -1885,7 +1885,7 @@ test('disconnect blocks guesses and reconnect requires applyRound', () => {})
 Each test constructs the engine with deterministic time and the `SNAKE` card.
 Assert snapshots and emitted effects; never inspect view components.
 
-- [ ] **Step 2: Run the tests red**
+- [x] **Step 2: Run the tests red**
 
 Run:
 
@@ -1895,7 +1895,7 @@ node --experimental-strip-types --import ./tools/core-tests/register.mjs --test 
 
 Expected: imports for `RoundStore`, `WordlessEngine`, and `WordDeck` fail.
 
-- [ ] **Step 3: Define the local-only card deck**
+- [x] **Step 3: Define the local-only card deck**
 
 ```ts
 import type { ChoiceIndex, ChoiceTuple } from './Protocol'
@@ -1923,7 +1923,7 @@ position deterministically so repeated play does not teach “always tap the
 first card.” Runtime shuffling is excluded; randomness adds test and capture
 risk without improving the judged proof.
 
-- [ ] **Step 4: Implement the observable store**
+- [x] **Step 4: Implement the observable store**
 
 `RoundStore` owns one immutable `LensRoundState`:
 
@@ -1951,7 +1951,7 @@ copy of its listener list. Views receive `store.getSnapshot()` and cannot
 mutate it. `RoundStore.listenerCountForDiagnostics()` returns only the count of
 currently registered listeners; it exposes neither callbacks nor state.
 
-- [ ] **Step 5: Implement engine commands and effects**
+- [x] **Step 5: Implement engine commands and effects**
 
 Expose exactly:
 
@@ -2097,7 +2097,7 @@ An initial `applyRound` emits no reset. If a previous product round exists,
 `applyRound(newRoundId, ...)` returns `publish-reset { previousRoundId,
 nextRoundId }` before any later start effect and then replaces the local state.
 
-- [ ] **Step 6: Verify engine invariants**
+- [x] **Step 6: Verify engine invariants**
 
 Run:
 
@@ -2109,7 +2109,7 @@ Expected: all engine tests pass, including an assertion that
 serializing every public effect contains neither `correctIndex` nor the answer
 before a correct result.
 
-- [ ] **Step 7: Commit the engine lane**
+- [x] **Step 7: Commit the engine lane**
 
 ```bash
 git add Assets/Wordless/Scripts/Core/RoundStore.ts Assets/Wordless/Scripts/Core/RoundStore.ts.meta Assets/Wordless/Scripts/Core/WordlessEngine.ts Assets/Wordless/Scripts/Core/WordlessEngine.ts.meta Assets/Wordless/Scripts/Core/WordDeck.ts Assets/Wordless/Scripts/Core/WordDeck.ts.meta tools/core-tests/engine.test.mjs docs/prompt-log.md

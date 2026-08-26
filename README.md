@@ -8,8 +8,9 @@ scribble into a shared session glyph.
 > approved.** The Specs Base Template opens and its empty baseline compiles and
 > runs in Preview. Snap Cloud Alpha access is unavailable, so the owner approved
 > a normal hosted Supabase Realtime compatibility spike. No Lens↔browser
-> realtime connection or game behavior has passed Gate 0 yet. The existing
-> implementation plan must be reconciled before that spike resumes.
+> realtime connection or game behavior has passed Gate 0 yet. The implementation
+> plan is reconciled with that amendment; Task 1 resumes at the native credential
+> asset and owner Supabase-project gates.
 
 ## The five-second read
 

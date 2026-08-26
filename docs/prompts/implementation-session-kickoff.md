@@ -16,11 +16,12 @@ Before any action, read completely:
 
 1. AGENTS.md
 2. docs/superpowers/specs/2026-08-24-wordless-relay-design.md
-3. docs/superpowers/plans/2026-08-24-wordless-relay-implementation.md
-4. docs/research/README.md
-5. docs/references/README.md
-6. docs/prompt-log.md
-7. README.md
+3. docs/superpowers/specs/2026-08-25-wordless-relay-standard-supabase-amendment.md
+4. docs/superpowers/plans/2026-08-24-wordless-relay-implementation.md
+5. docs/research/README.md
+6. docs/references/README.md
+7. docs/prompt-log.md
+8. README.md
 
 Then inspect git status, branch, remote visibility, recent commits, local Lens
 Studio version, whether a `.esproj` exists, and whether Lens Studio MCP points
@@ -55,8 +56,10 @@ Hard execution rules:
   malformed-message rejection, and restart reproduction pass and are
   committed.
 - Use one SPECS/Lens Studio Preview painter and one ordinary browser guesser
-  over Snap Cloud Realtime Broadcast. Never restore the rejected remote
-  two-Spectacles/Sync Kit architecture.
+  over an ordinary hosted Supabase Realtime public Broadcast channel. Perform
+  no Snap ID-token or Supabase user sign-in. Treat the public session code and
+  client-safe key as demo coordination, not security. Never restore the
+  rejected remote two-Spectacles/Sync Kit architecture.
 - The browser submits choices; the Lens validates and publishes outcomes.
   Correct answer/index remain Lens-local until reveal.
 - World points remain Lens-local. Only bounded integer normalized points cross
@@ -125,8 +128,10 @@ Hard execution rules:
   Lens-authored start may populate and activate that ID, or establish the
   initial/new-painter-epoch round when no product round is bound.
 - Use current installed package source and generated types as API authority.
-  Snap Cloud is alpha; do not assume entitlement, auth, channel policy,
-  reconnect, or latency before the spike proves it.
+  Compatibility with a normal Supabase project is provisional until Gate 0;
+  do not assume client-safe key type, public-channel policy, reconnect, or
+  latency before the spike proves it. Wake/resume the Free project before every
+  live preflight and reconfirm Realtime plus public-channel access.
 - Keep credentials and tokens out of git, logs, captures, and messages. Browser
   config may contain only the project URL and publishable/legacy anon key in an
   ignored local environment file. Never expose service-role or session tokens.
@@ -147,8 +152,10 @@ Persistence and stop conditions:
 - If Gate 0 passes every written criterion, commit its evidence and continue
   through the plan without waiting for routine reconfirmation.
 - If Gate 0 fails, commit the honest failure record, stop all later tasks, and
-  ask the owner to choose WORDLESS Duo or Split the Table. Do not substitute a
-  backend, local mirror, prerecorded traffic, or fake browser causality.
+  report the exact failed criterion. Do not substitute a backend, local mirror,
+  prerecorded traffic, or fake browser causality. A Cloudflare Worker plus
+  Durable Object needs a new explicit transport amendment; WORDLESS Duo and
+  Split the Table remain separate owner product decisions.
 - At Gate 1, require one continuous wrong→correct→glyph→applyRound capture and
   all tests/logs. If it fails, diagnose and repair within approved scope.
 - After Gate 1 passes, freeze features. Complete the visual, comprehension,

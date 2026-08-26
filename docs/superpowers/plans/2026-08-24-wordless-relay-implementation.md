@@ -11,26 +11,29 @@ guess causes the authoritative Lens result, and the exact stroke locks into a
 shared session glyph.
 
 **Architecture:** A pure `WordlessEngine` and `RoundStore` own round state in
-the Lens. A Snap Cloud Realtime Broadcast adapter carries versioned, bounded
-messages over one session-qualified channel; the browser renders public state
-and submits choices but never decides correctness. Lens-only world points are
-projected into quantized normalized coordinates for transport, while both
-surfaces deterministically normalize the same points into the result medallion.
+the Lens. An ordinary hosted Supabase Realtime public Broadcast adapter carries
+versioned, bounded messages over one session-qualified channel; the browser
+renders public state and submits choices but never decides correctness.
+Lens-only world points are projected into quantized normalized coordinates for
+transport, while both surfaces deterministically normalize the same points
+into the result medallion.
 
 **Tech Stack:** Lens Studio 5.23.1 currently installed (official hackathon
 minimum 5.22), Specs Base Template with `targetPlatform: Spectacles`,
 TypeScript, Spectacles Interaction Kit, Lens Studio MCP/CLAD tools,
-`SupabaseClient` plus the Supabase Plugin, Snap Cloud Realtime Broadcast, Vite
-vanilla TypeScript, `@supabase/supabase-js`, Vitest, Node 22 built-in tests, and
-Playwright Chromium.
+the installed Lens `SupabaseClient` 2.1.0 package over built-in
+`SupabaseModule`, ordinary hosted Supabase Realtime Broadcast, Vite vanilla
+TypeScript, `@supabase/supabase-js`, Vitest, Node 22 built-in tests, and
+Playwright Chromium. The Snap Cloud Alpha Plugin is not a runtime dependency.
 
 **Spec:**
-`docs/superpowers/specs/2026-08-24-wordless-relay-design.md`
+`docs/superpowers/specs/2026-08-24-wordless-relay-design.md` plus the binding
+`docs/superpowers/specs/2026-08-25-wordless-relay-standard-supabase-amendment.md`
 
 **Review status:** Reconciled on 2026-08-25 after an independent Fable 5
-`APPROVE WITH REQUIRED CHANGES` review; product implementation remains
-unstarted pending the owner's final approval of this reconciled plan and the
-fresh Specs Base Template project being opened.
+`APPROVE WITH REQUIRED CHANGES` review, then reconciled again after the owner
+approved the normal hosted Supabase amendment. The Specs baseline is open and
+Task 1 is in progress; no realtime traffic or Gate 0 GO is claimed.
 
 ## Global Constraints
 
@@ -66,12 +69,21 @@ fresh Specs Base Template project being opened.
 - Lens world points remain local. Transport points are integer pairs in
   `[0, 1000]`, capped at 128 accepted points per stroke and sent no faster than
   10 Hz.
-- Snap's current alpha workaround `heartbeatIntervalMs: 2500` is mandatory in
-  both clients unless the installed package documentation explicitly supersedes
-  it and that change is recorded.
-- Snap Cloud currently documents 200 peak Realtime connections, two million
-  monthly messages, and 250 KB maximum message size. WORDLESS sets a much
-  smaller measured target: every product message below 1 KB.
+- Gate 0 uses a public Supabase Broadcast channel and performs no Snap ID-token
+  sign-in. The client-safe project key is transport configuration, not a user
+  session or security boundary.
+- Do not carry the Alpha-only `heartbeatIntervalMs: 2500` workaround into the
+  normal project. Use the installed clients' compatible default unless Gate 0
+  proves that an explicit override is required, then record the exact value and
+  evidence before retaining it in either client.
+- Supabase Free-plan limits observed on 2026-08-25 are 200 concurrent Realtime
+  connections, 100 messages per second, 100 channel joins per second, and a
+  256 KB Broadcast payload. WORDLESS keeps the stricter measured targets of two
+  clients, one channel each, at most 10 Hz, and every product message below
+  1 KB.
+- A Free project may pause after low activity. Every live preflight and capture
+  rehearsal wakes/resumes the project, confirms Realtime plus public-channel
+  access, and reruns the two-way application probe before claiming readiness.
 - Browser URL and publishable/legacy anon key stay in ignored local config. A
   service-role key, database password, user token, or session token is never
   written to source, logs, captures, commits, or chat output.
@@ -104,23 +116,24 @@ fresh Specs Base Template project being opened.
 
 - Hackathon target, schedule, deliverables, and rubric:
   <https://lenslist.co/clad-summer-hackathon>
-- Snap Cloud alpha and project setup:
-  <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/getting-started>
-- Realtime Broadcast API and required heartbeat:
-  <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/realtime>
-- Official mode-switched two-way 10 Hz cursor example (broadcast or follow;
-  simultaneous two-way remains unproven until Gate 0, and the sample repository
-  is deprecated):
-  <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/examples/basic-setup>
-- Realtime usage limits:
-  <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/usage_limits>
-- Official Lens-plus-web setup pattern:
-  <https://developers.snap.com/spectacles/about-spectacles-features/snap-cloud/examples/web-app>
+- Snap `SupabaseModule`, documented for any Supabase project:
+  <https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.SupabaseModule.html>
+- Supabase Realtime Broadcast:
+  <https://supabase.com/docs/guides/realtime/broadcast>
+- Supabase Realtime public-channel settings:
+  <https://supabase.com/docs/guides/realtime/settings>
+- Supabase Realtime limits:
+  <https://supabase.com/docs/guides/realtime/limits>
+- Supabase Free-project pausing:
+  <https://supabase.com/docs/guides/platform/free-project-pausing>
 
-The public Snap Cloud examples span older Spectacles 2024 and current SPECS
-branches. The installed Lens Studio version and current Asset Library packages
-are authoritative for implementation. An executor must inspect them before
-copying any version-specific sample line such as `globalThis.supabaseModule`.
+The installed Lens Studio version, `SupabaseClient` package source, generated
+Lens/Editor declarations, and MCP asset types are authoritative for
+implementation. The vendor package currently exposes its module at
+`SupabaseClient.lspkg/supabase-snapcloud`; that historical vendor-authored
+import path may remain exactly as installed, but no user-authored adapter,
+status, environment variable, evidence label, or product claim calls the
+service Snap Cloud.
 
 ## Agent-native execution model
 
@@ -199,7 +212,7 @@ Assets/
         RecoveryCoordinator.ts             # pure single-flight recovery owner
       Transport/
         RelayPort.ts                       # transport interface
-        SnapCloudRelayTransport.ts         # Lens Supabase adapter
+        SupabaseRelayTransport.ts          # normal-project Lens adapter
       Input/
         BrushController.ts                 # SIK drag -> drawing samples
         ReplayController.ts                # gated PLAY AGAIN interaction
@@ -284,7 +297,7 @@ docs/
 
 ---
 
-### Task 1: Establish the SPECS project and Snap Cloud access gate
+### Task 1: Establish the SPECS project and standard Supabase gate
 
 **Files:**
 
@@ -299,8 +312,9 @@ docs/
 
 **Interfaces:**
 
-- Consumes: Installed Lens Studio, Lens Studio MCP server, verified Snapchat
-  account, Snap Cloud alpha entitlement.
+- Consumes: Installed Lens Studio, Lens Studio MCP server, owner-selected normal
+  hosted Supabase project, and its client-safe URL/key entered only at the
+  explicit credential gate.
 - Produces: A clean Specs Base Template project, current package/version record,
   ignored local credential location, and a Preview baseline.
 
@@ -319,8 +333,10 @@ node --version
 ```
 
 Expected repository path is `CONNECT-2026`, branch is `main`, and Lens Studio
-reports `5.23.1.26080420`. Record the resolved Node executable/version rather
-than assuming which installed version won PATH. Then branch explicitly:
+must report at least `5.22`; record the exact current version instead of
+requiring the earlier planning observation. Record the resolved Node
+executable/version rather than assuming which installed version won PATH. Then
+branch explicitly:
 
 - If no `.esproj` exists, stop with the single owner action: create/open a
   **Specs Base Template** project named `WordlessRelay` in this repository,
@@ -359,17 +375,19 @@ content, read it from `git show HEAD:AGENTS.md` and restore it outside the
 managed delimiters with a reviewed patch while preserving the generated block.
 Record whether the file legitimately changed.
 
-- [ ] **Step 3: Install and inspect current Snap Cloud assets**
+- [ ] **Step 3: Install and inspect the current Supabase client package**
 
-Through Lens Studio Asset Library/UI, install `SupabaseClient` and the Supabase
-Plugin. Open the current Snap Cloud Realtime example if available and record:
+Through Lens Studio MCP Asset Library tooling, install or verify
+`SupabaseClient`. Do not sign in through or depend on the unavailable Snap
+Cloud Alpha Plugin. Inspect the active package and generated definitions and
+record:
 
 ```text
 SupabaseClient package version
-Supabase Plugin version
 actual import path for createClient/RealtimeChannel/SupabaseClient
-whether the current package requires globalThis.supabaseModule
+whether the package itself requires `LensStudio:SupabaseModule`
 available channel subscribe/send/cleanup signatures
+whether createClient accepts the normal project URL and client-safe key
 ```
 
 Use the installed package source under `Cache/TypeScript/Src/Packages` and
@@ -381,15 +399,14 @@ Immediately inspect `git status --short`, `rg --files Assets`, and
 texture, script, scene, package, and companion `.meta`. Project-local Asset
 Library dependencies—including SIK/UIKit and the Supabase client package—must
 remain in their Lens-authored `Packages/*.lspkg` form and be committed; never
-replace them with Cache output. If the Supabase Plugin is editor-global rather
-than a project artifact, record its observed version/location as a host
-prerequisite without committing preferences or generated editor state.
+replace them with Cache output. Record the Alpha Plugin denial as historical
+failure evidence only; it is not a prerequisite and no generated editor-global
+plugin state is committed.
 
-- [ ] **Step 4: Prove Snap Cloud entitlement without exposing credentials**
+- [ ] **Step 4: Prove a credential-safe normal-project asset path**
 
-Open `Window → Supabase`, sign in, create or select the project named
-`wordless-relay`, and import its `SupabaseProject` asset into
-`Assets/LocalOnly/`. Add the directory to `.gitignore`:
+Before the owner enters any project value, add the local directory to
+`.gitignore`:
 
 ```gitignore
 Assets/LocalOnly/
@@ -397,9 +414,41 @@ Assets/LocalOnly.meta
 !.env.production.example
 ```
 
-Pass only when the plugin can list the project and the imported asset exposes a
-project URL and public token in the Inspector. Never print or commit either
-value.
+Use Lens Studio MCP `asset_graphql` to query `assetTypes` and require the exact
+native type `SupabaseProject`; use `ExecuteEditorCode` metadata to require that
+it is concrete and exposes exactly the expected editor credential fields. Fail
+on an exact-name collision. Create `Assets/LocalOnly/` through the Editor API,
+then create a blank native asset named `WORDLESS Supabase Project` at the Asset
+root with `createNativeAsset`, move the returned asset ID to
+`Assets/LocalOnly/` with `moveAsset`, and query only its ID, name, type, and
+path—never GraphQL `properties`. Use the active `Support/editor.d.ts`
+definition to require the editor fields `projectId`, `projectName`,
+`projectUrl`, and `publicToken`; record the runtime mapping
+`projectUrl -> SupabaseProject.url` plus `publicToken -> publicToken`. Call
+`Project.save()` through `ExecuteEditorCode`, then prove exactly one path-only
+result remains under `Assets/LocalOnly/`. If directory creation, asset
+creation, move, save, field-name inspection, or final path proof fails, record
+an immediate Task 1/Gate 0 NO-GO and stop. Do not improvise a script constant,
+committed JSON, raw request, or another credential container.
+
+Only after that blank-asset proof passes, stop at the explicit owner action:
+create or select the ordinary hosted Supabase project `wordless-relay`, ensure
+Realtime is enabled and **Allow public access to channels** is enabled (or
+record the dashboard's exact current wording), then paste the project URL and
+client-safe publishable key into the asset Inspector. If the Lens package later
+rejects the publishable key, the owner may replace it with the supported legacy
+anonymous public key; Gate 0 records which public key type actually worked.
+
+After the owner confirms entry, run a credential-safe `ExecuteEditorCode`
+check that filters the active model's `project.assetManager.assets` to the one
+asset named exactly `WORDLESS Supabase Project` for which
+`isOfType('SupabaseProject')` is true under `Assets/LocalOnly/`, and reduces the
+two credential fields inside editor code to booleans. Return only count, type,
+path, the four literal field names, `projectUrlPopulated`, and
+`publicTokenPopulated`; never return, print, log, serialize, or capture either
+string value. Follow with a path-only GraphQL query and never select
+`properties`. The browser later receives the same client-safe values only
+through ignored `web/.env.local`.
 
 - [ ] **Step 5: Record concrete environment evidence**
 
@@ -418,13 +467,17 @@ sections:
 
 ## Installed packages
 - SupabaseClient: record the exact Asset Library/package value
-- Supabase Plugin: record the exact plugin value
+- SupabaseModule: built-in module; record the exact observed API/signatures
 - Spectacles Interaction Kit: record the exact package value
 
-## Snap Cloud gate
-- Alpha entitlement: confirmed
-- Project visible in plugin: confirmed
+## Supabase Realtime gate
+- Alpha denial evidence: owner screenshot recorded; not treated as a pass
+- Native SupabaseProject authoring/move/save: record the MCP result
+- Normal project: owner-created project named wordless-relay
+- Realtime/public channels: record exact dashboard wording and later join proof
+- Client key type: publishable or legacy anonymous; record only the type
 - Credential asset path: record the exact ignored path under Assets/LocalOnly
+- Free-plan limits/pause preflight: record the current documented values
 - Secrets committed or logged: no
 
 ## Baseline
@@ -457,7 +510,7 @@ runtime errors. A successful compile without Preview evidence fails this step.
 - [ ] **Step 8: Commit the verified environment**
 
 ```bash
-git add .gitignore AGENTS.md WordlessRelay.esproj Assets Packages docs/environment.md docs/prompt-log.md
+git add .gitattributes .gitignore AGENTS.md WordlessRelay.esproj Assets Packages docs/environment.md docs/prompt-log.md
 git diff --cached --check
 git commit -m "chore: establish WORDLESS SPECS environment"
 ```
@@ -477,7 +530,7 @@ generated workspace state.
 
 - Create: `web/package.json`, `web/package-lock.json`, `web/index.html`
 - Retain/modify from scaffold: `web/tsconfig.json`, `web/.gitignore`
-- Create: `web/.env.example`
+- Use but do not commit: `web/.env.local`
 - Create: `web/src/probe-protocol.ts`, `web/src/relay-probe.ts`
 - Create: `web/src/main.ts`, `web/src/styles.css`
 - Create: `web/tests/probe-protocol.test.ts`
@@ -487,7 +540,8 @@ generated workspace state.
 
 **Interfaces:**
 
-- Consumes: Snap Cloud project URL/public key from ignored `web/.env.local`,
+- Consumes: normal Supabase project URL/client-safe public key from ignored
+  `web/.env.local`,
   fixed probe session `WAVE42`, broadcast event `wordless-message`.
 - Produces: A local page that visibly receives point batches, sends guesses and
   pings, shows channel state, and reports bytes/messages/RTT.
@@ -535,17 +589,25 @@ describe('probe protocol', () => {
 
   it('accepts a bounded point batch', () => {
     expect(parseProbeMessage({
-      kind: 'points', sessionId: 'WAVE42', seq: 1,
+      v: 1, kind: 'points', sessionId: 'WAVE42', seq: 1,
       points: [[100, 200], [300, 400]], sentAtMs: 10,
-    })).not.toBeNull()
+    }, 'WAVE42')).not.toBeNull()
   })
 
   it('rejects out-of-range and malformed data', () => {
     expect(parseProbeMessage({
-      kind: 'points', sessionId: 'WAVE42', seq: 1,
+      v: 1, kind: 'points', sessionId: 'WAVE42', seq: 1,
       points: [[1001, 0]], sentAtMs: 10,
-    })).toBeNull()
-    expect(parseProbeMessage({ kind: 'guess', choiceIndex: 9 })).toBeNull()
+    }, 'WAVE42')).toBeNull()
+    expect(parseProbeMessage({ v: 1, kind: 'guess', choiceIndex: 9 }, 'WAVE42')).toBeNull()
+    expect(parseProbeMessage({
+      v: 2, kind: 'ack', sessionId: 'WAVE42', seq: 2,
+      pingId: 'p-1', sentAtMs: 10,
+    }, 'WAVE42')).toBeNull()
+    expect(parseProbeMessage({
+      v: 1, kind: 'ack', sessionId: 'OTHER1', seq: 2,
+      pingId: 'p-1', sentAtMs: 10,
+    }, 'WAVE42')).toBeNull()
   })
 })
 ```
@@ -561,10 +623,10 @@ functions.
 
 ```ts
 export type ProbeMessage =
-  | { kind: 'points'; sessionId: string; seq: number; points: [number, number][]; sentAtMs: number }
-  | { kind: 'guess'; sessionId: string; guessId: string; choiceIndex: 0 | 1 | 2 | 3; sentAtMs: number }
-  | { kind: 'ping'; sessionId: string; pingId: string; sentAtMs: number }
-  | { kind: 'ack'; sessionId: string; pingId: string; sentAtMs: number }
+  | { v: 1; kind: 'points'; sessionId: string; seq: number; points: [number, number][]; sentAtMs: number }
+  | { v: 1; kind: 'guess'; sessionId: string; seq: number; guessId: string; choiceIndex: 0 | 1 | 2 | 3; sentAtMs: number }
+  | { v: 1; kind: 'ping'; sessionId: string; seq: number; pingId: string; sentAtMs: number }
+  | { v: 1; kind: 'ack'; sessionId: string; seq: number; pingId: string; sentAtMs: number }
 
 export const topicFor = (sessionId: string): string => {
   if (!/^[A-Z0-9]{6}$/.test(sessionId)) throw new Error('invalid session id')
@@ -574,23 +636,30 @@ export const topicFor = (sessionId: string): string => {
 const isInt = (value: unknown): value is number =>
   typeof value === 'number' && Number.isInteger(value)
 
-export function parseProbeMessage(value: unknown): ProbeMessage | null {
+export function parseProbeMessage(
+  value: unknown,
+  expectedSession: string,
+): ProbeMessage | null {
   if (typeof value !== 'object' || value === null) return null
   const v = value as Record<string, unknown>
-  if (typeof v.sessionId !== 'string' || !/^[A-Z0-9]{6}$/.test(v.sessionId)) return null
+  if (new TextEncoder().encode(JSON.stringify(value)).byteLength >= 1024) return null
+  if (v.v !== 1 || v.sessionId !== expectedSession ||
+      !/^[A-Z0-9]{6}$/.test(expectedSession)) return null
+  if (!isInt(v.seq) || v.seq < 1) return null
   if (typeof v.sentAtMs !== 'number' || !Number.isFinite(v.sentAtMs)) return null
   if (v.kind === 'points') {
-    if (!isInt(v.seq) || !Array.isArray(v.points) || v.points.length > 8) return null
+    if (!Array.isArray(v.points) || v.points.length > 8) return null
     const valid = v.points.every((point) => Array.isArray(point) && point.length === 2 &&
       point.every((axis) => isInt(axis) && axis >= 0 && axis <= 1000))
     return valid ? value as ProbeMessage : null
   }
   if (v.kind === 'guess') {
-    return typeof v.guessId === 'string' && isInt(v.choiceIndex) &&
+    return typeof v.guessId === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(v.guessId) && isInt(v.choiceIndex) &&
       v.choiceIndex >= 0 && v.choiceIndex <= 3 ? value as ProbeMessage : null
   }
   if (v.kind === 'ping' || v.kind === 'ack') {
-    return typeof v.pingId === 'string' ? value as ProbeMessage : null
+    return typeof v.pingId === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(v.pingId)
+      ? value as ProbeMessage : null
   }
   return null
 }
@@ -616,6 +685,8 @@ export class RelayProbe {
   private channel: RealtimeChannel | null = null
   private subscribed = false
   private counterpartSeen = false
+  private lastInboundSequence = 0
+  private outboundSequence = 0
 
   constructor(
     url: string,
@@ -624,9 +695,7 @@ export class RelayProbe {
     private readonly onMessage: (message: ProbeMessage) => void,
     private readonly onStatus: (status: ProbeStatus, detail: string) => void,
   ) {
-    this.client = createClient(url, publicKey, {
-      realtime: { heartbeatIntervalMs: 2500 },
-    })
+    this.client = createClient(url, publicKey)
   }
 
   connect(): void {
@@ -634,8 +703,9 @@ export class RelayProbe {
     this.channel = this.client
       .channel(topicFor(this.sessionId), { config: { broadcast: { self: false } } })
       .on('broadcast', { event: 'wordless-message' }, ({ payload }) => {
-        const parsed = parseProbeMessage(payload)
-        if (!parsed) return
+        const parsed = parseProbeMessage(payload, this.sessionId)
+        if (!parsed || parsed.seq <= this.lastInboundSequence) return
+        this.lastInboundSequence = parsed.seq
         this.onMessage(parsed)
         if (this.subscribed && !this.counterpartSeen) {
           this.counterpartSeen = true
@@ -679,14 +749,24 @@ export class RelayProbe {
 }
 ```
 
+The browser owns one monotonic outbound sequence and stamps `v: 1`, the exact
+session, and the next sequence onto every guess and ping. The Lens owns its
+separate outbound sequence for points and acknowledgements. The browser parser
+rejects wrong-version, wrong-session, non-positive-sequence, oversized,
+out-of-range, and overlong-ID messages before UI/metrics state; the channel
+owner additionally rejects duplicate/stale Lens sequences before `onMessage`.
+Reset `lastInboundSequence` only for a genuinely new clean Gate 0 connection,
+not after an arbitrary malformed payload.
+
 Supabase's `'ok'` send result proves only client-side acceptance unless channel
 acknowledgments are enabled; do not cite it as delivery. Gate 0 delivery and RTT
 proof comes from the application-level Lens `ack` returning to the browser.
 
-`main.ts` reads only `VITE_SNAP_CLOUD_URL`,
-`VITE_SNAP_CLOUD_PUBLIC_KEY`, and `VITE_RELAY_SESSION_ID`; it refuses to start
-if any is missing. `web/.env.example` lists those names with only
-`VITE_RELAY_SESSION_ID=WAVE42` populated.
+`main.ts` reads only `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLIC_KEY`, and
+`VITE_RELAY_SESSION_ID`; it refuses to start if any is missing. Use those names
+only in ignored `web/.env.local` during Tasks 2–4. Do not create or commit an
+example until Gate 0 proves the installed Lens client and selected key type are
+compatible.
 
 - [ ] **Step 6: Add a literal visible probe UI**
 
@@ -696,14 +776,16 @@ if any is missing. `web/.env.example` lists those names with only
 <main>
   <p id="connection" role="status">CONNECTING</p>
   <canvas id="stroke" width="1000" height="600" aria-label="Incoming Lens stroke"></canvas>
-  <button id="guess" type="button">SEND GUESS 2</button>
+  <button id="guess-wrong" type="button">SEND GUESS 1</button>
+  <button id="guess-correct" type="button">SEND GUESS 2</button>
   <button id="ping" type="button">MEASURE ROUND TRIP</button>
   <pre id="metrics" aria-live="polite"></pre>
 </main>
 ```
 
 Render received points as a solid violet polyline, count received messages and
-serialized bytes, send choice index `2`, and compute RTT from browser-origin
+serialized bytes, let either button send its literal bounded choice, and
+compute RTT from browser-origin
 `ping` to Lens-origin `ack` using the original `sentAtMs`. In development only,
 assign the probe to `window.wordlessProbe` so Gate 0 can reproducibly call
 `sendUncheckedForGate0(payload)` for its malformed-message matrix. The probe
@@ -726,7 +808,7 @@ credentials: the page reaches `CONNECTING` without leaking values to output.
 ```bash
 git add web docs/prompt-log.md
 git diff --cached --check
-git commit -m "spike: add Snap Cloud browser probe"
+git commit -m "spike: add Supabase Realtime browser probe"
 ```
 
 Verify `web/.env.local` is absent from `git status --short` and `git ls-files`.
@@ -746,7 +828,7 @@ Verify `web/.env.local` is absent from `git status --short` and `git ls-files`.
 
 - Consumes: `SupabaseProject` asset in ignored `Assets/LocalOnly/`, session
   `WAVE42`, browser's `wordless-message` event.
-- Produces: Lens `AUTH_OK`/`SUBSCRIBED`/`RX_GUESS` evidence, a visible
+- Produces: Lens `CLIENT_CONFIGURED`/`SUBSCRIBED`/`RX_GUESS` evidence, a visible
   correct/incorrect state, 10 Hz point messages, and ping acknowledgements.
 
 - [ ] **Step 1: Add the Node resolver and failing Lens-parser tests**
@@ -780,8 +862,9 @@ This exact loader plus `--experimental-strip-types` has been smoke-tested on
 the installed Node 22.14, 24.16, and 25.8 runtimes. It lets Lens-compatible
 extensionless imports execute unchanged in the Node test process.
 
-Test `parseProbeGuess` with choice `2`, choice `9`, wrong session, missing
-`guessId`, and a duplicate-ID set. Run:
+Test `parseProbeInbound` with a valid guess, choice `9`, wrong session, missing
+`guessId`, a duplicate-ID set, a valid ping, a ping with missing `pingId`, and
+an unknown kind. Run:
 
 ```bash
 node --experimental-strip-types --import ./tools/core-tests/register.mjs --test tools/core-tests/spike-protocol.test.mjs
@@ -795,23 +878,42 @@ Export:
 
 ```ts
 export interface ProbeGuess {
+  v: 1
   kind: 'guess'
   sessionId: string
+  seq: number
   guessId: string
   choiceIndex: 0 | 1 | 2 | 3
   sentAtMs: number
 }
 
-export function parseProbeGuess(
+export interface ProbePing {
+  v: 1
+  kind: 'ping'
+  sessionId: string
+  seq: number
+  pingId: string
+  sentAtMs: number
+}
+
+export function parseProbeInbound(
   value: unknown,
   expectedSession: string,
+  lastAcceptedSequence: number,
   seenGuessIds: { [id: string]: boolean },
-): ProbeGuess | null
+): ProbeGuess | ProbePing | null
 ```
 
-The function accepts only the exact session, integer choice `0..3`, finite
-timestamp, nonempty ID, and unseen ID. It marks no ID itself; the caller marks
-an ID only after accepting the message.
+The function first computes an exact UTF-8 serialized byte count and rejects
+anything at or above 1,024 bytes. It then accepts only `v: 1`, the exact
+session, a positive integer sequence strictly above `lastAcceptedSequence`,
+and a finite timestamp. A guess also requires integer choice `0..3` and an
+unseen ASCII `guessId` matching `[A-Za-z0-9_-]{1,64}`; a ping requires a
+`pingId` with the same bound. It rejects every other kind. It marks no ID or
+sequence itself; the caller advances the high-water and marks a guess ID only
+after accepting the message. Tests cover wrong version, duplicate/stale
+sequence, oversized serialized input, overlong/non-ASCII IDs, and a valid
+fresh ping as well as the cases above.
 
 Run the prior Node test. Expected: pass.
 
@@ -837,6 +939,7 @@ export class RelaySpike extends BaseScriptComponent {
   private client: SupabaseClient
   private channel: RealtimeChannel
   private sequence = 0
+  private lastInboundSequence = 0
   private seenGuessIds: { [id: string]: boolean } = {}
 
   onAwake(): void {
@@ -847,21 +950,12 @@ export class RelaySpike extends BaseScriptComponent {
   }
 
   private async initialize(): Promise<void> {
-    this.setStatus('AUTHENTICATING', new vec4(1, 0.84, 0.35, 1))
+    this.setStatus('CONNECTING', new vec4(1, 0.84, 0.35, 1))
     this.client = createClient(
       this.supabaseProject.url,
       this.supabaseProject.publicToken,
-      { realtime: { heartbeatIntervalMs: 2500 } },
     )
-    const { error } = await this.client.auth.signInWithIdToken({
-      provider: 'snapchat', token: '',
-    })
-    if (error) {
-      print('[RelaySpike] AUTH_FAILED ' + String(error.name ?? error))
-      this.setStatus('AUTH FAILED', new vec4(1, 0.47, 0.42, 1))
-      return
-    }
-    print('[RelaySpike] AUTH_OK')
+    print('[RelaySpike] CLIENT_CONFIGURED')
     this.openChannel()
   }
 }
@@ -878,7 +972,8 @@ globalThis.supabaseModule = require('LensStudio:SupabaseModule')
 ```
 
 That sample is a clue, not authority over the installed package. Record the
-installed finding and never log session/user tokens.
+installed finding and never log credential values or user/session tokens. The
+normal public-channel probe performs no Snapchat or Supabase user sign-in.
 
 - [ ] **Step 4: Add channel receive/send behavior**
 
@@ -888,9 +983,11 @@ Join `wordless-relay:${this.channelName}` with
 - A valid guess logs `RX_GUESS`, marks its ID, and sets the visible state to
   mint `CORRECT` only for choice `2`; all other allowed choices become coral
   `TRY AGAIN`.
-- A ping produces an `ack` carrying the same `pingId` and original `sentAtMs`.
+- Every Lens-origin point or ack carries `v: 1` and the next Lens-owned positive
+  sequence. A ping produces an `ack` carrying the same bounded `pingId` and
+  original `sentAtMs`.
 - Unknown, malformed, wrong-session, and duplicate payloads log
-  `REJECTED` and do not alter the visible state.
+  `REJECTED` and do not alter the visible state or inbound sequence high-water.
 - Begin sending one 3-point batch every 0.1 seconds only after status
   `SUBSCRIBED`; increment `seq`, animate the x coordinate deterministically,
   and keep every value in `0..1000`.
@@ -918,20 +1015,23 @@ Use Lens Studio's TypeScript recompile tool, then Preview run/log collection.
 Expected sequence:
 
 ```text
-[RelaySpike] AUTH_OK
+[RelaySpike] CLIENT_CONFIGURED
 [RelaySpike] CHANNEL SUBSCRIBED
 ```
 
-An auth retryable fetch error permits one documented retry after a one-second
-`DelayedCallbackEvent`; any second failure stops the task. A compile result
-without these runtime lines does not pass.
+Any client, socket, channel, or payload error/warning fails that attempt and is
+recorded.
+After independently confirming that the Free project is awake, a later clean
+Preview run may be recorded as a separate attempt; never hide a failure with an
+in-probe retry. A compile result without both current runtime lines does not
+pass.
 
 - [ ] **Step 7: Commit the Lens probe**
 
 ```bash
 git add Assets/Wordless/Scripts/Spike/ProbeProtocol.ts Assets/Wordless/Scripts/Spike/ProbeProtocol.ts.meta Assets/Wordless/Scripts/Spike/RelaySpike.ts Assets/Wordless/Scripts/Spike/RelaySpike.ts.meta tools/core-tests/register.mjs tools/core-tests/resolver.mjs tools/core-tests/spike-protocol.test.mjs Assets/Scene.scene Assets/Scene.scene.meta docs/prompt-log.md
 git diff --cached --check
-git commit -m "spike: add Snap Cloud Lens probe"
+git commit -m "spike: add Supabase Realtime Lens probe"
 ```
 
 ### Task 4: Execute and decide Gate 0
@@ -939,6 +1039,7 @@ git commit -m "spike: add Snap Cloud Lens probe"
 **Files:**
 
 - Create: `docs/evidence/realtime-spike.md`
+- Create after compatibility is proven: `web/.env.example`
 - Modify: `docs/prompt-log.md`
 - Use but do not commit: `captures/realtime-spike/`
 
@@ -956,6 +1057,14 @@ npm --prefix web test
 npm --prefix web run build
 npm --prefix web run dev -- --host 127.0.0.1
 ```
+
+In the Supabase dashboard, first wake/resume the Free project if necessary,
+confirm Realtime is enabled, confirm the observed setting equivalent to
+**Allow public access to channels**, and prove that each client joins the
+public channel without a user-auth step. Record the key *type* only
+(publishable preferred; legacy anonymous only if current Lens compatibility
+requires it), never the key. Any client/channel warning or a failed
+unauthenticated join fails this attempt.
 
 Refresh Lens Preview, clear its Logger, and verify browser and Lens both join
 `WAVE42`. The browser must not display `CONNECTED` until `SUBSCRIBED` and a
@@ -979,10 +1088,13 @@ never sends an outcome field.
 - [ ] **Step 4: Prove rejection and continuity**
 
 From `window.wordlessProbe.sendUncheckedForGate0`, send wrong-session,
-out-of-range choice, duplicate guess ID, string-valued timestamp, unknown-kind,
-and over-eight-point messages. Require six `REJECTED` logs and zero visible
-result changes. Then maintain 10 Hz valid traffic for another ten seconds with
-no warning, gap, timeout, or disconnect.
+wrong-version, sequence zero, duplicate/stale sequence, out-of-range choice,
+duplicate guess ID at a fresh sequence, overlong ID, string-valued timestamp,
+unknown-kind, over-eight-point, and at-least-1,024-byte messages. Require eleven
+`REJECTED` logs and zero visible result or sequence-high-water changes. Then
+send the next valid contiguous message and require acceptance, proving invalid
+messages did not poison continuity. Maintain 10 Hz valid traffic for another
+ten seconds with no warning, gap, timeout, or disconnect.
 
 - [ ] **Step 5: Measure fifty round trips**
 
@@ -1015,6 +1127,11 @@ Populate `docs/evidence/realtime-spike.md` with:
 # Realtime spike evidence
 - Result: GO or NO-GO
 - Lens Studio/package versions: actual values
+- Service/project mode: ordinary hosted Supabase Realtime public Broadcast
+- Realtime/public-channel setting label: actual observed wording
+- Client-safe key type: publishable or legacy anonymous; never the value
+- User-auth step: none
+- Free-project wake/resume check: observed result
 - Channel status sequence: actual values
 - Lens → browser continuous duration: actual seconds
 - Browser → Lens wrong/correct outcomes: observed values
@@ -1029,17 +1146,27 @@ Populate `docs/evidence/realtime-spike.md` with:
 
 All descriptive fields become observed values before commit.
 
+Only after this live run proves the compatible names and key type, create
+`web/.env.example` with placeholders for `VITE_SUPABASE_URL` and
+`VITE_SUPABASE_PUBLIC_KEY` and with only
+`VITE_RELAY_SESSION_ID=WAVE42` populated. Confirm the file contains no real
+value and `web/.env.local` remains ignored and untracked.
+
 - [ ] **Step 8: Commit the decision and obey it**
 
 ```bash
 git add docs/evidence/realtime-spike.md docs/prompt-log.md
+test ! -e web/.env.example || git add web/.env.example
 git diff --cached --check
 git commit -m "test: record WORDLESS realtime gate"
 ```
 
-If result is NO-GO, stop. Report the exact failed criterion and ask the owner to
-choose WORDLESS Duo or Split the Table. Do not build a local mirror, replace
-Snap Cloud, simulate traffic, or continue to Task 5.
+If result is NO-GO, commit the honest failure record and stop before Task 5.
+Report the exact failed criterion. Do not silently substitute a backend, build
+a local mirror, simulate traffic, or weaken browser causality. A Cloudflare
+Worker plus Durable Object remains research-only and requires a new explicit
+owner-approved transport amendment; WORDLESS Duo and Split the Table remain
+separate owner product decisions.
 
 ### Task 5: Freeze the canonical protocol and local validation harness
 
@@ -2100,7 +2227,7 @@ git commit -m "feat: add bounded stroke and glyph geometry"
 **Files:**
 
 - Create: `Assets/Wordless/Scripts/Core/ReceivePolicy.ts`
-- Create: `Assets/Wordless/Scripts/Transport/SnapCloudRelayTransport.ts`
+- Create: `Assets/Wordless/Scripts/Transport/SupabaseRelayTransport.ts`
 - Create: `web/src/relay-client.ts`
 - Create: `web/tests/relay-client.test.ts`
 - Create: `tools/core-tests/transport-policy.test.mjs`
@@ -2128,6 +2255,7 @@ export interface BrowserChannel {
   subscribe(callback: (status: string, error?: unknown) => void): BrowserChannel
   send(message: { type: 'broadcast'; event: string; payload: unknown }): Promise<string>
   unsubscribe(): Promise<string>
+  remove(): Promise<void>
 }
 
 export interface BrowserRoundDelegate {
@@ -2155,7 +2283,10 @@ cannot.
 Test: topic name, `SUBSCRIBED` status, sanitized receive, invalid receive
 rejection, non-`ok` send failure, ping/ack, pending-draft cancellation on
 close, connect-after-close with the same sender/continued sequence, and
-cleanup. With two linked fake
+cleanup. Cleanup must await `unsubscribe()` and then `remove()` exactly once;
+the production wrapper implements `remove()` with the owning Supabase client's
+`removeChannel(channel)`, while Lens teardown proves `removeAllChannels()`.
+With two linked fake
 channels and injected clocks, also cover browser-first, Lens-first, and
 simultaneous subscription; initial ready lost in either direction; targeted
 ack lost then recovered by a ready retry; ack never echoed; duplicate ready
@@ -2364,11 +2495,14 @@ the authorized gap barrier under Step 5's exact conditions.
 
 - [ ] **Step 4: Implement the Lens adapter**
 
-`SnapCloudRelayTransport` implements `RelayPort` using the exact authenticated
-lifecycle proven in Gate 0. It:
+`SupabaseRelayTransport` implements `RelayPort` using the exact normal-project,
+unauthenticated public-channel lifecycle proven in Gate 0. It:
 
-- authenticates before channel creation;
-- uses `heartbeatIntervalMs: 2500`;
+- initializes the built-in module only if the installed package requires it;
+- creates the client from the ignored normal-project URL and client-safe public
+  key, with no Snapchat or Supabase user-token sign-in;
+- uses the clients' proven default Realtime configuration unless Gate 0 recorded
+  a required standard-project override;
 - joins `wordless-relay:${sessionId}`;
 - sends/receives only event `wordless-message`;
 - calls `parseRelayMessage` before notifying listeners;
@@ -2639,7 +2773,7 @@ bound painter's first start follows the initial-binding rule.
 - [ ] **Step 6: Replace the spike in the scene**
 
 Through one Lens MCP writer, remove the `RelaySpike` component, attach
-`SnapCloudRelayTransport`, preserve the ignored Supabase input, and save.
+`SupabaseRelayTransport`, preserve the ignored Supabase input, and save.
 Gate 0's committed spike evidence remains the baseline; do not claim the
 transport alone reproduces its point/guess path before the browser surface and
 `WordlessApp` exist. After compile confirms no remaining Lens import, delete
@@ -2656,8 +2790,9 @@ sh tools/typecheck/check.sh
 ```
 
 Then compile and run Preview only far enough to prove the attached transport
-initializes, authenticates/subscribes when invoked, reports literal transport
-status, and cleans up without runtime exceptions. `SUBSCRIBED` is not app
+configures its client, subscribes to the public channel when invoked, reports
+literal transport status, and cleans up without runtime exceptions. No auth
+claim is made, and `SUBSCRIBED` is not app
 readiness. Task 8 acceptance comes from the deterministic linked-adapter/policy
 matrix, web build, Lens typecheck, compile, and those lifecycle logs; it makes
 no live product-round, point, guess, reload, or latency claim.
@@ -2665,7 +2800,7 @@ no live product-round, point, guess, reload, or latency claim.
 - [ ] **Step 8: Commit the production transport**
 
 ```bash
-git add Assets/Wordless/Scripts/Core/ReceivePolicy.ts Assets/Wordless/Scripts/Core/ReceivePolicy.ts.meta Assets/Wordless/Scripts/Transport/SnapCloudRelayTransport.ts Assets/Wordless/Scripts/Transport/SnapCloudRelayTransport.ts.meta web/src/relay-client.ts web/tests/relay-client.test.ts tools/core-tests/transport-policy.test.mjs Assets/Scene.scene Assets/Scene.scene.meta docs/prompt-log.md
+git add Assets/Wordless/Scripts/Core/ReceivePolicy.ts Assets/Wordless/Scripts/Core/ReceivePolicy.ts.meta Assets/Wordless/Scripts/Transport/SupabaseRelayTransport.ts Assets/Wordless/Scripts/Transport/SupabaseRelayTransport.ts.meta web/src/relay-client.ts web/tests/relay-client.test.ts tools/core-tests/transport-policy.test.mjs Assets/Scene.scene Assets/Scene.scene.meta docs/prompt-log.md
 git add -u -- Assets/Wordless/Scripts/Spike/RelaySpike.ts Assets/Wordless/Scripts/Spike/RelaySpike.ts.meta Assets/Wordless/Scripts/Spike/ProbeProtocol.ts Assets/Wordless/Scripts/Spike/ProbeProtocol.ts.meta tools/core-tests/spike-protocol.test.mjs
 git diff --cached --check
 git commit -m "feat: add validated WORDLESS relay adapters"
@@ -2984,7 +3119,7 @@ Create `web/playwright.config.ts` with `testDir: './e2e'`, a fixed
 `--strictPort`, and Chromium-only phone/desktop projects at `390×844` and
 `1440×900`. Each spec installs the fake relay factory with
 `page.addInitScript()` **before** `page.goto()`, so tests need neither credentials
-nor Snap Cloud. Assert four visible cards, no horizontal overflow, matching
+nor a live Supabase service. Assert four visible cards, no horizontal overflow, matching
 pending/rejected/timeout behavior, wrong then correct state, and exact-path
 glyph derivation after `finalPointCount`. Advance the injected clock through
 450 ms and assert `CORRECT -> GLYPH_LOCKED`; reset/reconnect before completion
@@ -3609,7 +3744,7 @@ whitespace errors.
 - [ ] **Step 2: Compile and establish clean runtime state**
 
 Use Lens Studio compile then Preview/log collection. Clear prior overlays and
-logs. Require Snap Cloud auth/subscription, one painter/guesser readiness
+logs. Require Supabase client configuration/public-channel subscription, one painter/guesser readiness
 exchange, and one `APPLY_ROUND round=r-<instance-nonce>-1` whose concrete ID
 passes the bounded production-ID parser.
 Before the judged run, restart twice and prove both browser-first and Lens-first
@@ -3935,7 +4070,8 @@ git commit -m "polish: prove WORDLESS five-second clarity"
 - Create temporarily, then delete before commit:
   `web/tests/adversarial/BrowserFaultChannel.ts`
 - Create temporarily, then delete before commit:
-  `web/tests/real-cloud-fault-matrix.test.ts`
+  `web/tests/real-supabase-fault-matrix.test.ts`
+- Create: `tools/security/audit-public-build-config.mjs`
 - Create: `docs/evidence/resilience.md`
 - Modify: `docs/prompt-log.md`
 
@@ -3948,16 +4084,17 @@ git commit -m "polish: prove WORDLESS five-second clarity"
 - [ ] **Step 1: Build a non-shipping fault wrapper and run the adversarial matrix**
 
 First rerun the complete parser/policy/linked-fake matrix in root and browser
-tests. Then create the two temporary `web/tests/` files. The real-cloud Vitest
-case
+tests. Then create the two temporary `web/tests/` files. Before any live case,
+wake/resume the Free project, confirm Realtime and public-channel access, and
+rerun the Gate 0 two-way application probe. The live-Supabase Vitest case
 constructs the real `BrowserRelayClient` with an injected `BrowserChannel`
 wrapper around the approved Supabase Broadcast channel and reads only the same
-ignored `VITE_` public URL/anon configuration as the browser. It is gated by
-`WORDLESS_REAL_CLOUD_MATRIX=1`; without that flag it skips, never silently
+ignored `VITE_SUPABASE_URL`/`VITE_SUPABASE_PUBLIC_KEY` configuration as the
+browser. It is gated by `WORDLESS_REAL_SUPABASE_MATRIX=1`; without that flag it skips, never silently
 passes. Run it explicitly with:
 
 ```bash
-WORDLESS_REAL_CLOUD_MATRIX=1 npm --prefix web exec -- vitest run tests/real-cloud-fault-matrix.test.ts --testTimeout=180000 --hookTimeout=30000
+WORDLESS_REAL_SUPABASE_MATRIX=1 npm --prefix web exec -- vitest run tests/real-supabase-fault-matrix.test.ts --testTimeout=180000 --hookTimeout=30000
 ```
 
 Vitest supplies the existing Vite `@wordless/core` alias, so the temporary
@@ -4044,13 +4181,13 @@ deadline guess times out regardless of whether the guess handler or timer
 callback was invoked first.
 
 Classify every case in `docs/evidence/resilience.md` as pure-linked-fake,
-real-cloud fault-wrapper, or both; do not imply that a locally swallowed packet
+live-Supabase fault wrapper, or both; do not imply that a locally swallowed packet
 proves platform packet loss. After the real matrix, delete both temporary
 files and require:
 
 ```bash
 test ! -e web/tests/adversarial/BrowserFaultChannel.ts
-test ! -e web/tests/real-cloud-fault-matrix.test.ts
+test ! -e web/tests/real-supabase-fault-matrix.test.ts
 ! rg -n 'BrowserFaultChannel|sendRawForTest|fault injection' web/src web/dist Assets/Wordless
 ```
 
@@ -4094,8 +4231,9 @@ a new `applyRound`.
 
 ```bash
 npm --prefix web run build
-! rg -l '(SUPABASE_SERVICE_ROLE_KEY|DATABASE_PASSWORD|sb_secret_[A-Za-z0-9_-]{20,})' web/src Assets/Wordless tools --glob '!**/*.md'
-! rg -l '(gho_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|sb_secret_[A-Za-z0-9_-]{20,}|c2VydmljZV9yb2xl)' web/dist
+! rg -l '(SUPABASE_(SERVICE_ROLE_KEY|ACCESS_TOKEN|MANAGEMENT_TOKEN)|DATABASE_(URL|PASSWORD)|POSTGRES_PASSWORD|service_role|sb_secret_[A-Za-z0-9_-]{20,})' web/src Assets/Wordless tools --glob '!**/*.md' --glob '!tools/security/audit-public-build-config.mjs'
+! rg -l '(gho_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|sbp_[A-Za-z0-9_-]{20,}|sb_secret_[A-Za-z0-9_-]{20,}|c2VydmljZV9yb2xl)' web/dist
+node tools/security/audit-public-build-config.mjs web/.env.local web/dist
 ! git ls-files | rg '(^|/)\.env($|\.(local|production|development|test)$)|(^|/)Assets/LocalOnly/'
 du -sh web/dist
 ```
@@ -4103,9 +4241,17 @@ du -sh web/dist
 Expected: build succeeds; user-authored source has no forbidden secret-key
 identifier/value, the vendor-containing bundle has no value-shaped private key
 or encoded `service_role` marker, and no real environment/local-only path is
-tracked. Generic Supabase protocol field names such as `access_token` may exist
-inside bundled `supabase-js` and are not treated as credentials. Only the
-intended public project URL/key are embedded through production environment values.
+tracked. `audit-public-build-config.mjs` parses ignored `.env.local` in memory,
+never prints values or hashes, and reports counts plus key type only. It rejects
+every JWT-shaped bundle value that is not byte-for-byte the configured public
+key; when the configured legacy key is JWT-shaped, it decodes only enough to
+require role `anon` and reject `service_role`. With a publishable key, it
+requires zero JWT-shaped configuration values. It likewise verifies that any
+embedded project URL equals the configured public URL. Generic Supabase
+protocol field names such as `access_token` may exist inside bundled
+`supabase-js` and are not treated as credentials. Only the intended client-safe
+public project URL/key are embedded through production environment values; they
+remain uncommitted even though a built client bundle necessarily embeds them.
 Document that the public channel/session code is a demo coordination mechanism,
 not a security boundary.
 
@@ -4119,7 +4265,7 @@ invalid and rerun its Task 13/14 review before Task 16; a docs-only evidence
 commit does not invalidate it.
 
 ```bash
-git add Assets/Wordless web docs/evidence/resilience.md docs/prompt-log.md
+git add Assets/Wordless web tools/security/audit-public-build-config.mjs docs/evidence/resilience.md docs/prompt-log.md
 git diff --cached --check
 git commit -m "test: harden WORDLESS relay demo"
 ```
@@ -4159,9 +4305,11 @@ exact claim | scope | evidence path/log/test | allowed wording
 
 Include: bidirectional Lens↔browser, one Preview painter, one browser guesser,
 10/5 Hz measured cadence, exact-path glyph, wrong/correct authority, tested
-viewport sizes, observed RTT, and Preview simulation. Explicitly ban: hardware
+viewport sizes, observed RTT, Preview simulation, and ordinary hosted Supabase
+Realtime public Broadcast. Explicitly ban: hardware
 test, secure/private channel, arbitrary remote scale, persistence, recognition,
-first-ever, production readiness, unmeasured latency, remote play, or
+authentication, guaranteed availability, first-ever, production readiness,
+unmeasured latency, remote play, or
 different-network participation unless a separately captured cross-network run
 exists.
 
@@ -4175,7 +4323,7 @@ Use this order:
 3. why spatial: body-scale midair drawing
 4. how browser participates causally
 5. CLAD execution and verification
-6. Preview and alpha limitations
+6. Preview simulation and unauthenticated public-channel demo/security limitations
 ```
 
 The first paragraph must be understandable without the words Supabase,
@@ -4276,7 +4424,9 @@ git status --short --branch
 git log --oneline --decorate -12
 ```
 
-Then run Lens compile, Preview logs, a full connected round, the local browser
+Then wake/resume the Supabase project, confirm Realtime/public-channel access,
+and rerun the two-way probe. Run Lens compile, Preview logs, a full connected
+round, the local browser
 check (plus hosted check only if Optional Task 17 already ran), secret scan,
 relative-link check, video probe, and claim-ledger review.
 Record the Playwright/Axe result explicitly, including zero serious/critical
@@ -4286,7 +4436,13 @@ violations. Every result and exact command enters
 Audit the **current tree and full git history** by filename-only output for
 credential patterns, absolute home paths, `.env`/`Assets/LocalOnly`, and
 reference-only image blobs; never print a matched value. The release checklist
-records every finding and the required public-release remediation. Record the
+records every finding and the required public-release remediation. Include
+Supabase management/access tokens, service-role keys, database URLs/passwords,
+`sb_secret_` values, JWT-shaped values, real project URL patterns, and any
+active Snap Cloud product/evidence label. Public project URLs/keys may appear
+only in ignored local inputs and generated deployment output, never tracked
+source or history. Historical Alpha-denial evidence stays explicitly
+historical. Record the
 three reference files' reachable Git blob IDs in an ignored/local audit file so
 absence can later be tested without opening the images. Because the private
 planning history intentionally contained reference images and earlier prompts
@@ -4338,7 +4494,15 @@ already connected or the owner authorizes connection at this step. Deploy
 Lens credential asset. If authorization is absent, record SKIPPED and retain
 the working local demo; do not choose another host silently.
 
+Create `.env.production.example` with only the Gate-0-proven
+`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLIC_KEY`, and
+`VITE_RELAY_SESSION_ID` names and placeholder values. Never commit a real
+project value.
+
 - [ ] **Step 2: Re-run the real Lens against the hosted browser**
+
+Wake/resume the Free project, reconfirm Realtime and public Broadcast access,
+and rerun the two-way application probe before capture.
 
 Join `WAVE42`, complete wrong→correct→glyph→replay, and record RTT/payload data.
 Hosted behavior must meet Gate 0 thresholds and differ by no more than 30% from
@@ -4377,6 +4541,13 @@ video URL is intentionally absent until the authorized upload exists. Include
 Task 16's full-history audit and block the public flip: under the current
 project contract, documented provenance cannot authorize shipping reachable
 reference-image blobs.
+
+Repeat the filename-only current-tree/history audit for real `.env` or
+`Assets/LocalOnly` paths, Supabase management/access/service-role/database
+credentials, `sb_secret_` and JWT-shaped values, real project URL patterns, and
+active Snap Cloud product claims. Report filenames/commit IDs only—never print
+a credential value. Placeholder examples and explicitly historical Alpha
+failure records are allowed; any other finding blocks publication.
 
 - [ ] **Step 2: Authorize, execute, and verify history/lineage remediation**
 

@@ -534,3 +534,72 @@ The same reviewer then performed a scoped re-review of those corrections. All
 four findings were confirmed addressed, with no remaining or new Critical or
 Important issue. The reviewer's only non-blocking whitespace note was removed
 before staging.
+
+## 2026-08-25 — Owner-approved plan reconciliation and Task 1 restart
+
+**Owner instruction**
+
+> approve written amendment. Please power through the rest of all the tasks 1 - 15 or whatever it was.
+
+This authorizes the already written standard-Supabase amendment and continued
+execution through Task 15, subject to the plan's existing Gate 0/Gate 1 checks
+and explicit owner/human-coordination stops. It does not authorize a silent
+backend change, public repository visibility, history rewriting, video upload,
+hosting-account connection, or contest submission.
+
+**Credential-safe feasibility audit**
+
+Before any mutation, Lens Studio MCP and the active generated declarations were
+inspected without querying asset properties. The active editor reported native
+asset type `SupabaseProject`, zero current instances, and a concrete editor
+class exposing `projectId`, `projectName`, `projectUrl`, and `publicToken`.
+Runtime declarations expose `url` and `publicToken`, establishing the required
+`projectUrl -> url` mapping. The installed `SupabaseClient` package is 2.1.0
+and its built-in module path accepts an arbitrary normal Supabase URL and
+client-safe key. Create/move/save APIs are present, but their real mutation is
+still a Task 1 test—not claimed as passed here. No credential value was read,
+printed, logged, or committed.
+
+**Canonical-plan reconciliation**
+
+The implementation plan, fresh-session kickoff, and README status were updated
+to make the approved amendment executable end to end:
+
+- ordinary hosted Supabase Realtime public Broadcast replaces active Snap
+  Cloud service/auth assumptions while the historical Alpha denial and the
+  installed vendor import path remain truthfully labeled;
+- Task 1 now fail-fast proves a blank native credential asset under ignored
+  `Assets/LocalOnly/` before asking the owner to create/select the normal
+  project and paste its URL/client-safe key;
+- Gate 0 messages are versioned, positive-sequenced, exact-session checked,
+  byte bounded, ID bounded, and rejected before visible state; no user-token
+  auth or Alpha heartbeat override remains;
+- the browser example environment file is created only after Gate 0 proves the
+  compatible variable names/key type, and an early NO-GO can still commit its
+  honest failure record;
+- the production adapter is `SupabaseRelayTransport`, browser teardown proves
+  both unsubscribe and removal, Free-project wake/public-channel preflights are
+  repeated, and live fault evidence is named Supabase explicitly;
+- the production-bundle audit forbids management/service/database secrets while
+  allowing only the configured client-safe legacy-anon JWT when compatibility
+  requires it, without printing values; release claims explicitly describe an
+  unauthenticated public-channel demo rather than a security boundary.
+
+**Independent reviews and corrections**
+
+A first full-plan audit identified stale Alpha auth, environment, adapter,
+evidence, and release wording across Tasks 1–18. A separate active-editor audit
+verified the native-asset API and editor/runtime field mapping while preserving
+the actual mutation as a fail-fast gate. A fresh post-edit reviewer then found
+five executable-plan defects: an exact-name asset filter mismatch, insufficient
+Gate 0 version/sequence/bounds validation, a legacy-anon JWT false positive, an
+unconditional `.env.example` stage on early NO-GO, and incomplete browser
+channel removal semantics. All five were corrected. The same reviewer reran
+the scoped review, withdrew one declaration-path concern after confirming
+`Editor.Assets.SupabaseProject`, and returned PASS with no remaining Critical,
+Important, or Minor contract finding. The orchestrator independently reran the
+forbidden-token/name scan, heading inventory, code-fence balance, and
+`git diff --check`; all passed before staging.
+
+No runtime product task began during this reconciliation. Task 1 resumes next
+with the credential-free native asset create/move/save/path-only proof.

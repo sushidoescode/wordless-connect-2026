@@ -793,3 +793,91 @@ environment`) after the final specification and quality/safety reviews both
 returned PASS with no Critical, Important, or Minor findings. The execution
 plan's Task 1 checkboxes are now marked complete from that evidence; Task 2 is
 the active step and Gate 0 remains unclaimed.
+
+## 2026-08-26 — Publishable-key transcript exposure and rotation
+
+While checking the Task 2 development server, Codex mistakenly requested
+Vite's transformed `src/main.ts` and filtered its response in the shell. Vite
+had already substituted the local environment variables, so the ordinary
+Supabase project URL and the then-current client-safe publishable key appeared
+in the private tool transcript. No secret/service-role key, database password,
+management token, or user token was involved, and the value was never staged,
+committed, or pushed. The probe server was stopped immediately and the browser
+probe tab was closed.
+
+Codex created a replacement publishable key named `wordless_gate0` in the
+authenticated Supabase dashboard, updated only the ignored `web/.env.local`
+and ignored native `SupabaseProject` asset, saved the Lens project, and cleared
+the clipboard. Value-blind Lens Editor checks confirmed exactly one native
+project asset with all four fields populated, a valid hosted-project URL
+shape, and the publishable-key shape. A fresh browser process using the
+replacement key reached the visible state `SUBSCRIBED · WAITING FOR LENS`.
+
+After that replacement-key validation, Codex opened the old default
+publishable row's action menu with a strict row guard, completed the dashboard's
+typed-name confirmation, and deleted that superseded key. A final value-blind
+dashboard query showed only `wordless_gate0` in the Publishable section and the
+unchanged default row in the Secret section. The secret row was never copied,
+selected, edited, or deleted. This rotation closes the transcript exposure;
+the upcoming Lens half of Gate 0 must still prove that the installed Lens
+client can subscribe and exchange traffic with the replacement key.
+
+The post-rotation repository audit searched tracked and unignored worktree
+files, the index, and every reachable commit for complete Supabase
+publishable/secret-key shapes, hosted project URL shapes, and PostgreSQL
+connection strings. All three match-file counts were zero. Both local
+credential containers remained ignored, and `git ls-files` returned zero
+tracked files beneath `web/.env.local` or `Assets/LocalOnly/`.
+
+## 2026-08-26 — Task 2 browser spike implementation
+
+The browser probe was built as the deliberately literal Gate 0 surface: one
+Supabase client/channel, the fixed `WAVE42` topic, strict sub-1-KB versioned
+message parsing, three send controls, an incoming-stroke canvas, visible
+connection state, and message/byte/application-RTT metrics. Scaffold branding
+and unused public assets were removed. Missing-config verification displayed
+all three exact missing variable names and initiated no Supabase request; with
+ignored local config, the replacement-key run subscribed successfully.
+
+The initial protocol test failed because the required module did not exist,
+then passed after the bounded parser was implemented. A subsequent review loop
+added red/green coverage for synchronous ping-registration ordering, terminal
+transport-state latching, contiguous inbound sequence enforcement, safe
+rejection of unserializable payloads, and a rolling 128-point Gate 0 display
+window. The rolling window limits only temporary visualization memory; it does
+not change the product's separate 128-point-per-stroke contract, and accepted
+traffic continues to contribute to message/byte metrics. Sequence gaps are
+reported visibly and never reach UI/metrics as accepted traffic. The two
+literal buttons submit bounded choice indexes 1 and 2 respectively, while the
+browser still makes no correctness decision.
+
+Fresh orchestrator verification after those corrections passed 11/11 Vitest
+cases and a TypeScript/Vite production build with 50 modules transformed. The
+stylesheet contains only the six exact approved palette values. Final Task 2
+specification and quality rereviews are pending before staging or commit.
+
+The fresh Task 2 specification rereview returned PASS with no deviation. The
+fresh quality rereview returned FAIL before commit: terminal failure was
+latched only in the inbound controller while the owning `RelayProbe` retained
+its channel and callable send paths, and the pending-ping/RTT collections were
+unbounded (including a pending entry left behind after a failed send). A second
+TDD correction loop is in progress to prove owner-level teardown/send
+rejection and bounded RTT ownership. The earlier 11/11 result is therefore not
+being treated as the Task 2 commit gate.
+
+The second correction introduced a narrow injectable client/channel boundary
+so the real `RelayProbe` owner could be tested without network traffic. Red
+tests demonstrated missing exact-once removal, post-terminal send rejection,
+and removal-failure containment before the implementation nulled channel
+ownership, prevented reconnect/send after the first terminal state, and
+contained asynchronous cleanup failures. A bounded RTT tracker now retains at
+most 64 pending pings for 10 seconds and 128 completed samples; failed sends
+discard their pending entry. The owner-lifecycle suite reached 15/15 before the
+RTT tests were added, and the full suite reached 19/19.
+
+Fresh orchestrator verification again passed all 19 tests and the production
+TypeScript/Vite build with 50 modules transformed. The live ignored-config
+page remained `SUBSCRIBED · WAITING FOR LENS` with all three controls enabled.
+Independent final specification and quality reviewers both returned PASS with
+zero findings. Task 2 is therefore eligible for its scoped commit; this is
+still only the browser half and does not claim bidirectional traffic or Gate 0.

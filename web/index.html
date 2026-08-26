@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WORDLESS Relay Probe</title>
+  </head>
+  <body>
+    <main>
+      <p id="connection" role="status">CONNECTING</p>
+      <canvas id="stroke" width="1000" height="600" aria-label="Incoming Lens stroke"></canvas>
+      <button id="guess-wrong" type="button">SEND GUESS 1</button>
+      <button id="guess-correct" type="button">SEND GUESS 2</button>
+      <button id="ping" type="button">MEASURE ROUND TRIP</button>
+      <pre id="metrics" aria-live="polite"></pre>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -33,8 +33,8 @@ Playwright Chromium. The Snap Cloud Alpha Plugin is not a runtime dependency.
 **Review status:** Reconciled on 2026-08-25 after an independent Fable 5
 `APPROVE WITH REQUIRED CHANGES` review, then reconciled again after the owner
 approved the normal hosted Supabase amendment. The Specs baseline is open and
-Task 1 is complete at commit `89bcd23`; Task 2 is in progress. No realtime
-traffic or Gate 0 GO is claimed.
+Task 1 is complete at commit `89bcd23`; Task 2 is complete and Task 3 is next.
+No bidirectional realtime traffic or Gate 0 GO is claimed.
 
 ## Global Constraints
 
@@ -547,7 +547,7 @@ generated workspace state.
 - Produces: A local page that visibly receives point batches, sends guesses and
   pings, shows channel state, and reports bytes/messages/RTT.
 
-- [ ] **Step 1: Scaffold the smallest typed browser**
+- [x] **Step 1: Scaffold the smallest typed browser**
 
 ```bash
 npm create vite@latest web -- --template vanilla-ts
@@ -577,7 +577,7 @@ public asset. The vanilla-ts scaffold currently produces one `tsconfig.json`
 and no `vite.config.ts`; record the observed shape rather than creating a
 framework-template config split.
 
-- [ ] **Step 2: Write the failing probe-protocol tests**
+- [x] **Step 2: Write the failing probe-protocol tests**
 
 ```ts
 import { describe, expect, it } from 'vitest'
@@ -613,14 +613,14 @@ describe('probe protocol', () => {
 })
 ```
 
-- [ ] **Step 3: Run the tests and verify the red state**
+- [x] **Step 3: Run the tests and verify the red state**
 
 Run: `npm --prefix web test`
 
 Expected: failure because `probe-protocol.ts` does not yet export the required
 functions.
 
-- [ ] **Step 4: Implement the exact probe contract**
+- [x] **Step 4: Implement the exact probe contract**
 
 ```ts
 export type ProbeMessage =
@@ -670,7 +670,7 @@ Run: `npm --prefix web test`
 
 Expected: all probe-protocol tests pass.
 
-- [ ] **Step 5: Build the browser relay probe**
+- [x] **Step 5: Build the browser relay probe**
 
 Create one Supabase client and one channel owner. The connection core is:
 
@@ -769,7 +769,7 @@ only in ignored `web/.env.local` during Tasks 2–4. Do not create or commit an
 example until Gate 0 proves the installed Lens client and selected key type are
 compatible.
 
-- [ ] **Step 6: Add a literal visible probe UI**
+- [x] **Step 6: Add a literal visible probe UI**
 
 `index.html` contains exactly these interactive/status regions:
 
@@ -792,7 +792,7 @@ assign the probe to `window.wordlessProbe` so Gate 0 can reproducibly call
 `sendUncheckedForGate0(payload)` for its malformed-message matrix. The probe
 files and this escape hatch are deleted before the product browser is committed.
 
-- [ ] **Step 7: Verify browser-only evidence**
+- [x] **Step 7: Verify browser-only evidence**
 
 ```bash
 npm --prefix web test
@@ -804,7 +804,7 @@ Expected without local credentials: tests/build pass; the page renders a clear
 missing-configuration error and makes no network call. With ignored local
 credentials: the page reaches `CONNECTING` without leaking values to output.
 
-- [ ] **Step 8: Commit the browser probe**
+- [x] **Step 8: Commit the browser probe**
 
 ```bash
 git add web docs/prompt-log.md

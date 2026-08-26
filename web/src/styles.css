@@ -1,0 +1,102 @@
+:root {
+  --violet: #8B5CF6;
+  --lemon: #FFD65A;
+  --mint: #73E6AE;
+  --coral: #FF786A;
+  --ivory: #FFF6E8;
+  --plum: #200B2B;
+
+  color: var(--ivory);
+  background: var(--plum);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+main {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+#connection,
+#stroke,
+#metrics {
+  grid-column: 1 / -1;
+}
+
+#connection {
+  margin: 0;
+  color: var(--lemon);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+#connection[data-status='subscribed'],
+#connection[data-status='live'] {
+  color: var(--mint);
+}
+
+#connection[data-status='sequence-gap'],
+#connection[data-status='failed'],
+#connection[data-status='closed'] {
+  color: var(--coral);
+}
+
+canvas {
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  border: 3px solid var(--mint);
+  background: var(--ivory);
+}
+
+button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--plum);
+  background: var(--lemon);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--mint);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+#metrics {
+  min-height: 7.5em;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 680px) {
+  main {
+    grid-template-columns: 1fr;
+  }
+
+  #connection,
+  #stroke,
+  #metrics {
+    grid-column: 1;
+  }
+}

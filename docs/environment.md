@@ -56,6 +56,9 @@ Lens-to-browser traffic remains the separate Gate 0 proof in Tasks 2–4.
   no unsaved setting change remained
 - Client key type: publishable (`sb_publishable_...` shape); no secret,
   `service_role`, database, or session credential was selected or transferred
+- Active client key label: `wordless_gate0`. It replaced and revoked the
+  initial default publishable key after that client-safe value appeared in a
+  private Vite tool transcript; the dashboard's secret-key row was untouched
 - Credential entry/persistence: all four native identity/configuration fields
   are populated after `Project.save()` and a full Lens Studio restart; checks
   returned only booleans and shape validity, never values
@@ -67,7 +70,9 @@ Lens-to-browser traffic remains the separate Gate 0 proof in Tasks 2–4.
   connections, 100 messages/s, 100 channel joins/s, 256 KB Broadcast payload
 - Free-project inactivity behavior: may pause after low activity over a 7-day
   period; dashboard action is `Resume project`
-- Repository/log/capture/chat credential values: none
+- Repository/index/history credential-shaped match-file counts after rotation:
+  0/0/0. The old publishable key and project URL did appear once in a private
+  tool transcript; no secret credential and no git exposure occurred
 - Optional GitHub-integration prompt: closed before any repository selection,
   installation, or authorization; no Supabase GitHub integration was added
 - Prior localhost MCP bearer exposure: present only in a private tool

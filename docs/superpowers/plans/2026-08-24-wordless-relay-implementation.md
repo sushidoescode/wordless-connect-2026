@@ -2132,7 +2132,7 @@ git commit -m "feat: add authoritative WORDLESS round engine"
 - Produces: `acceptWorldPoint`, `quantizePlanePoint`,
   `takePointBatch`, and `normalizeGlyph` for engine, Lens, and browser.
 
-- [ ] **Step 1: Write the failing geometry tests**
+- [x] **Step 1: Write the failing geometry tests**
 
 ```js
 test('samples only after 2.5 cm of movement', () => {})
@@ -2146,7 +2146,7 @@ test('single-point glyph remains finite and centered', () => {})
 test('path checksum is deterministic and order-sensitive', () => {})
 ```
 
-- [ ] **Step 2: Run the geometry tests red**
+- [x] **Step 2: Run the geometry tests red**
 
 Run:
 
@@ -2156,7 +2156,7 @@ node --experimental-strip-types --import ./tools/core-tests/register.mjs --test 
 
 Expected: module-not-found failure for `StrokeGeometry.ts`.
 
-- [ ] **Step 3: Implement the explicit sampling math**
+- [x] **Step 3: Implement the explicit sampling math**
 
 ```ts
 export const DRAWING_WIDTH_CM = 180
@@ -2204,7 +2204,7 @@ export function pathCoordinateHash(points: readonly QuantizedPoint[]): string {
 }
 ```
 
-- [ ] **Step 4: Implement exact-path medallion normalization**
+- [x] **Step 4: Implement exact-path medallion normalization**
 
 Convert integer points to `0..1`, compute the bounding box, center it, and apply
 one uniform scale so the larger dimension occupies `0.8`. Return integers in
@@ -2212,7 +2212,7 @@ one uniform scale so the larger dimension occupies `0.8`. Return integers in
 the fixed axis to `500`. Never smooth, classify, reorder, add, or remove a
 point.
 
-- [ ] **Step 5: Verify geometry**
+- [x] **Step 5: Verify geometry**
 
 Run:
 
@@ -2223,7 +2223,7 @@ node --experimental-strip-types --import ./tools/core-tests/register.mjs --test 
 Expected: all geometry tests pass, and a 128-point input returns exactly 128
 glyph points in the original order.
 
-- [ ] **Step 6: Commit the geometry lane**
+- [x] **Step 6: Commit the geometry lane**
 
 ```bash
 git add Assets/Wordless/Scripts/Core/StrokeGeometry.ts Assets/Wordless/Scripts/Core/StrokeGeometry.ts.meta tools/core-tests/geometry.test.mjs docs/prompt-log.md

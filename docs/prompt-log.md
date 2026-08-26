@@ -1490,3 +1490,41 @@ here rather than hidden. Preview was paused afterward. Final independent
 contract and quality re-reviews each returned PASS with no Critical,
 Important, or Minor findings. This is Preview/runtime compatibility evidence,
 not hardware, production, security, persistence, scale, or latency evidence.
+
+## 2026-08-26 — Task 7 bounded stroke and deterministic glyph geometry
+
+Task 7 began in parallel only after the Task 5 protocol freeze. The focused
+test command first failed with `ERR_MODULE_NOT_FOUND` for the absent geometry
+module. The first implementation passed 14/14 tests covering the approved
+2.5 cm sampling threshold, 180-by-110 cm drawing plane, integer `0..1000`
+quantization, 128-point cap, ordered eight-point batching, exact-path
+normalization, degenerate paths, and deterministic coordinate-only hashing.
+The first specification review passed without changing the approved math.
+
+Three quality loops then hardened caller-owned input boundaries. First,
+four regressions showed that non-finite world or quantized coordinates could
+be accepted or emitted; the suite moved from the required 14 pass / 4 fail red
+state to 18/18 green after adding finite domain guards. Second, nine
+regressions demonstrated accessor/Proxy time-of-check/time-of-use and sparse
+array cases; the suite moved from 18 pass / 9 fail to 27/27 after each world
+point, path length, outer index, and tuple coordinate was snapshotted exactly
+once and malformed or throwing input was normalized to the documented failure.
+
+The final cross-review found `takePointBatch` still called `slice` twice on the
+caller queue, allowing a changing-length Proxy to lose its tail and allowing
+invalid or sparse tuples through. Six regressions produced 27 pass / 6 fail.
+Batching now obtains one validated plain snapshot, then derives `batch` and
+`rest` from it as independent tuple copies. That loop finished at 33/33. The
+128-point normalization test confirms every point remains in original order;
+no smoothing, classification, addition, removal, or semantic redrawing occurs.
+The checksum remains diagnostic-only and never logs raw coordinates.
+
+Final verification passed 33/33 focused geometry tests and 110/110 integrated
+core tests, plus the Lens preflight typecheck and scoped diff checks. The same
+fresh Lens Studio MCP compile/run compatibility pass that closed the parallel
+core lanes succeeded with `errors=[]`, a subscribed replacement Preview epoch,
+and continuing point traffic before Preview was paused. Independent final
+specification and quality review returned PASS with no Critical, Important, or
+Minor findings. This validates pure geometry and Preview compatibility only;
+it does not imply recognition, hardware testing, production readiness,
+security, persistence, scale, or platform latency.

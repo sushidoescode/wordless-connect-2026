@@ -982,3 +982,385 @@ source, scene diff, metadata inventory, tests, and prompt-log evidence. Task 3
 is therefore eligible for its scoped commit. This remains Lens Studio Preview
 evidence only and makes no hardware, latency, security, persistence, scale, or
 Gate 0 claim.
+
+## 2026-08-26 — Task 4 Gate 0 realtime decision
+
+Task 3 was committed as `91ef26f` (`spike: add Supabase Realtime Lens
+probe`) after its staged credential, generated-state, inspection-residue, and
+missing-metadata checks all returned zero. Task 4 then ran as a serial live
+integration gate with no product/game implementation in flight.
+
+**Preflight and honest capture attempts**
+
+The clean preflight passed the browser's 19/19 Vitest cases and production
+build, Lens TypeScript recompilation, fresh Preview subscription, and two
+unauthenticated public-channel joins. The browser did not reach `CONNECTED`
+until Lens-origin traffic arrived.
+
+macOS display-level captures returned wallpaper instead of the active apps.
+Window-specific H.264 recording recovered both browser and Lens Studio, but
+the Lens Preview GPU subregion remained frozen in that recorder even while
+the live widget and counters advanced. The retained composite therefore
+labels the frozen pane as unreliable and inserts actual Preview and Logger
+widget grabs only at their true timestamps. Failed wallpaper, Logger
+activation, direct-window, and first-composition attempts remain under the
+ignored capture ledger rather than being hidden. The final evidence never
+calls a held widget frame continuous video.
+
+The first Lens-window preflight also revealed that editor selection had
+returned to the ignored `SupabaseProject` Inspector despite an earlier safe
+selection report. That preflight image contained the ordinary project URL and
+client-safe publishable key. The exact file,
+`captures/realtime-spike/preflight-lens-window.png`, was immediately deleted,
+confirmed absent, and never staged or committed. Selection was forced through
+Lens MCP to the `RelaySpike` scene root and verified by scene-object name
+before any retained capture. No secret/service-role key, database password,
+or management token was involved.
+
+**Live application proof**
+
+Run A recorded a fresh unauthenticated browser and Preview. A 10.0-second
+measured window advanced 87 accepted messages and 10,427 bytes while the
+browser stayed `CONNECTED`; the point sender was configured for a nominal
+100 ms interval and the observed accepted-message rate was 8.7/s. Browser
+choice 2 produced authoritative Lens `RX_GUESS` at 04:34:08 PT and an actual
+mint `CORRECT` Preview state without stopping the stream.
+
+Run B first sent choice 1 as sequence 1 / `guess-1`, producing Lens
+`RX_GUESS` and actual coral `TRY AGAIN`. The unchecked Gate test door then
+sent wrong-session, wrong-version, sequence-zero, stale-sequence,
+out-of-range-choice, duplicate-ID, overlong-ID, string-timestamp,
+unknown-kind, nine-point, and 1,223-byte inputs. Lens emitted exactly 11
+`REJECTED` lines. The next ordinary sequence 2 / `guess-2` was accepted and
+produced mint `CORRECT`, proving the rejects did not advance the accepted
+high-water. A subsequent 10.05-second window advanced 84 accepted messages
+and 10,145 bytes at an observed 8.36/s while remaining connected with no
+sequence gap, terminal state, timeout, transport warning, or disconnect.
+
+The browser then sent fifty pings at measured 250.5–253.2 ms spacing while
+points continued. All 50 received their correlated Lens-origin application
+acknowledgment. RTT median was 79 ms, p95 109 ms, and maximum 114 ms. The
+runtime-only Gate meter counted 2,029 valid inbound/outbound messages,
+241,663 valid serialized bytes, and a largest valid message of 122 bytes; the
+1,223-byte malformed negative was deliberately excluded. Browser video frame
+hashes found no freeze longer than 0.2 seconds. No guess or acknowledgment was
+dropped, so the 5 Hz conditional retest was not needed.
+
+Run A and one later tail contained three unrelated Lens Studio Quest/ADB
+device-discovery warnings. They neither came from RelaySpike/Supabase nor
+coincided with a channel or application failure. Run B and both restart
+verification tails returned `errors=[]`; the evidence deliberately does not
+claim that the editor was globally warning-free.
+
+**Cold restart and capture integrity**
+
+The original isolated Chrome and Vite processes were terminated and ports
+9334/5175 confirmed empty. Fresh Vite, Lens recompile/Preview, and a new
+isolated browser then reproduced unauthenticated joins, a moving 10.2-second
+stream, authoritative `RX_GUESS`, and actual mint `CORRECT` with no Lens
+runtime error. The aligned 45.066-second 1920×1080 composite is
+`captures/realtime-spike/restart-aligned-composite.mov`, SHA-256
+`356a3b8043e8bdd1ccdfab71818266331079345b2ec35b4371342f27ddfb378a`.
+Raw capture durations and hashes, exact timestamps, metrics, and the capture
+limitation are recorded in `docs/evidence/realtime-spike.md`; all media remains
+ignored and uncommitted.
+
+**Post-capture key closure and smoke**
+
+After the client-safe value appeared in the deleted preflight capture and the
+private tool transcript, Codex created a new publishable key named
+`wordless_runtime`. It copied the value only inside an exact dashboard-row
+scope, updated ignored `web/.env.local`, and used an ignored, mode-600,
+short-lived Editor-code file so Lens MCP received only a file path rather than
+the credential in its call. Value-blind editor results confirmed exactly one
+native asset, populated URL/token, publishable shape, and successful
+`Project.save()`. The temporary file was first scrubbed back to its placeholder
+and then removed; the clipboard was cleared. A direct attempt to use the Lens
+Editor Clipboard module failed safely because that module permission was not
+granted and changed no asset.
+
+The first post-rotation browser assertion had an over-escaped metrics regular
+expression; a sanitized DOM read showed the page itself was already live. A
+second 2.5-second check then observed zero new messages because that browser
+had joined before Lens refresh and retained the publisher's old sequence
+high-water. No code or config was changed. Repeating in the correct order—Lens
+refresh followed by a genuinely fresh browser—passed: Lens compiled and
+subscribed with `errors=[]`, the browser reached unauthenticated
+`CONNECTED/live`, and its metrics advanced from 250 messages / 30,206 bytes
+to 271 / 32,744 in 2.5 seconds. All three controls remained enabled and no
+login surface, sequence gap, or terminal state appeared. The superseded
+`wordless_gate0` publishable row was then irreversibly deleted under an exact
+row/name guard; the new publishable row and untouched default secret row
+remained.
+
+During dashboard cleanup, one overly broad read-only Chrome tab enumeration
+returned unrelated tab titles and URLs to the private tool transcript. It did
+not read page bodies or credential values. All later browser reads were exact
+Supabase-tab, row, and sanitized-field queries. Chrome's local `Allow
+JavaScript from Apple Events` option was used for these bounded dashboard
+actions; automated attempts to switch it back off could not activate the
+owner's main Chrome window in the current macOS UI session, so that local
+hardening cleanup remains explicitly unclaimed rather than silently asserted.
+
+**Independent review correction**
+
+The live operator initially returned GO, but the required independent review
+rejected that conclusion on two literal criteria. First, the measured accepted
+rates were 8.70/s and 8.36/s rather than the required maintained 10 Hz; a
+nominal 100 ms timer does not substitute for observed delivery. Second, the
+window recorder froze the Lens Preview GPU pane, and two timestamped widget
+stills cannot establish the no-visible-freeze-over-one-second threshold even
+though the browser video and runtime logs continued. The fully measured run
+also used the now-revoked pre-rotation key; the 2.5-second post-rotation smoke
+did not repeat the rejection, RTT, authority, and restart matrix.
+
+Task 4 therefore remains **NO-GO / RETEST REQUIRED**, the plan checkboxes are
+reopened, and Task 5 remains blocked. The first attempt, failed capture modes,
+metrics, and rotation smoke stay in the record. Remediation is limited to the
+realtime spike: make actual accepted point cadence meet 10 Hz, collect
+continuous actual Preview frames with Lens MCP, then rerun every Gate 0 step
+from a fresh active-key state. No game work has begun.
+
+**Cadence remediation and active-key Gate 0 rerun**
+
+The remediation stayed inside the spike. Red tests first established that a
+simple timer could burst multiple sends after a delayed callback and that
+sequence numbers assigned before the shared FIFO could describe enqueue time
+rather than actual wire-start order. `ProbeCadence` now advances one
+phase-locked 100 ms deadline at a time, emits at most one draft per callback,
+and rebases after two or more missed deadlines. A matching
+`ProbePointStartGate` applies the same rule at actual FIFO send start, while
+`ProbeWireSequencer` allocates sequence only after that gate releases. A
+750 ms blocked-send regression proves starts occur at 0, 750, 850, …, 1,350 ms
+rather than bursting at 750 ms. Rejected/stopped drafts allocate no wire
+sequence. The bounded capacity-eight FIFO and fail-closed behavior remain.
+
+The first measurement review then found that callback-time evidence and a
+separately seeded frame sampler could not prove the same epoch. A second red/
+green loop added `ProbeUpdateGapSampler`: at `SUBSCRIBED`, one exact `nowMs`
+starts both point cadence and update-gap sampling. It records every consecutive
+`UpdateEvent` gap from ordinal 1, emits one numeric-only
+`UPDATE_GAP_MAX sampleCount=N maxGapMs=M spanMs=S` line after at least ten
+seconds, and terminates on an invalid or reversing clock. Point telemetry is
+numeric-only `POINT_START ordinal=N monotonicMs=M`; it contains no payload,
+coordinate, project, or credential value. Final pure regression coverage
+passed 30/30, including generation cadence, actual-start cadence, sequencing,
+finite-clock failure, shared epoch, parser, replay, FIFO, and teardown cases.
+Independent remediation specification and quality reviewers returned PASS.
+
+The accepted evidence rule is `T = 100 ms`, same-epoch maximum update gap
+`F < T`, and observation allowance `B = F + 1 ms`. Fresh ordinals 1–101 must
+span `10,000..10,000+B ms`; a prospectively armed mid-run ordinal window must
+span `10,000-B..10,000+B ms`. This permits one frame of observation error but
+does not permit retrospective favorable-window selection.
+
+Fresh active-key Run A logged `CLIENT_CONFIGURED` at 08:10:24.658 PT and
+`CHANNEL SUBSCRIBED` at 08:10:25.100 PT. Lens ordinals 1–101 were contiguous
+over 10,021 ms with `F=45`, `B=46`, and no cadence diagnostics. Browser
+sequences 1–101 were contiguous over 10,019 ms source time and 10,017.6 ms
+arrival time, remained `CONNECTED`, and had no gap or terminal state. Choice 2
+caused Lens `RX_GUESS` at 08:10:39.296 PT and actual mint `CORRECT`.
+
+Fresh Run B first accepted choice 1 as valid outbound sequence 1, logged
+`RX_GUESS`, and showed actual coral `TRY AGAIN`. The eleven specified malformed
+candidates—including the 1,223-byte oversized input—were sent through the
+unchecked Gate door. Lens emitted exactly eleven `REJECTED` lines; browser
+valid-outbound count stayed at one and the accepted high-water did not move.
+The next ordinary sequence 2 was accepted, produced a second `RX_GUESS`, and
+showed actual mint `CORRECT`. A prospectively armed ordinal/sequence
+1,855–1,955 window had Lens span 10,017 ms, browser source span 10,016 ms,
+arrival span 10,009.5 ms, and no diagnostics, gap, or terminal state. Run B's
+same uninterrupted epoch had already emitted
+`UPDATE_GAP_MAX sampleCount=333 maxGapMs=66 spanMs=10010`, establishing
+`F=66`, `B=67` before that later window. The prospective helper used Run A's
+stricter already-passing `B=46` exactly as predeclared. All three frozen spans
+pass both `[9,954, 10,046] ms` for the armed bound and `[9,933, 10,067] ms`
+for Run B's same-epoch bound; this establishes cumulative cadence but, as the
+later quality correction below records, not exact-window update health.
+
+Fifty pings began at 250.4 ms minimum, 252.3 ms median, and 253.3 ms maximum
+spacing while points continued. Exactly 50/50 correlated application
+acknowledgments arrived; median RTT was 86 ms, p95 106 ms, and maximum 111 ms.
+The meter counted 2,891 valid inbound and 52 valid outbound messages, 2,943
+total valid messages, 351,902 valid serialized bytes, and a 122-byte largest
+valid message. The 1,223-byte malformed negative remained excluded. A
+496-point/49,479.5 ms tail had no sequence gap, terminal state, or
+discontinuity.
+
+For visible continuity, four accepted sets used 22 direct Lens Studio MCP
+Preview screenshots targeted every 500 ms. Their spans were 10,483, 10,491,
+10,499, and 10,490 ms; worst completion gaps were 545, 517, 516, and 518 ms;
+all 22 images in every set had distinct hashes. Continuous browser recordings
+fully enclosed each set. These are timestamped real Preview frames, not
+continuous Preview video. Root visually confirmed cursor movement and the
+actual coral/mint result states.
+
+The restart terminated the old Vite/Chrome processes and confirmed ports
+5175/9334 empty before launching a new isolated browser profile and fresh
+Preview. Lens logged `CLIENT_CONFIGURED` at 08:22:24.111 PT and
+`CHANNEL SUBSCRIBED` at 08:22:24.457 PT. Ordinals/sequences 1–101 were
+contiguous with `F=48`, `B=49`, Lens span 10,015 ms, browser source/arrival
+spans 10,012/10,012.1 ms, and no gap or terminal state. Choice 2 caused
+`RX_GUESS` at 08:22:40.652 PT and actual mint `CORRECT`. The fresh processes
+were terminated and both ports again confirmed empty.
+
+The retest ledger remains explicit: paused Preview yielded no epoch; ordinary
+Preview refresh retained old ordinals; a long editor-code sampler timed out;
+several samplers failed recording overlap; one 40-second recorder ended before
+the late sampler; and one prolonged non-accepted session received WebSocket
+close 1006 after 5,317 messages. That close did not repeat in fresh Run A, Run
+B, or restart, so it does not satisfy the plan's repeat-disconnect NO-GO rule.
+No failed attempt supplied accepted evidence.
+
+Root independently recomputed the four accepted browser-video and screenshot-
+manifest SHA-256 values, checked H.264 metadata/durations, confirmed 22/22
+unique frames in every set, and rescanned retained captures. Credential-pattern
+matches were zero. The repository remained private, ignored local config and
+captures remained untracked, the Lens credential asset was never inspected,
+and no preview sample is described as hardware or a device test. Exact hashes,
+metrics, failed-attempt adjudication, and claim boundaries are recorded in
+`docs/evidence/realtime-spike.md`.
+
+Final quality review found that the timestamp manifests named the Preview PNGs
+but did not cryptographically bind their contents. Root independently sorted
+each set's frame filenames, SHA-256 hashed every file, concatenated only the
+64-character digests one per line, and SHA-256 hashed that stream. All four
+sets remained 22/22 unique. The resulting aggregates were
+`bb4734cfc1782ff90bffb473d8730675433d1a86b812f001912bbd615c436c1d`
+(Run A),
+`315f331a715cedbc248b92ff1fad4e3ddcebdb007bc2bfa5f2f08515f30a88e6`
+(Run B matrix),
+`19a3cfda315569d89b4873878f2da2b57eedfceab74d988453921c66dc067e11`
+(Run B pings), and
+`290e2a81f0cfaf8488b15ed65e4e0fb735162f6a5656ab19f0e086f8cae26f32`
+(restart). The final real Logger screenshot independently matched SHA-256
+`83f608d0c9da877df02c8b2bca5e96551dfb454f43e480d339aff181fb82ac70`.
+The evidence record now binds both capture timing and frame contents.
+
+The corrected active-key matrix therefore returns **Gate 0 GO**. This freezes
+ordinary hosted Supabase Realtime public Broadcast as the implementation
+transport and unblocks Task 5; it does not broaden the approved product or
+support any production, hardware, security, persistence, scale, or platform-
+latency claim.
+
+Final root verification did not hide a late failed attempt. TypeScript first
+recompiled successfully, but immediate log collection caused two rapid Preview
+resets; the canceled old epoch emitted `CHANNEL_ERROR` before the replacement
+epoch subscribed. After pausing and recompiling, a separate fresh epoch reached
+`CLIENT_CONFIGURED` but then emitted `CHANNEL_ERROR` before subscription and
+also surfaced unrelated Quest/ADB discovery warnings. That entire attempt was
+rejected. A value-blind ordinary browser client then subscribed successfully,
+independently confirming that the normal Free project and active publishable
+configuration were awake. The next ordinary fresh Preview run logged
+`CLIENT_CONFIGURED` at 08:39:33.227 PT, `CHANNEL SUBSCRIBED` at
+08:39:33.704 PT, active point traffic, and
+`UPDATE_GAP_MAX sampleCount=330 maxGapMs=79 spanMs=10030`, with no RelaySpike
+error or channel warning in that epoch. Preview was then paused. This is an
+initial-join failure followed by a distinct clean run, not a second connected-
+channel disconnect, and it is retained for independent review alongside the
+earlier close-1006 attempt.
+
+**Exact-window cadence review reopened Gate 0**
+
+A deeper evidence audit challenged the post-rejection Run B cadence proof.
+Root confirmed that Run B's own uninterrupted epoch emitted
+`UPDATE_GAP_MAX sampleCount=333 maxGapMs=66 spanMs=10010` before the later
+ordinal 1,855–1,955 window, and that the frozen Lens/browser spans pass both
+the prospectively declared stricter `B=46` envelope and the same-epoch `B=67`
+envelope. Specification review considered that conservative proof sufficient
+under Task 4's cumulative 10 Hz wording and the written mid-run procedure.
+
+Independent quality review produced a valid counterexample: the one-shot gap
+sampler had stopped long before ordinals 1,855–1,955, and a phase-locked sender
+can suffer one `UpdateEvent` gap above 100 ms followed by shorter intervals
+while retaining a passing cumulative span. Because adjacent intervals were
+diagnostic only, the current artifacts cannot rule that out. Root accepted the
+stricter finding, reopened Task 4 Steps 4/7/8, changed the evidence result back
+to **RETEST REQUIRED**, and kept Task 5 blocked.
+
+The correction remains evidence-only: retain the phase-locked sender/FIFO,
+add finite/reversal-fail-closed numeric telemetry for the maximum Update gap
+between each actual point start, then prospectively freeze and rerun the one
+missing post-rejection 101-point window. The maximum carried by exact ordinals
+`start+1..end` covers the same 100 intervals; require it below 100 ms and
+require the already-predeclared `B=46` cumulative envelope. No prior failed
+attempt or favorable completed window may substitute.
+
+**Exact-window telemetry and decisive Run B correction**
+
+The narrow correction began with a red/green loop around the evidence gap,
+without changing the product or transport. The first focused run failed three
+assertions because the persistent tracker did not yet exist and point-start
+telemetry did not carry an interval maximum. `ProbeUpdateGapTracker` now starts
+from the same subscription clock as cadence generation, observes every later
+`UpdateEvent`, preserves its last observation when an interval maximum is
+drained, and fails closed on a non-finite or reversing clock. Every actual
+point start logs only numeric `ordinal`, `monotonicMs`, and `updateGapMaxMs`
+fields. Thus the maxima on ordinals `start+1..end` cover exactly the 100 update
+intervals associated with a fixed 101-point window. The focused suite passed
+16/16 after implementation; the complete core suite passed 32/32, the browser
+suite passed 19/19, the production browser build passed, and the scoped diff
+check passed.
+
+Lens TypeScript compiled successfully. A clean live preflight then emitted
+`CLIENT_CONFIGURED`, `CHANNEL SUBSCRIBED`, and point-start lines containing
+finite update-gap values; the collected runtime error array was empty. The
+decisive post-rejection run used a fresh isolated Vite/browser pair armed at
+zero before a true Lens Preview refresh. No authentication surface appeared.
+Lens subscribed at 13:58:35.381 PT.
+
+The ordinary wrong choice produced `RX_GUESS` at 13:58:56.111 PT and actual
+coral `TRY AGAIN`. The unchecked test door sent the same eleven malformed
+candidates, including a 1,223-byte message; Lens emitted exactly eleven
+`REJECTED` lines from 13:59:08.780 through 13:59:10.310 PT, while valid browser
+outbound count stayed at one. The next ordinary valid choice used sequence 2,
+produced `RX_GUESS` at 13:59:15.647 PT, advanced valid outbound count to two,
+and changed the actual Preview widget to mint `CORRECT`. No rejection poisoned
+the accepted high-water or continuity state.
+
+The prospective helper had predeclared `B=46` before the outcome was known.
+It then captured contiguous Lens ordinals and browser sequences 958–1,058.
+The first Lens point started at monotonic 96,298 ms and the last at 106,298 ms,
+for an exact 10,000 ms source span and 10.000 Hz. Browser source span was also
+10,000 ms at 10.000 Hz; browser arrival span was 10,001.5 ms at approximately
+9.9985 Hz. The carried interval maxima on ordinals 959–1,058 produced exact
+`F=48 ms`, hence `B=49 ms`. All three spans passed both the frozen
+`[9,954, 10,046] ms` envelope and the independently derived
+`[9,951, 10,049] ms` envelope. There were zero cadence diagnostics, sequence
+gaps, terminal states, or non-monotonic observations. Root independently
+reran the exact-window auditor against the post-recovery Lens log boundary;
+it reproduced 101 indexed points, 100 transitions, `F=48`, both envelope
+passes, and a combined pass.
+
+The browser ended `CONNECTED` with 2,528 valid Lens-origin messages and two
+valid browser-origin messages: 2,530 total, 304,558 serialized bytes, and a
+122-byte largest valid message. The post-window Lens tail contained no
+warning, error, rejection, send, channel, or update-gap diagnostic. Preview
+was paused after capture, the isolated processes were terminated, and ports
+5175/9334 were empty.
+
+The decisive browser recording is
+`captures/realtime-spike/retest-exact-runb-window-browser.mov`, a 59.990-second
+silent H.264 recording at 1880x2250, SHA-256
+`2a0d4815ac4162dd64254138ea9deceaf9f2127b850b313594f4286dc16e240e`.
+Its manifest SHA-256 is
+`036694602aa601c8c8a6c426665e10a67d4dcc5e0d4f051aa5b28d6551a94ace`.
+A 22-frame direct MCP Preview sample fell wholly inside that exact browser
+window, spanned 9,448 ms, had 431–484 ms completion gaps, and contained 22/22
+distinct frames with visible cursor movement. It is supplemental alignment
+evidence, not a replacement for the four already accepted greater-than-ten-
+second Preview samples. Using the documented aggregate formula—sorted files,
+each file's 64-character digest alone, one digest per line with a final
+newline—its frame-content aggregate is
+`7f36b44a91337254a7644a8a3baa65a72bfb52abf75107f053409395eb890e8d`.
+The operator's initially reported `e3f8...` value was reproducibly traced to
+hashing full `shasum` output lines including filenames; all 22 individual
+frame hashes were unchanged. The exact wrong/correct stills and Logger panel
+are bound by hashes in the evidence record.
+
+This prospective exact-window run resolves the independent review's only
+remaining objection. Gate 0 returns to **GO**, ordinary hosted Supabase
+Realtime public Broadcast remains the frozen implementation transport, and
+Task 5 is unblocked. The proof remains one Lens Studio Preview client and one
+ordinary browser; it is not hardware footage, a device test, or evidence for
+production, security, persistence, scale, or platform latency.

@@ -29,6 +29,7 @@
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
     channelName: false
+    pointCursor: false
     statusText: false
     statusVisual: false
     supabaseProject: false
@@ -45,6 +46,7 @@
       channelName: WAVE42
       statusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       statusVisual: !<reference.MaterialMeshVisual> 00000000-0000-0000-0000-000000000000
+      pointCursor: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
@@ -53,3 +55,4 @@
     - '// @input string channelName = "WAVE42"'
     - // @input Component.Text statusText
     - // @input Component.MaterialMeshVisual statusVisual
+    - // @input SceneObject pointCursor

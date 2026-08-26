@@ -1,12 +1,20 @@
 import {
-  clearInterval,
   createClient,
   REALTIME_SUBSCRIBE_STATES,
-  setInterval,
   type RealtimeChannel,
   type SupabaseClient,
 } from 'SupabaseClient.lspkg/supabase-snapcloud'
 
+import {
+  formatProbeUpdateGapReport,
+  prepareProbePointSend,
+  ProbeCadence,
+  ProbePointStartGate,
+  ProbeUpdateGapSampler,
+  ProbeUpdateGapTracker,
+  ProbeWireSequencer,
+  type ProbeCadenceBatch,
+} from './ProbeCadence'
 import {
   createProbeIdSet,
   parseProbeInbound,
@@ -16,7 +24,9 @@ import { ProbeSendQueue } from './ProbeSendQueue'
 
 const BROADCAST_EVENT = 'wordless-message'
 const OUTBOUND_QUEUE_CAPACITY = 8
-const POINT_INTERVAL_MS = 100
+const CURSOR_MIN_X = -22
+const CURSOR_MAX_X = 22
+const POINT_X_CYCLE_MAX = 900
 
 type ProbeOutbound = { [key: string]: unknown }
 
@@ -26,32 +36,57 @@ export class RelaySpike extends BaseScriptComponent {
   @input channelName: string = 'WAVE42'
   @input statusText: Text
   @input statusVisual: MaterialMeshVisual
+  @input pointCursor: SceneObject
 
   private client: SupabaseClient | null = null
   private channel: RealtimeChannel | null = null
   private sendQueue: ProbeSendQueue<ProbeOutbound> | null = null
-  private sequence = 0
+  private readonly wireSequencer = new ProbeWireSequencer()
   private lastInboundSequence = 0
   private seenGuessIds = createProbeIdSet()
   private subscribed = false
   private terminal = false
   private removalStarted = false
   private pointBatchIndex = 0
-  private pointSendInFlight = false
-  private pointTimer: ReturnType<typeof setInterval> | null = null
+  private pointSendOrdinal = 0
+  private outboundQueueDepth = 0
+  private readonly pointCadence = new ProbeCadence()
+  private readonly pointStartGate = new ProbePointStartGate()
+  private readonly updateGapSampler = new ProbeUpdateGapSampler()
+  private readonly updateGapTracker = new ProbeUpdateGapTracker()
+  private pointStartResolve: ((released: boolean) => void) | null = null
 
   onAwake(): void {
     this.createEvent('OnStartEvent').bind(() => {
       void this.initialize().catch(() => this.terminate('CLIENT ERROR'))
     })
+    this.createEvent('UpdateEvent').bind(() => {
+      if (!this.subscribed || this.terminal) return
+      const nowMs = getTime() * 1_000
+      const gapObservation = this.updateGapSampler.observe(nowMs)
+      const gapTracked = this.updateGapTracker.observe(nowMs)
+      if (gapObservation.invalid || !gapTracked) {
+        print('[RelaySpike] UPDATE_GAP_INVALID')
+        this.terminate('CHANNEL_ERROR')
+        return
+      }
+      this.releaseWaitingPointStart(nowMs)
+      if (!this.terminal) {
+        this.enqueuePointTicks(this.pointCadence.poll(nowMs))
+      }
+      if (!this.terminal && gapObservation.report) {
+        print(formatProbeUpdateGapReport(gapObservation.report))
+      }
+    })
     this.createEvent('OnDestroyEvent').bind(() => {
       this.terminal = true
       this.subscribed = false
+      this.pointCadence.stop()
+      this.stopPointStarts()
       if (this.sendQueue) {
         this.sendQueue.stop()
         this.sendQueue = null
       }
-      this.stopPointTimer()
       this.removeChannels()
     })
   }
@@ -113,7 +148,15 @@ export class RelaySpike extends BaseScriptComponent {
         new vec4(0.450980, 0.901961, 0.682353, 1),
       )
       print('[RelaySpike] CHANNEL SUBSCRIBED')
-      this.startPointTimer()
+      const nowMs = getTime() * 1_000
+      const gapSamplerStarted = this.updateGapSampler.start(nowMs)
+      const gapTrackerStarted = this.updateGapTracker.start(nowMs)
+      if (!gapSamplerStarted || !gapTrackerStarted) {
+        print('[RelaySpike] UPDATE_GAP_INVALID')
+        this.terminate('CHANNEL_ERROR')
+        return
+      }
+      this.enqueuePointTicks(this.pointCadence.start(nowMs))
       return
     }
 
@@ -166,89 +209,170 @@ export class RelaySpike extends BaseScriptComponent {
       v: 1,
       kind: 'ack',
       sessionId: this.channelName,
-      seq: this.nextSequence(),
       pingId: ping.pingId,
       sentAtMs: ping.sentAtMs,
     })
   }
 
-  private startPointTimer(): void {
-    if (this.pointTimer || this.terminal) return
-    this.pointTimer = setInterval(() => {
-      void this.sendPointBatch()
-    }, POINT_INTERVAL_MS)
-  }
+  private enqueuePointTicks(batch: ProbeCadenceBatch): void {
+    if (batch.overflowed) {
+      print('[RelaySpike] SEND CADENCE_OVERFLOW')
+      this.terminate('CHANNEL_ERROR')
+      return
+    }
 
-  private stopPointTimer(): void {
-    if (!this.pointTimer) return
-    clearInterval(this.pointTimer)
-    this.pointTimer = null
+    for (let count = 0; count < batch.dueTicks; count += 1) {
+      void this.sendPointBatch()
+    }
   }
 
   private async sendPointBatch(): Promise<void> {
-    if (!this.subscribed || this.terminal || this.pointSendInFlight) return
-    this.pointSendInFlight = true
+    if (!this.subscribed || this.terminal) return
 
     const x = (this.pointBatchIndex * 37) % 901
     this.pointBatchIndex += 1
-    try {
-      await this.sendPayload({
-        v: 1,
-        kind: 'points',
-        sessionId: this.channelName,
-        seq: this.nextSequence(),
-        points: [
-          [x, 360],
-          [x + 50, 500],
-          [x + 100, 640],
-        ],
-        sentAtMs: Date.now(),
-      })
-    }
-    finally {
-      this.pointSendInFlight = false
-    }
+    const sent = await this.sendPayload({
+      v: 1,
+      kind: 'points',
+      sessionId: this.channelName,
+      points: [
+        [x, 360],
+        [x + 50, 500],
+        [x + 100, 640],
+      ],
+    })
+    if (sent) this.movePointCursor(x)
   }
 
-  private async sendPayload(payload: ProbeOutbound): Promise<void> {
+  private async sendPayload(payload: ProbeOutbound): Promise<boolean> {
     const queue = this.sendQueue
-    if (!queue || !this.subscribed || this.terminal) return
+    if (!queue || !this.subscribed || this.terminal) return false
+    if (this.outboundQueueDepth >= OUTBOUND_QUEUE_CAPACITY) {
+      print('[RelaySpike] SEND QUEUE_REJECTED')
+      this.terminate('CHANNEL_ERROR')
+      return false
+    }
 
+    this.outboundQueueDepth += 1
     const sent = await queue.enqueue(payload)
+    this.outboundQueueDepth -= 1
     if (!sent && !this.terminal) this.terminate('CHANNEL_ERROR')
+    return sent
   }
 
   private async sendPayloadNow(payload: ProbeOutbound): Promise<boolean> {
-    const channel = this.channel
-    if (!channel || !this.subscribed || this.terminal) return false
+    if (!this.channel || !this.subscribed || this.terminal) return false
 
     try {
+      if (payload.kind === 'points') {
+        const mayStart = await this.waitForPointStart()
+        if (!mayStart) return false
+      }
+      const channel = this.channel
+      if (!channel || !this.subscribed || this.terminal) return false
+      let updateGapMaxMs = 0
+      if (payload.kind === 'points') {
+        const trackedMaxGapMs = this.updateGapTracker.drainMaxGapMs()
+        if (trackedMaxGapMs === null) {
+          print('[RelaySpike] UPDATE_GAP_INVALID')
+          this.terminate('CHANNEL_ERROR')
+          return false
+        }
+        updateGapMaxMs = trackedMaxGapMs
+      }
+      let wirePayload = this.wireSequencer.stamp(payload)
+      if (payload.kind === 'points') {
+        this.pointSendOrdinal += 1
+        const prepared = prepareProbePointSend(
+          wirePayload,
+          this.pointSendOrdinal,
+          getTime() * 1_000,
+          Date.now(),
+          updateGapMaxMs,
+        )
+        wirePayload = prepared.wirePayload
+        print(prepared.telemetry)
+      }
       const result = await channel.send({
         type: 'broadcast',
         event: BROADCAST_EVENT,
-        payload,
+        payload: wirePayload,
       })
+      if (result !== 'ok') print('[RelaySpike] SEND CHANNEL_NON_OK')
       return result === 'ok'
     }
     catch {
+      print('[RelaySpike] SEND CHANNEL_THROW')
       return false
     }
   }
 
-  private nextSequence(): number {
-    this.sequence += 1
-    return this.sequence
+  private waitForPointStart(): Promise<boolean> {
+    if (this.terminal || !this.subscribed) return Promise.resolve(false)
+
+    const batch = this.pointStartGate.tryStart(getTime() * 1_000)
+    if (batch.overflowed) {
+      print('[RelaySpike] SEND CADENCE_OVERFLOW')
+      this.terminate('CHANNEL_ERROR')
+      return Promise.resolve(false)
+    }
+    if (batch.dueTicks === 1) return Promise.resolve(true)
+    if (this.pointStartResolve) {
+      print('[RelaySpike] SEND CADENCE_CONFLICT')
+      this.terminate('CHANNEL_ERROR')
+      return Promise.resolve(false)
+    }
+
+    return new Promise((resolve) => {
+      this.pointStartResolve = resolve
+    })
+  }
+
+  private releaseWaitingPointStart(nowMs: number): void {
+    const resolve = this.pointStartResolve
+    if (!resolve) return
+
+    const batch = this.pointStartGate.tryStart(nowMs)
+    if (batch.overflowed) {
+      this.pointStartResolve = null
+      resolve(false)
+      print('[RelaySpike] SEND CADENCE_OVERFLOW')
+      this.terminate('CHANNEL_ERROR')
+      return
+    }
+    if (batch.dueTicks === 0) return
+
+    this.pointStartResolve = null
+    resolve(true)
+  }
+
+  private stopPointStarts(): void {
+    this.pointStartGate.stop()
+    const resolve = this.pointStartResolve
+    this.pointStartResolve = null
+    if (resolve) resolve(false)
+  }
+
+  private movePointCursor(transportedX: number): void {
+    if (!this.pointCursor) return
+
+    const transform = this.pointCursor.getTransform()
+    const position = transform.getLocalPosition()
+    const cursorX = CURSOR_MIN_X +
+      (transportedX / POINT_X_CYCLE_MAX) * (CURSOR_MAX_X - CURSOR_MIN_X)
+    transform.setLocalPosition(new vec3(cursorX, position.y, position.z))
   }
 
   private terminate(status: string): void {
     if (this.terminal) return
     this.terminal = true
     this.subscribed = false
+    this.pointCadence.stop()
+    this.stopPointStarts()
     if (this.sendQueue) {
       this.sendQueue.stop()
       this.sendQueue = null
     }
-    this.stopPointTimer()
     this.setStatus(status, new vec4(1, 0.470588, 0.415686, 1))
     print(`[RelaySpike] CHANNEL ${status}`)
     this.removeChannels()

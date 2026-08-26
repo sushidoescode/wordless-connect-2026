@@ -18,8 +18,8 @@ Lens-only world points are projected into quantized normalized coordinates for
 transport, while both surfaces deterministically normalize the same points
 into the result medallion.
 
-**Tech Stack:** Lens Studio 5.23.1 currently installed (official hackathon
-minimum 5.22), Specs Base Template with `targetPlatform: Spectacles`,
+**Tech Stack:** Lens Studio 5.23.2.26081320 currently installed (official
+hackathon minimum 5.22), Specs Base Template with `targetPlatform: Spectacles`,
 TypeScript, Spectacles Interaction Kit, Lens Studio MCP/CLAD tools,
 the installed Lens `SupabaseClient` 2.1.0 package over built-in
 `SupabaseModule`, ordinary hosted Supabase Realtime Broadcast, Vite vanilla
@@ -33,8 +33,16 @@ Playwright Chromium. The Snap Cloud Alpha Plugin is not a runtime dependency.
 **Review status:** Reconciled on 2026-08-25 after an independent Fable 5
 `APPROVE WITH REQUIRED CHANGES` review, then reconciled again after the owner
 approved the normal hosted Supabase amendment. The Specs baseline is open and
-Tasks 1–2 are complete; Task 3 is complete and Task 4 is next. No Gate 0 GO is
-claimed.
+Tasks 1–4 are complete. Task 4's first live attempt was rejected by independent
+review because observed accepted traffic was below 10 Hz and the retained Lens
+Preview pane could not prove the no-freeze threshold. The active-key rerun then
+passed every matrix item except one exact-window cadence measurement: Run B's
+later post-rejection window froze prospectively and passed cumulative bounds,
+but its one-shot `UpdateEvent` sampler had already stopped. The narrow
+correction prospectively armed `B=46` after rejection and valid recovery, then
+proved contiguous Lens ordinals/browser sequences 958–1,058 over 10,000 ms
+source spans with exact-window `F=48`, exact `B=49`, 10,001.5 ms browser
+arrival span, and no diagnostics. Gate 0 is GO and unblocked; Task 5 is next.
 
 ## Global Constraints
 
@@ -1050,7 +1058,7 @@ git commit -m "spike: add Supabase Realtime Lens probe"
 - Produces: A binary GO/NO-GO with reproducible capture, metrics, and exact
   hashes. A GO freezes the transport choice; a NO-GO stops all later tasks.
 
-- [ ] **Step 1: Start from a clean two-surface state**
+- [x] **Step 1: Start from a clean two-surface state**
 
 ```bash
 git status --short --branch
@@ -1071,14 +1079,14 @@ Refresh Lens Preview, clear its Logger, and verify browser and Lens both join
 `WAVE42`. The browser must not display `CONNECTED` until `SUBSCRIBED` and a
 counterpart message have both occurred.
 
-- [ ] **Step 2: Prove Lens → browser movement**
+- [x] **Step 2: Prove Lens → browser movement**
 
 Record both surfaces and the Lens Logger together. Require at least ten
 continuous seconds of changing real Lens-origin point batches. The browser must
 draw the received line and increment message/byte counters; a hard-coded local
 browser animation does not count.
 
-- [ ] **Step 3: Prove browser → Lens authority**
+- [x] **Step 3: Prove browser → Lens authority**
 
 Click `SEND GUESS 2` once. Require the browser send event, Lens `RX_GUESS` log,
 Lens-side validation, and visible Lens transition to mint `CORRECT` while the
@@ -1086,7 +1094,7 @@ Lens-side validation, and visible Lens transition to mint `CORRECT` while the
 and require coral `TRY AGAIN`, again without stopping the stream. The browser
 never sends an outcome field.
 
-- [ ] **Step 4: Prove rejection and continuity**
+- [x] **Step 4: Prove rejection and continuity**
 
 From `window.wordlessProbe.sendUncheckedForGate0`, send wrong-session,
 wrong-version, sequence zero, duplicate/stale sequence, out-of-range choice,
@@ -1097,7 +1105,7 @@ send the next valid contiguous message and require acceptance, proving invalid
 messages did not poison continuity. Maintain 10 Hz valid traffic for another
 ten seconds with no warning, gap, timeout, or disconnect.
 
-- [ ] **Step 5: Measure fifty round trips**
+- [x] **Step 5: Measure fifty round trips**
 
 While the 10 Hz point stream remains active, send fifty browser pings spaced
 250 ms apart. Record median, p95, maximum, message count, and largest serialized
@@ -1115,12 +1123,12 @@ NO-GO: median > 400 ms, p95 > 1200 ms, repeat disconnect, or dropped guesses
 A retest passes only if the 5 Hz clip remains visibly continuous and all other
 criteria pass.
 
-- [ ] **Step 6: Restart and reproduce**
+- [x] **Step 6: Restart and reproduce**
 
 Close the browser tab, refresh Preview, restart Vite, and repeat one point
 stream plus one correct guess. Reproduction after restart is mandatory.
 
-- [ ] **Step 7: Write the evidence record**
+- [x] **Step 7: Write the evidence record**
 
 Populate `docs/evidence/realtime-spike.md` with:
 
@@ -1153,7 +1161,7 @@ Only after this live run proves the compatible names and key type, create
 `VITE_RELAY_SESSION_ID=WAVE42` populated. Confirm the file contains no real
 value and `web/.env.local` remains ignored and untracked.
 
-- [ ] **Step 8: Commit the decision and obey it**
+- [x] **Step 8: Commit the decision and obey it**
 
 ```bash
 git add docs/evidence/realtime-spike.md docs/prompt-log.md

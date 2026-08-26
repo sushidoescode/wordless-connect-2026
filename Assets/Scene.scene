@@ -603,6 +603,7 @@
       channelName: WAVE42
       statusText: !<reference.Text> 8a3effd7-885f-4e2f-908e-c82e67ee957c
       statusVisual: !<reference.MaterialMeshVisual> 0ee58dae-c624-4bb2-ba0d-1a82d8e84bae
+      pointCursor: !<reference.SceneObject> 0ddce73b-2dde-42bc-823a-c597b1b2dd6a
   ScriptTypes:
     "":
       {}

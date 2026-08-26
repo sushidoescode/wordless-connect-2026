@@ -1,8 +1,10 @@
 # WORDLESS environment record
 
 Observed 2026-08-26 in the active `WordlessRelay.esproj` project. The normal
-Supabase owner gate and post-entry persistence checks are complete; live
-Lens-to-browser traffic remains the separate Gate 0 proof in Tasks 2–4.
+Supabase owner gate and post-entry persistence checks are complete. Task 4's
+active-key rerun and exact post-rejection Run B correction passed the required
+bidirectional, rejection, RTT, visual-continuity, restart, and cadence
+criteria. Gate 0 is GO and unblocked; Task 5 is next.
 
 ## Editor and target
 
@@ -56,9 +58,14 @@ Lens-to-browser traffic remains the separate Gate 0 proof in Tasks 2–4.
   no unsaved setting change remained
 - Client key type: publishable (`sb_publishable_...` shape); no secret,
   `service_role`, database, or session credential was selected or transferred
-- Active client key label: `wordless_gate0`. It replaced and revoked the
-  initial default publishable key after that client-safe value appeared in a
-  private Vite tool transcript; the dashboard's secret-key row was untouched
+- Active client key label: `wordless_runtime`. It replaced and revoked
+  `wordless_gate0` after that client-safe value appeared in a deleted local
+  preflight capture/private tool transcript; the dashboard's secret-key row
+  was untouched. A short post-rotation smoke proved both clients could join,
+  then the full Gate 0 matrix passed under this active key: three fresh
+  maintained-10-Hz windows, correct/wrong Lens authority, 11/11 invalid
+  rejections with contiguous recovery, 50/50 application acknowledgments,
+  direct Preview visual sampling, and restart reproduction
 - Credential entry/persistence: all four native identity/configuration fields
   are populated after `Project.save()` and a full Lens Studio restart; checks
   returned only booleans and shape validity, never values
@@ -82,9 +89,54 @@ Lens-to-browser traffic remains the separate Gate 0 proof in Tasks 2–4.
 - Post-restart MCP identity check: exact root `WordlessRelay.esproj`,
   `Spectacles` target, and exactly one path-only matching local asset; PASS
 
+## Gate 0 retained measurements and decision
+
+- Fresh Run A: Lens point ordinals 1–101 contiguous over 10,021 ms; browser
+  sequences 1–101 contiguous over 10,019 ms source time and 10,017.6 ms
+  arrival time; no gap or terminal state
+- Retained full-matrix Run B cumulative window: prospectively armed
+  ordinals/sequences 1,855–1,955 contiguous; Lens span 10,017 ms, browser
+  source/arrival spans 10,016/10,009.5 ms; same-epoch `F=66`, `B=67`;
+  prospectively armed under the stricter previously passing `B=46`; no gap or
+  terminal state. This remains disclosed as cumulative continuity evidence,
+  but does not bear the exact-window proof because its `F` came from that
+  epoch's earlier ten-second measurement
+- Exact post-rejection Run B correction: prospectively armed with predeclared
+  `B=46` without pausing the runtime; Lens ordinals and browser sequences
+  958–1,058 were contiguous; exact-window `F=48` came from per-point interval
+  telemetry on ordinals 959–1,058, giving exact `B=49`; Lens and browser source
+  spans were both 10,000 ms and browser arrival span was 10,001.5 ms; no
+  diagnostic, sequence gap, terminal state, warning, or disconnect occurred
+- Fresh restart: ordinals/sequences 1–101 contiguous; Lens span 10,015 ms,
+  browser source/arrival spans 10,012/10,012.1 ms; no gap or terminal state
+- Earlier full-matrix epoch maximum consecutive Preview update gaps: 45, 66,
+  and 48 ms, each below the 100 ms cadence period; the retained Run B value
+  came from that epoch's first ten seconds, not its later post-rejection
+  window, so it remains historical context rather than exact-window proof
+- Guess authority: actual coral `TRY AGAIN` for choice 1 and actual mint
+  `CORRECT` for choice 2, each after Lens `RX_GUESS`
+- Invalid matrix: exactly 11 Lens `REJECTED` logs, followed by valid contiguous
+  sequence 2 acceptance
+- Fifty-ping application RTT: median 86 ms, p95 106 ms, maximum 111 ms;
+  50/50 correlated acknowledgments, 122-byte largest valid message
+- Preview visual continuity: four sets of 22 distinct direct MCP frames, each
+  spanning more than ten seconds with 545 ms worst completion gap; continuous
+  browser recordings fully enclose every set
+- One WebSocket close 1006 occurred only in a prolonged rejected attempt after
+  5,317 messages; it did not repeat in fresh Run A, Run B, or restart and is
+  retained in the evidence ledger
+- Final pre-commit verification retained a failed rapid-reset/initial-join
+  attempt, independently confirmed the Free project awake with a successful
+  browser-client subscription, then produced a separate clean Preview epoch:
+  `CLIENT_CONFIGURED` → `CHANNEL SUBSCRIBED`, active point traffic, and
+  `UPDATE_GAP_MAX sampleCount=330 maxGapMs=79 spanMs=10030`
+- Full evidence, artifact hashes, failed-attempt ledger, and claim boundary:
+  `docs/evidence/realtime-spike.md`
+
 ## Baseline
 
-- TypeScript compile result: succeeded after credential persistence and restart
+- TypeScript compile result: succeeded after credential persistence/restart and
+  again against the final Gate 0 worktree
 - Preview refresh/run result: success after credential persistence and restart;
   first activity at 26 ms
 - Bounded post-refresh Preview project runtime errors/warnings: 0

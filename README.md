@@ -4,13 +4,12 @@ One player paints a clue in midair on Spectacles. A friend joins from a
 browser, watches the stroke arrive live, and taps the answer that turns the
 scribble into a shared session glyph.
 
-> **Current status — approved design; reconciled plan awaiting approval.** No Lens Studio
-> project, web application, or realtime connection has been implemented yet.
-> Fable 5's independent review returned APPROVE WITH REQUIRED CHANGES; the
-> verified corrections and additional protocol audit are reconciled for the
-> owner's final plan approval. Task 1 then starts once the fresh Specs Base
-> Template project is open; the
-> first build activity remains a hard Lens-to-browser feasibility spike.
+> **Current status — project baseline established; transport amendment
+> approved.** The Specs Base Template opens and its empty baseline compiles and
+> runs in Preview. Snap Cloud Alpha access is unavailable, so the owner approved
+> a normal hosted Supabase Realtime compatibility spike. No Lens↔browser
+> realtime connection or game behavior has passed Gate 0 yet. The existing
+> implementation plan must be reconciled before that spike resumes.
 
 ## The five-second read
 
@@ -44,6 +43,8 @@ fallbacks, and scope are in the
 - [`AGENTS.md`](AGENTS.md) — non-negotiable build and honesty contract.
 - [`docs/superpowers/specs/2026-08-24-wordless-relay-design.md`](docs/superpowers/specs/2026-08-24-wordless-relay-design.md)
   — approved product and technical design.
+- [`docs/superpowers/specs/2026-08-25-wordless-relay-standard-supabase-amendment.md`](docs/superpowers/specs/2026-08-25-wordless-relay-standard-supabase-amendment.md)
+  — approved replacement for conflicting Snap Cloud transport/setup claims.
 - [`docs/superpowers/plans/2026-08-24-wordless-relay-implementation.md`](docs/superpowers/plans/2026-08-24-wordless-relay-implementation.md)
   — agent-native implementation, verification, polish, and submission plan.
 - [`docs/research/README.md`](docs/research/README.md) — research authority,

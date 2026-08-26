@@ -332,3 +332,205 @@ The design amendment, implementation plan, research wording, README status,
 and fresh-session kickoff are reconciled. Product implementation remains
 unstarted pending the owner's final plan approval and the fresh Specs Base
 Template project being opened.
+
+## 2026-08-25 — Approved implementation begins; Task 1 relocation
+
+**Human direction and authority**
+
+The owner approved the reconciled implementation plan at commit `4dc5751`,
+directed execution to begin at Task 1 without reopening product ideation, and
+authorized Codex to relocate the freshly created Specs Base Template when Lens
+Studio had placed it one directory below the plan's repository-root layout.
+The repository remains private.
+
+**Observed preflight**
+
+- Git `main`, `origin/main`, and `HEAD` matched `4dc5751`; GitHub reported the
+  repository as private.
+- Lens Studio reported `5.23.2.26081320`, above the required 5.22 minimum.
+- The implementation shell resolved `/usr/local/bin/node`, version `v22.14.0`.
+- The fresh project initially existed at
+  `CONNECT-2026/WordlessRelay/WordlessRelay.esproj`, with its expected
+  template `Assets/`, `Packages/`, generated editor state, and managed agent
+  instructions.
+
+**Relocation decision and evidence**
+
+Lens Studio MCP first confirmed the nested active project, its three root scene
+objects, and its Spectacles target. An Editor API `Project.saveTo` attempt to
+the repository root failed cleanly because Lens Studio rejects saving a
+project into an overlapping parent directory; no copy was created. The editor
+then saved the fresh project and switched to an empty project. With the
+owner's explicit authorization, Codex mechanically moved the closed template
+baseline one level up, retained the discarded nested wrapper recoverably under
+`/tmp`, preserved the custom WORDLESS contract outside Lens Studio's managed
+`AGENTS.md` block, and reopened the root manifest through the Editor API.
+
+Fresh MCP inspection then reported:
+
+```text
+project file: CONNECT-2026/WordlessRelay.esproj
+project directory: CONNECT-2026
+assets directory: CONNECT-2026/Assets
+target platform: Spectacles
+scene roots: Camera Object, Lighting, SpectaclesInteractionKit
+Preview input: Interactive
+Preview device: SPECS 27
+```
+
+This relocation changed no approved product or runtime architecture. The
+Lens-generated `.gitattributes` is retained as part of the actual template
+baseline because it defines Lens asset/LFS and `.meta` handling, even though
+the plan's example staging command did not name it.
+
+**Failure and secret-handling note**
+
+During the initial local inventory, a generated Lens MCP configuration was
+printed to the private tool transcript and included its localhost bearer
+credential. The value was not copied into source, this log, staging, or any
+message, and all generated connector files remain ignored. The editor session
+will be restarted before the Task 1 commit so that the exposed local session
+credential is invalidated, followed by fresh MCP/project verification. No raw
+HTTP request was made.
+
+**Execution process ruling**
+
+The project-specific kickoff overrides generic subagent defaults: task workers
+do not edit this log, stage, commit, push, or share the Lens scene. The
+orchestrator alone records evidence and commits reviewed states. Implementation
+tasks receive separate specification and quality/runtime reviews; evidence-only
+Tasks 4, 12, and 16 may use the plan-authorized combined review.
+
+**Task 1 package-gate failure**
+
+The Task 1 implementer used the Lens Studio MCP Asset Library installer for
+`SupabaseClient` 2.1.0. The call timed out after 300 seconds. Read-only
+filesystem inspection showed that `Packages/SupabaseClient.lspkg`, its `.meta`,
+and editor-global Supabase plugin files had appeared, but the ambiguous timed-
+out mutation is not counted as a passed install. In accordance with the hard
+Lens Studio rule, no raw HTTP or alternative editor-control path was attempted.
+
+Task 1 is blocked before Snap Cloud entitlement, project import, compile, and
+Preview runtime verification. Resume requires the owner to use the open Lens
+Studio UI to complete `Window → Supabase`: sign in, create or select
+`wordless-relay`, import its `SupabaseProject` asset into
+`Assets/LocalOnly/`, and confirm in the Inspector that the URL and public token
+fields are populated without copying either value. The generated credential
+asset remains local and ignored. No later implementation task has begun.
+
+## 2026-08-25 — Task 1 owner-gate verification after reported completion
+
+The owner reported that the Supabase sign-in/project/import action was done.
+Fresh credential-safe Lens Studio MCP queries inspected only asset IDs, names,
+types, and paths; they did not read property values. The active root project
+still reported zero `SupabaseProject` assets and no asset under
+`Assets/LocalOnly/`. A filesystem path-only check agreed. The discrepancy is
+therefore an unmaterialized import in the active project, not a Git-ignore
+artifact.
+
+The installed Supabase plugin source explains the exact workflow: its project
+row has a separate `Import Credentials` button, which creates a native
+`SupabaseProject` asset at the Asset Browser root. Once that asset exists,
+Codex can move it into the ignored `Assets/LocalOnly/` directory through Lens
+Studio MCP and verify only field presence, never values.
+
+Fresh MCP baseline evidence did pass independently of that gate:
+
+```text
+SupabaseClient project package: 2.1.0
+TypeScript recompile: succeeded
+Preview reset/run: success
+Preview runtime errors: 0
+Normal startup prints: SIK Version : 0.18.0
+```
+
+The public Week 3 page was also inspected read-only. It lists the public
+repository link, demo video, CLAD prompt log, and project description as
+submission materials, but the unauthenticated page exposes only its
+registration form. Exact logged-in submission fields and any published-Lens
+link field remain session-gated and are not guessed.
+
+Codex attempted to open the Supabase panel through `ExecuteEditorCode` so it
+could finish the button action itself. The MCP call failed during type-checking
+because the supplied code referenced the non-exported
+`Editor.IPluginDescriptor` namespace member. Per the Lens Studio MCP hard rule,
+no further Lens operation or alternate editor-control path was attempted after
+that error. Task 1 remains at the explicit owner gate: in
+`Window → Supabase`, locate `wordless-relay` and click its
+`Import Credentials` button. No credential value was printed, logged, staged,
+or committed.
+
+## 2026-08-25 — Snap Cloud Alpha denial and fallback amendment research
+
+**Owner evidence**
+
+The owner supplied a Lens Studio screenshot showing that Supabase Plugin login
+failed because Snap Cloud is currently in Alpha and the Snapchat account is not
+yet approved. The owner has applied for access but cannot rely on an approval
+date. This closes the original Task 1 entitlement route as unavailable today;
+it is not treated as a credential or setup mistake. The screenshot remains an
+external conversation artifact and was not copied into the repository.
+
+**Required process**
+
+The owner asked for another route. Because transport is a material design
+boundary, implementation remains paused while an explicit amendment is
+researched and approved. No fallback code, cloud deployment, product feature,
+or unsupported network claim has been created.
+
+**Current amendment candidates**
+
+1. The lowest-change candidate is ordinary hosted Supabase rather than the
+   unavailable Snap Cloud-managed project. The installed Lens API documents
+   `SupabaseModule.createRealtimeConnection` and
+   `performSupabaseRequest` as operating against *any Supabase project*. The
+   installed `SupabaseClient` 2.1.0 bundle delegates its websocket and fetch
+   operations to those APIs and accepts an arbitrary project URL plus public
+   key. A normal public Broadcast channel therefore has a plausible Lens↔web
+   path without Snap Cloud Plugin entitlement, but Gate 0 must prove it in the
+   current SPECS Preview before any game work.
+2. The stronger-control, larger-change candidate is a standards-based `wss://`
+   relay implemented as a Cloudflare Worker plus one Durable Object per
+   ephemeral session. Lens Studio documents open-internet WebSocket support
+   through `InternetModule.createWebSocket`, and a browser can use its native
+   WebSocket client. This adds backend code, deployment credentials, ticket
+   issuance, admission policy, and new failure modes.
+3. Managed realtime protocols without a Lens SDK and HTTPS polling remain
+   inferior fallbacks because they add provider-protocol/auth work or weaken
+   immediacy. The already-reviewed WORDLESS Duo/Split the Table pivots remain
+   product changes, not drop-in relay substitutions.
+
+Ordinary Supabase is the current recommendation for a first amended spike
+because it preserves the one-Preview/one-browser product, Broadcast semantics,
+installed Lens package, browser library, and most of the reviewed protocol.
+It will not be described as Snap Cloud. Only a public/publishable or legacy
+anonymous client key may enter ignored local configuration; a service-role or
+secret key is forbidden. Standard Supabase free-tier limits and inactivity
+pausing must be recorded, measured against the probe, and rehearsed before
+capture. This recommendation is not yet owner-approved.
+
+**Owner approval**
+
+> Yes let's go with the normal free Supabase. approved
+
+The approved amendment preserves one Lens Studio Preview painter and one
+ordinary browser guesser. It replaces only the unavailable Snap Cloud-managed
+project with a normal hosted Supabase Realtime public Broadcast channel. No
+code or external Supabase project was created by this approval; the written
+amendment and reconciled implementation plan precede runtime work.
+
+**Independent amendment review**
+
+A read-only consistency review found no Critical issues and required two
+Important corrections before commit. The amendment now makes generic native
+`SupabaseProject` creation/move/field-name inspection a credential-safe MCP
+prerequisite that fails Gate 0 if unsupported, rather than asserting that path
+works. It also preserves the stronger simultaneous-traffic proof: browser
+choice validation plus fifty correlated ping/ack RTT samples occur while the
+10 Hz Lens-origin point stream remains active. Stale README, research-index,
+and local-credential labels were reconciled at the same time.
+
+The same reviewer then performed a scoped re-review of those corrections. All
+four findings were confirmed addressed, with no remaining or new Critical or
+Important issue. The reviewer's only non-blocking whitespace note was removed
+before staging.

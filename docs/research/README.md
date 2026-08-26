@@ -46,6 +46,29 @@ Snap Cloud is labeled alpha. These documents establish a plausible path, not
 proof that this account has access or that the intended interaction performs
 well. The design therefore begins with a recorded feasibility spike.
 
+## Approved transport amendment — 2026-08-25
+
+The original Snap Cloud feasibility gate failed because the owner's account is
+not approved for the Alpha. The owner approved an explicit amendment to try a
+normal hosted Supabase project through the installed Lens `SupabaseModule`,
+which Snap documents as supporting any Supabase project. This is still a Gate
+0 hypothesis, not runtime proof. The binding amendment is
+`docs/superpowers/specs/2026-08-25-wordless-relay-standard-supabase-amendment.md`.
+
+- Snap `SupabaseModule`:
+  <https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.SupabaseModule.html>
+- Supabase Broadcast and public-channel behavior:
+  <https://supabase.com/docs/guides/realtime/broadcast>
+- Supabase Realtime settings and limits:
+  <https://supabase.com/docs/guides/realtime/settings>
+  <https://supabase.com/docs/guides/realtime/limits>
+- Supabase Free-project pausing:
+  <https://supabase.com/docs/guides/platform/free-project-pausing>
+
+No source establishes that generic native `SupabaseProject` authoring or the
+installed package works against that normal project in SPECS Preview. The
+amended Gate 0 must prove both before game work.
+
 ## Competitive conclusion
 
 The official Organize winner, PackSpace, and the prospective Guide entry

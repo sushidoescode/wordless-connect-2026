@@ -9,7 +9,15 @@
 message sizing, non-replayed readiness, timeout/rejection signaling,
 connection-instance sequencing, and web tooling. These changes preserve the
 approved product and authority model; the reconciled implementation plan is
-the exact contract.
+the exact contract except where a later approved amendment explicitly
+supersedes it.
+
+**Transport amendment — 2026-08-25:** Snap Cloud Alpha entitlement was
+unavailable. The owner approved ordinary hosted Supabase Realtime while
+preserving the one-Preview/one-browser product and every authority/evidence
+boundary. The binding amendment is
+`2026-08-25-wordless-relay-standard-supabase-amendment.md`; it supersedes
+conflicting Snap Cloud service, setup, adapter-name, and claim language below.
 
 ## 1. Product sentence
 
@@ -102,12 +110,12 @@ session glyph, not from claiming invention of air drawing or charades.
 
 ### Realtime service boundary
 
-`RelayTransport` is an adapter boundary, not game logic. Snap Cloud Realtime is
-the preferred first adapter because an official deprecated sample documents a
-mode-switched Lens↔web cursor exchange at 10 Hz. It does not prove simultaneous
-two-way behavior in the current SPECS runtime; the spike decides whether access,
-runtime compatibility, true simultaneous traffic, latency, and capture quality
-are sufficient.
+`RelayTransport` is an adapter boundary, not game logic. Ordinary hosted
+Supabase Realtime is the approved first adapter after Snap Cloud Alpha access
+failed. Snap's installed `SupabaseModule` documents support for any Supabase
+project, but it does not prove simultaneous two-way behavior in the current
+SPECS runtime; the spike decides whether standard-project compatibility, true
+simultaneous traffic, latency, and capture quality are sufficient.
 
 No second transport may be introduced without recording an architecture
 amendment in the prompt log and confirming that its use complies with the
@@ -340,8 +348,8 @@ and invalidates every pending old-round close or terminal callback.
   healthy-channel point-count mismatch. No path invents missing geometry.
 - Rate or payload warning: stop the probe, record the evidence, and reduce the
   cap before continuing.
-- Unsupported Snap Cloud access: the spike fails. Do not hide the failure with
-  prerecorded network behavior.
+- Unsupported configured Supabase access: the spike fails. Do not hide the
+  failure with prerecorded network behavior or a silent service substitution.
 - Browser inspection can reveal bundled choices. The project makes no
   anti-cheat or confidential-state claim.
 
@@ -394,7 +402,8 @@ timers, and semantic icon generation.
 1. Start from a fresh Spectacles Lens Studio project.
 2. Confirm the project target and the currently documented compatible package
    versions.
-3. Confirm whether the account has usable Snap Cloud Realtime access.
+3. Confirm a normal hosted Supabase project and client-safe public key work
+   through the installed Lens package without Snap Cloud Plugin entitlement.
 4. Create the smallest Lens script that sends one changing normalized point.
 5. Create the smallest browser page that plots the point and sends one fixed
    guess event.
@@ -414,11 +423,11 @@ timers, and semantic icon generation.
 
 ### Failure decision
 
-If Snap Cloud access or bidirectional exchange cannot pass within the first
-implementation block, stop the Relay build. The project owner then chooses
-between the already-reviewed alternatives: colocated WORDLESS Duo through
-Sync Kit, or Split the Table. No feature work from Relay begins before that
-choice.
+If standard Supabase compatibility or bidirectional exchange cannot pass
+within the first implementation block, stop the Relay build. The project owner
+then chooses among another explicit transport amendment, colocated WORDLESS Duo
+through Sync Kit, or Split the Table. No feature work from Relay begins before
+that choice.
 
 ## 13. Testing and evidence strategy
 

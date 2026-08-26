@@ -6,6 +6,11 @@
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@wordless/core/*": ["../Assets/Wordless/Scripts/Core/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

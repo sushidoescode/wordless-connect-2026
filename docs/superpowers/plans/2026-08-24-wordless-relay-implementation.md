@@ -1199,7 +1199,7 @@ separate owner product decisions.
   transport interface, root verification commands, and web alias to the same
   pure source file.
 
-- [ ] **Step 1: Write the failing protocol tests**
+- [x] **Step 1: Write the failing protocol tests**
 
 Test these cases in `tools/core-tests/protocol.test.mjs`:
 
@@ -1285,7 +1285,7 @@ wire message. Build every maximal ID/word from the declared length constants,
 including round-start/reset targets from `CONNECTION_ID_LENGTH`, so the test
 cannot pass by silently choosing short representative strings.
 
-- [ ] **Step 2: Run the protocol tests red**
+- [x] **Step 2: Run the protocol tests red**
 
 ```bash
 node --experimental-strip-types --import ./tools/core-tests/register.mjs --test tools/core-tests/protocol.test.mjs
@@ -1293,7 +1293,7 @@ node --experimental-strip-types --import ./tools/core-tests/register.mjs --test 
 
 Expected: module-not-found failure for `Protocol.ts`.
 
-- [ ] **Step 3: Implement the frozen wire types**
+- [x] **Step 3: Implement the frozen wire types**
 
 Use these exact public types:
 
@@ -1609,7 +1609,7 @@ with no reset pending, while the Lens is `CORRECT`, `GLYPH_LOCKED`, or
 `TIMED_OUT`, starts the normal new-`applyRound` recovery. Older or unknown round
 IDs are rejected.
 
-- [ ] **Step 4: Define the transport boundary**
+- [x] **Step 4: Define the transport boundary**
 
 ```ts
 import type { RelayMessage, RelayMessageDraft } from '../Core/Protocol'
@@ -1689,7 +1689,7 @@ sender. A sequence-gap fact is also emitted before any related rejected
 gameplay payload can occur. The composition root is the only consumer that may
 turn those facts into engine disconnect/`applyRound` actions.
 
-- [ ] **Step 5: Make the web import the canonical pure module**
+- [x] **Step 5: Make the web import the canonical pure module**
 
 Replace `web/vite.config.ts` with:
 
@@ -1736,7 +1736,7 @@ probe's local byte counter with an import of `serializedAsciiBytes` from that
 alias, so `npm run build:web` proves both TypeScript and Vite consume the actual
 shared source instead of validating an unused alias.
 
-- [ ] **Step 6: Add root verification scripts**
+- [x] **Step 6: Add root verification scripts**
 
 Create the root `package.json` first:
 
@@ -1807,7 +1807,7 @@ generated Lens declarations and installed package sources; it must not borrow
 types from GUIDE or ORGANIZE. The resolved TypeScript version is pinned in the
 root lockfile rather than fetched by an unpinned invocation.
 
-- [ ] **Step 7: Verify and freeze the protocol**
+- [x] **Step 7: Verify and freeze the protocol**
 
 ```bash
 npm run test:core
@@ -1819,7 +1819,7 @@ sh tools/typecheck/check.sh
 Then compile/run Preview to prove importing the pure module did not break Lens
 runtime. Expected: all local commands pass and Preview retains Gate 0 behavior.
 
-- [ ] **Step 8: Commit the frozen contract**
+- [x] **Step 8: Commit the frozen contract**
 
 ```bash
 git add package.json package-lock.json Assets/Wordless/Scripts/Core/Protocol.ts Assets/Wordless/Scripts/Core/Protocol.ts.meta Assets/Wordless/Scripts/Transport/RelayPort.ts Assets/Wordless/Scripts/Transport/RelayPort.ts.meta tools/core-tests/protocol.test.mjs tools/typecheck/check.sh tools/typecheck/tsconfig.preflight.json web/vite.config.ts web/tsconfig.json web/src/relay-probe.ts docs/prompt-log.md

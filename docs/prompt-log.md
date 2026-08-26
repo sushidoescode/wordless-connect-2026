@@ -1364,3 +1364,87 @@ Realtime public Broadcast remains the frozen implementation transport, and
 Task 5 is unblocked. The proof remains one Lens Studio Preview client and one
 ordinary browser; it is not hardware footage, a device test, or evidence for
 production, security, persistence, scale, or platform latency.
+
+## 2026-08-26 — Task 5 canonical protocol freeze
+
+Task 5 began only after Gate 0 was committed as `99d577b`. The protocol lane
+used a literal red/green cycle. The first focused command exited 1 with
+`ERR_MODULE_NOT_FOUND` for the not-yet-created
+`Assets/Wordless/Scripts/Core/Protocol.ts` (TAP 0 pass / 1 fail), establishing
+that the new test did not pass against an accidental or copied implementation.
+
+The green implementation created one canonical pure protocol module shared by
+Lens and browser. It declares the approved version/event names, complete
+message union and draft type, explicit identifier/word/point/message bounds,
+round-start builder, restart-safe nonce/counter round-ID builder, sanitized
+parser, and ASCII byte counter. The parser validates lobby versus product
+round scope, positive safe sequences, finite timestamps, exact connection IDs,
+unique four-choice tuples, terminal point counts, bounded point batches, and
+all per-message payloads before returning a fresh projection. Tests construct
+all sixteen maximal legal wire shapes—including both result outcomes—and
+prove each remains within the 1,024-byte cap. A correct result contains no
+geometry, and a round start contains no answer index.
+
+`RelayPort` freezes the transport/composition boundary without importing
+Supabase into core state. Vite and the web TypeScript resolver map
+`@wordless/core` directly to the Lens-owned pure source, and the existing
+browser probe now uses that module's actual byte counter; the production build
+therefore proves the alias is live rather than decorative. The existing web
+workspace resolves TypeScript 6.0.3, whose deprecation error otherwise rejects
+the plan-required `baseUrl`, so its config adds the narrow
+`"ignoreDeprecations": "6.0"` compatibility setting. The new root validation
+harness separately pins TypeScript 5.9.3 and uses only this project's generated
+Lens declarations and package sources.
+
+Fresh parent verification passed 43/43 core tests, 19/19 browser tests, the
+production web build with 51 transformed modules, the root `npm run check`,
+the executable Lens preflight typecheck, and `git diff --check`. Lens Studio's
+forced TypeScript compilation returned `succeeded`. The required subsequent
+Preview refresh returned `errors=[]`, first activity at 25 ms, then a clean new
+epoch emitted `CLIENT_CONFIGURED`, `CHANNEL SUBSCRIBED`, and continuing
+numeric point-start telemetry. One `CHANNEL_ERROR` print immediately preceded
+the new epoch at the reset boundary and belonged to the canceled old channel;
+it is retained here rather than hidden. The replacement epoch subscribed and
+streamed normally. Preview was then paused. This verifies that importing the
+new pure files did not break the existing Gate 0 Preview path; it does not add
+a hardware, production, security, persistence, scale, or latency claim.
+
+**Independent protocol review and remediation**
+
+The first Task 5 specification review rejected the freeze on a real
+caller-owned-input race. The initial parser measured and validated the original
+object, then reread its fields while constructing the sanitized result. An
+adversarial enumerable getter/Proxy could therefore return a short legal value
+during validation and a 2,000-character value during projection, producing an
+accepted result above the 1,024-byte cap. The focused regression was red with
+11 passing tests and one failure: the accessor was read three times instead of
+the required one.
+
+The parser now performs exactly one `JSON.stringify` of unknown input, rejects
+that exact string if it is non-ASCII or above the cap, parses it into plain JSON
+data, and performs every later validation/projection only on that snapshot.
+Cycles, BigInt values, throwing accessors/Proxies, non-ASCII input, and
+oversized input fail closed. The regression covers both a base-field getter and
+a nested payload Proxy, verifies one read each, and rechecks the returned wire
+size. Separate tests now invalidate each of a presence acknowledgment's own and
+acknowledged connection IDs. That loop went green at 12/12 focused and 44/44
+full core tests.
+
+Quality review then found JavaScript RegExp coercion allowed a numeric nonce
+through the nominal string API: `createRoundId(12345678, 1)` returned a round
+ID instead of rejecting it. The new focused test produced the required red
+state with 12 passes and one `Missing expected exception` failure.
+`createRoundId` now checks the nonce's string type before its exact
+uppercase-alphanumeric format. The suite also asserts all sixteen frozen
+public constants against literal approved values, so coordinated constant/test
+drift cannot remain invisible.
+
+Final verification passed 13/13 focused protocol tests, 45/45 full core tests,
+19/19 browser tests, the 51-module production web build, the Lens preflight
+typecheck, and `git diff --check`. After the final parser fixes, an independent
+Lens MCP recompile succeeded and its required refreshed Preview returned
+`errors=[]`, first activity at 25 ms, `CLIENT_CONFIGURED`,
+`CHANNEL SUBSCRIBED`, and 54 continuing numeric point starts with no new
+channel error; Preview was paused afterward. No credential or forbidden local
+artifact entered the worktree, and the repository remained private. Task 5
+remains uncommitted until both reviewers confirm this reconciled state.

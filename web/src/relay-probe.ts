@@ -1,4 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import {
+  MAX_MESSAGE_BYTES,
+  serializedAsciiBytes,
+} from '@wordless/core/Protocol'
 import { parseProbeMessage, topicFor, type ProbeMessage } from './probe-protocol'
 
 export type ProbeStatus =
@@ -287,6 +291,9 @@ export class RelayProbe {
 
   async send(message: ProbeMessage): Promise<void> {
     const channel = this.requireActiveChannel()
+    if (serializedAsciiBytes(message) > MAX_MESSAGE_BYTES) {
+      throw new Error('broadcast payload exceeds the protocol byte cap')
+    }
     const result = await channel.send({
       type: 'broadcast', event: 'wordless-message', payload: message,
     })

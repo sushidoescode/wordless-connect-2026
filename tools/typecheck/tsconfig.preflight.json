@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "isolatedModules": true,
+    "lib": ["es2021"],
+    "module": "commonjs",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "../../Assets/*",
+        "../../Cache/TypeScript/Src/Packages/*"
+      ]
+    },
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "target": "es2021",
+    "types": []
+  },
+  "include": [
+    "../../Cache/TypeScript/lib/LensifyTS/Declarations/**/*.d.ts",
+    "../../Assets/**/*.ts"
+  ]
+}

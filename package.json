@@ -1,0 +1,14 @@
+{
+  "name": "wordless-relay",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:core": "node --experimental-strip-types --import ./tools/core-tests/register.mjs --test tools/core-tests/*.test.mjs",
+    "test:web": "npm --prefix web test",
+    "build:web": "npm --prefix web run build",
+    "check": "npm run test:core && npm run test:web && npm run build:web"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

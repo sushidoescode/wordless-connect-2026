@@ -29,6 +29,7 @@ Support/
 PluginsUserPreferences/
 Workspaces/
 BackUp/
+/.virtual-scene.json
 *.lock
 /jsconfig.json
 /tsconfig.json
@@ -36,10 +37,15 @@ BackUp/
 
 # Lens Studio managed local agent/editor configuration
 /.mcp.json
+/.claude.md
+/CLAUDE.md
 /.codex/config.toml
 /.cursor/mcp.json
 /.vscode/
 /.claude/settings.local.json
+
+# Lens Studio editor plugin cache (not project runtime packages)
+/Plugins/
 
 # Web tooling
 node_modules/

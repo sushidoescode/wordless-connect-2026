@@ -603,3 +603,187 @@ forbidden-token/name scan, heading inventory, code-fence balance, and
 
 No runtime product task began during this reconciliation. Task 1 resumes next
 with the credential-free native asset create/move/save/path-only proof.
+
+## 2026-08-26 — Task 1 native asset proof and refreshed baseline
+
+The delegated Task 1 worker could not start its mandatory reads because its
+unified subprocess launcher returned `CreateProcess ... No such file or
+directory` under the default shell, `/bin/sh`, and `/bin/bash`. It made no MCP
+call or mutation. The orchestrator therefore continued the same bounded step
+directly; the active primary-session executor and Lens Studio MCP were healthy.
+
+**Credential-free MCP proof**
+
+The preflight returned the exact active project
+`CONNECT-2026/WordlessRelay.esproj`, concrete native type `SupabaseProject`,
+expected editor field names, zero exact-name collisions, and zero existing
+matching assets. No GraphQL `properties` field was selected. Through Lens
+Studio MCP, the orchestrator then:
+
+1. created the ignored `Assets/LocalOnly/` directory through the Editor API;
+2. created one blank native asset named `WORDLESS Supabase Project` at the
+   Asset root;
+3. moved returned asset ID `6ba48142-cc1e-49ef-8d22-84f2e2859a8e` to
+   `Assets/LocalOnly/`;
+4. confirmed the four literal editor field names without evaluating their
+   values, called `Project.save()`, and received a successful return; and
+5. reran a path-only query proving exactly one `SupabaseProject` at
+   `LocalOnly/WORDLESS Supabase Project.supabaseProject`.
+
+Git ignore checks matched both the asset/meta and `Assets/LocalOnly.meta`; Git
+reported the directory only as ignored. No credential value existed, was read,
+or entered during this step. The native authoring path therefore passes; the
+normal Supabase project and values remain the explicit owner gate.
+
+**Baseline and package evidence**
+
+Fresh evidence found Lens Studio `5.23.2.26081320`, target platform
+`Spectacles`, interactive `SPECS 27` Preview, Node `v22.14.0`, npm `10.9.2`,
+private GitHub visibility, SupabaseClient `2.1.0`, SIK package `2.0.0`, and
+UIKit `2.0.0`. All seven non-local primary Asset/package files had adjacent
+metadata. Installed source shows the vendor import path
+`SupabaseClient.lspkg/supabase-snapcloud`, bundled supabase-js `2.81.0`, a
+direct internal require of `LensStudio:SupabaseModule`, arbitrary URL/key
+client construction, channel subscribe/send/unsubscribe, and client removal
+APIs. The historical import path is not relabeled as the service.
+
+Forced TypeScript compile succeeded. A fresh Preview reset ran with first
+activity at 26 ms, zero errors/warnings, and the normal
+`SIK Version : 0.18.0` print. Compile success is not being used as network
+proof.
+
+**Current external facts**
+
+The Firecrawl CLI was absent globally, so its documented `npx
+firecrawl-cli@latest` fallback was used without account authentication and
+wrote only ignored `.firecrawl/` artifacts. Current official Supabase pages
+retain the dashboard labels `Enable Realtime service` and
+`Allow public access to channels`; a publishable `sb_publishable_...` key is
+client-safe, while secret/`service_role` keys are forbidden. Current Free
+limits are 200 concurrent connections, 100 messages/s, 100 joins/s, and a
+256 KB Broadcast payload. Low-activity Free projects may pause after a 7-day
+period and expose `Resume project` in the dashboard.
+
+The public Week 3 page requires a public repository, demo video, CLAD prompt
+log, and project description. Its unauthenticated surface shows registration
+fields only and no required published-Lens field, so authenticated submission
+fields remain unclaimed.
+
+Task 1 now stops at its explicit owner action: create/select the normal
+`wordless-relay` project, enable Realtime and public channels, then paste only
+the project URL and publishable client key into the ignored Lens asset. No game
+or browser-spike task has begun.
+
+**Pre-credential quality review correction**
+
+The specification reviewer returned PASS with no Critical or Important issue
+for the native asset path, metadata, target, packages, and ignored state. It
+qualified the clean runtime statement: a later global log tail contains
+unrelated Quest ADB discovery warnings, so only the bounded post-refresh
+capture supports zero *project runtime* errors/warnings.
+
+The independent quality/safety reviewer correctly returned FAIL before owner
+credential entry for two reasons. First, the initial setup transcript already
+recorded that a generated localhost MCP bearer had appeared in the private tool
+transcript; the promised Lens Studio restart/invalidation had not yet occurred.
+Second, a generated untracked `.virtual-scene.json` snapshot remained at the
+repository root. Such snapshots can serialize asset properties if regenerated
+after values exist. The snapshot is being moved recoverably to Trash and its
+root path added to `.gitignore`; no further VirtualScene read may run around
+credential handling. The reviewer also confirmed that the actual ignored asset
+and adjacent meta exist, while `Assets/LocalOnly.meta` itself has not
+materialized—the ignore rule covers that potential path, not an existing file.
+
+Credential entry remains blocked until the owner quits and reopens Lens Studio,
+which rotates/invalidates the prior local MCP session, and Codex then rebinds
+MCP and re-verifies the exact project plus path-only asset identity. The same
+owner action may proceed to Supabase/dashboard and Inspector entry only after
+that fresh verification succeeds.
+
+**Fresh editor restart and safe rebind**
+
+The owner confirmed Lens Studio was fully quit. Codex launched the exact root
+`WordlessRelay.esproj` with the macOS application launcher and rebound through
+Lens Studio MCP to the new editor process before any Supabase value was
+entered. Credential-safe Editor API inspection returned the exact project path,
+target `Spectacles`, and one matching `SupabaseProject` with the expected ID,
+name, type, local-only path, and four field names. A separate path-only asset
+query returned the same one asset; neither call selected or returned any asset
+property value. Preview configuration remains Interactive, `SPECS 27`, Front,
+Plane. The restart/rebind prerequisite is satisfied and the owner credential
+gate may now open.
+
+## 2026-08-26 — Normal Supabase owner gate completed
+
+**Owner authorization**
+
+The owner explicitly asked Codex to handle the normal Free Supabase setup and
+Lens Studio entry. This authorized creation of the in-scope Free organization
+and project, inspection of their Realtime settings, and transfer of only the
+client-safe project URL and publishable key into the ignored native asset. It
+did not authorize a public repository, hosting integration, GitHub app install,
+secret-key use, or any Task 18 action.
+
+**Hosted project and dashboard checks**
+
+Through the owner's already authenticated ordinary Chrome session, Codex
+created the Free organization `Wordless Relay` and Free project
+`wordless-relay` in the default Americas region. Supabase's password generator
+created the database password; Codex never read, copied, printed, or stored it.
+The active project dashboard showed neither provisioning nor paused state.
+
+Realtime Settings showed both `Enable Realtime service` and
+`Allow public access to channels` enabled. `Save changes` was disabled after
+inspection, so no unsaved settings remained. The API Keys page exposed separate
+Publishable and Secret sections. Codex used the first, explicitly labeled
+publishable-key copy control, validated only its `sb_publishable_...` shape,
+and never revealed, copied, or selected the secret key. Clipboard contents were
+cleared after the Lens entry. An accidental optional `Connect GitHub` popup was
+closed before repository selection, installation, authorization, or other
+state change.
+
+**Credential-safe Lens entry and root cause**
+
+The publishable key persisted in the ignored native `SupabaseProject` asset.
+The project URL visibly entered the Inspector but normalized back to empty on
+blur; direct Editor API assignment reproduced the same behavior, proving this
+was native asset normalization rather than a paste failure. The supported Snap
+import path supplies a complete four-field native tuple. Testing that bounded
+hypothesis by assigning the normal project's non-secret identity fields
+`projectId` and `projectName` before `projectUrl` caused the URL to persist.
+This resolved the incompatibility without switching key type or backend.
+
+`Project.save()` then returned success with value-blind checks confirming all
+four fields populated, a valid hosted-project URL shape, and the publishable-key
+shape. Lens Studio was fully quit and reopened on the exact root
+`WordlessRelay.esproj`; the stable asset ID and every populated/shape boolean
+remained true. A separate GraphQL query selected only ID, name, type, and path.
+No VirtualScene read or asset `properties` query occurred around credentials.
+
+**Fresh baseline evidence**
+
+After restart, forced TypeScript compilation succeeded. A fresh Preview reset
+reported first activity at 26 ms, the expected SIK version print, and zero
+bounded project runtime errors or warnings. This is an editor/runtime baseline,
+not Realtime traffic proof. Tasks 2–4 and every written Gate 0 criterion remain
+required before product/game work.
+
+**Final Task 1 staging hygiene**
+
+The final quality pass identified untracked editor/tool artifacts that an
+unscoped future `git add -A` could otherwise capture. The Lens editor's
+project-local `Plugins/` cache and generated `CLAUDE.md` compatibility pointer
+are now explicitly ignored; shipped runtime packages remain the three complete
+`Packages/*.lspkg` plus metadata pairs. The temporary empty
+`WordlessRelay/.codex-cwd-recovery` path exists only because this session's
+executor was launched with a stale, removed working directory; it is excluded
+locally through `.git/info/exclude`, is outside the Task 1 staging set, and will
+be removed when the executor no longer needs it. No credential or project
+runtime asset is stored there.
+
+The first staged metadata verification loop accidentally used zsh's special
+`path` variable as its filename iterator, which temporarily emptied command
+lookup inside that subprocess and produced seven false missing-meta reports.
+The subprocess ended without changing files. A corrected loop using
+`candidate_file` returned `MISSING_META_COUNT=0`; forbidden staged paths and
+credential-shaped staged files also both returned zero.

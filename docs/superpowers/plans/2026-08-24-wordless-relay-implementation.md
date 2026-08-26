@@ -33,7 +33,8 @@ Playwright Chromium. The Snap Cloud Alpha Plugin is not a runtime dependency.
 **Review status:** Reconciled on 2026-08-25 after an independent Fable 5
 `APPROVE WITH REQUIRED CHANGES` review, then reconciled again after the owner
 approved the normal hosted Supabase amendment. The Specs baseline is open and
-Task 1 is in progress; no realtime traffic or Gate 0 GO is claimed.
+Task 1 is complete at commit `89bcd23`; Task 2 is in progress. No realtime
+traffic or Gate 0 GO is claimed.
 
 ## Global Constraints
 
@@ -318,7 +319,7 @@ docs/
 - Produces: A clean Specs Base Template project, current package/version record,
   ignored local credential location, and a Preview baseline.
 
-- [ ] **Step 1: Confirm the human/editor prerequisite before changing files**
+- [x] **Step 1: Confirm the human/editor prerequisite before changing files**
 
 Run:
 
@@ -350,7 +351,7 @@ branch explicitly:
   expected template plus preserved planning state, stop and report the exact
   conflict. Never delete or reset them speculatively.
 
-- [ ] **Step 2: Verify the active editor through Lens Studio MCP**
+- [x] **Step 2: Verify the active editor through Lens Studio MCP**
 
 Load the available Lens Studio MCP schemas, then use their project-inspection
 and scene-inspection tools. Confirm all of these from tool output:
@@ -375,7 +376,7 @@ content, read it from `git show HEAD:AGENTS.md` and restore it outside the
 managed delimiters with a reviewed patch while preserving the generated block.
 Record whether the file legitimately changed.
 
-- [ ] **Step 3: Install and inspect the current Supabase client package**
+- [x] **Step 3: Install and inspect the current Supabase client package**
 
 Through Lens Studio MCP Asset Library tooling, install or verify
 `SupabaseClient`. Do not sign in through or depend on the unavailable Snap
@@ -403,7 +404,7 @@ replace them with Cache output. Record the Alpha Plugin denial as historical
 failure evidence only; it is not a prerequisite and no generated editor-global
 plugin state is committed.
 
-- [ ] **Step 4: Prove a credential-safe normal-project asset path**
+- [x] **Step 4: Prove a credential-safe normal-project asset path**
 
 Before the owner enters any project value, add the local directory to
 `.gitignore`:
@@ -450,7 +451,7 @@ string value. Follow with a path-only GraphQL query and never select
 `properties`. The browser later receives the same client-safe values only
 through ignored `web/.env.local`.
 
-- [ ] **Step 5: Record concrete environment evidence**
+- [x] **Step 5: Record concrete environment evidence**
 
 Write `docs/environment.md` with the actual observed values and these fixed
 sections:
@@ -489,7 +490,7 @@ sections:
 Every “record” instruction is replaced by the observed value before the file is
 staged; instructional text never enters the environment record commit.
 
-- [ ] **Step 6: Inspect the live Week 3 submission surface early**
+- [x] **Step 6: Inspect the live Week 3 submission surface early**
 
 Open the actual Week 3 submission form read-only and add a `Submission fields`
 section to `docs/environment.md` listing every currently required field. At
@@ -501,13 +502,13 @@ that exact limitation and alert the owner; do not guess. The repository remains
 private during development, but the release checklist must treat the
 owner-authorized private→public change as mandatory before submission.
 
-- [ ] **Step 7: Verify the empty-project baseline**
+- [x] **Step 7: Verify the empty-project baseline**
 
 Use the Lens Studio compile tool, then the Preview run/log collection tool.
 Expected: compile succeeds, Preview starts, and Logger shows zero project
 runtime errors. A successful compile without Preview evidence fails this step.
 
-- [ ] **Step 8: Commit the verified environment**
+- [x] **Step 8: Commit the verified environment**
 
 ```bash
 git add .gitattributes .gitignore AGENTS.md WordlessRelay.esproj Assets Packages docs/environment.md docs/prompt-log.md

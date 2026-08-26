@@ -787,3 +787,9 @@ lookup inside that subprocess and produced seven false missing-meta reports.
 The subprocess ended without changing files. A corrected loop using
 `candidate_file` returned `MISSING_META_COUNT=0`; forbidden staged paths and
 credential-shaped staged files also both returned zero.
+
+Task 1 was committed as `89bcd23` (`chore: establish WORDLESS SPECS
+environment`) after the final specification and quality/safety reviews both
+returned PASS with no Critical, Important, or Minor findings. The execution
+plan's Task 1 checkboxes are now marked complete from that evidence; Task 2 is
+the active step and Gate 0 remains unclaimed.

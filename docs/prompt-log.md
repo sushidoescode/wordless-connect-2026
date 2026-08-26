@@ -881,3 +881,104 @@ page remained `SUBSCRIBED · WAITING FOR LENS` with all three controls enabled.
 Independent final specification and quality reviewers both returned PASS with
 zero findings. Task 2 is therefore eligible for its scoped commit; this is
 still only the browser half and does not claim bidirectional traffic or Gate 0.
+
+## 2026-08-26 — Task 3 Lens realtime probe
+
+Task 2 was committed as `cffe337` (`spike: add Supabase Realtime browser
+probe`) after its final credential/prohibited-path staged counts were zero.
+Task 3 then began under a single Lens Studio MCP writer; the existing Vite
+probe stayed running and ignored credential files remained untouched.
+
+**Protocol TDD and installed API evidence**
+
+The exact Node 22 command from the plan first failed with exit 1 and the
+expected `ERR_MODULE_NOT_FOUND` for the not-yet-created Lens
+`ProbeProtocol.ts`. After implementation, the pure parser suite passed 13/13.
+A separate read-only audit of the installed `SupabaseClient` 2.1.0 package
+confirmed the `SupabaseClient.lspkg/supabase-snapcloud` import, Broadcast
+wrapper `message.payload`, public-channel status/send/remove APIs, package
+timer functions, and default client-side-only meaning of send result `ok`.
+The installed bundle directly requires `LensStudio:SupabaseModule`; it has no
+`globalThis.supabaseModule` reference, so the sample-observed global assignment
+was correctly omitted.
+
+**Editor attempts and first live Lens result**
+
+The first read-only camera transform query failed type checking because it
+passed `scene.mainCamera` (a Camera component) where a SceneObject was
+required. No editor code executed and no scene mutation occurred. Local
+`editor.d.ts` evidence identified `scene.mainCamera.sceneObject`; the corrected
+query returned the camera-relative placement basis. The MCP writer created the
+probe hierarchy at `(0, 8, -100)`, wired `WAVE42`, status visuals/text, and the
+ignored native project asset without reading any credential property, and
+saved the scene.
+
+Initial preset authoring emitted generic PBR dependency debris. The writer
+resolved exact asset identities, retained and renamed only the two referenced
+primitive meshes plus required unlit materials/shader beneath
+`Assets/Wordless/`, and removed unused debris through Lens MCP. A runtime
+inspection call temporarily installed `AiPreviewAgentInspect`; the package was
+confirmed inspection-only and removed through Lens MCP after capture.
+
+The first accepted compile succeeded. One Preview refresh overlapped a second
+editor reset and produced five `QSslSocket` destroyed-signal warnings plus
+`Avatar URL is empty`; that attempt was rejected rather than hidden. A later
+separate bounded Preview run returned `errors: []`, no W/F/E lines, and exact
+current logs `CLIENT_CONFIGURED` followed by `CHANNEL SUBSCRIBED`. This proves
+the Lens client can join with the replacement publishable key, but Task 3 is
+not yet eligible for commit and bidirectional Gate 0 remains unclaimed.
+
+**Pre-commit review corrections in progress**
+
+Root diff inspection found that removing the inspection package had left its
+`AiPreviewAgent Handler`/`AgentInspectScript` scene entities serialized with a
+dangling package reference. Independent preliminary reviews also found a
+prototype-key duplicate-ID bypass for `__proto__`, a destroy/terminal inbound
+race, overlapping point/ack send paths rather than one outbound FIFO, and Lens
+color approximations rather than the fixed hex palette. The single MCP writer
+is removing the inspection root, adding red/green duplicate/FIFO coverage,
+latching terminal state before teardown, guarding inbound traffic, applying
+the exact palette through source and MCP, and will rerun compile plus Preview.
+No Task 3 review pass or commit is claimed before that correction loop closes.
+
+The correction loop then landed without expanding product scope. The exact
+inspection root was deleted through Lens MCP and all supplied inspection
+names/IDs plus the temporary package were absent from the saved scene. Destroy
+now latches terminal/subscribed state synchronously, inbound handling ignores
+post-terminal or pre-subscription traffic, and one bounded `ProbeSendQueue`
+serializes every point and acknowledgement send with maximum concurrency one.
+The guess-ID set now has a null prototype and uses own-property checks.
+Runtime/status materials and text now use the exact violet, lemon, mint, coral,
+and ivory values from the approved palette.
+
+The combined correction tests first failed because `createProbeIdSet` and
+`ProbeSendQueue` did not exist. An intermediate red run caught Node 22's ban on
+TypeScript parameter properties, which was corrected to ordinary fields. The
+final combined parser/queue suite passed 16/16, including the later-sequence
+`__proto__` replay, FIFO order, maximum concurrency one, bounded overflow, and
+safe stop/drain cases.
+
+Fresh orchestrator verification independently passed the same 16/16 Node
+suite, `git diff --check`, zero inspection-residue matches, and zero missing
+adjacent metadata under `Assets/Wordless/`. Lens TypeScript recompilation
+returned `succeeded`. A new bounded Preview refresh reported first activity at
+26 ms, `errors: []`, no capped output, and these exact current lines:
+
+```text
+[RelaySpike] CLIENT_CONFIGURED
+[RelaySpike] CHANNEL SUBSCRIBED
+```
+
+The already-running ordinary browser simultaneously moved from subscribed to
+`CONNECTED` and its received message/byte counters increased from genuine
+Lens-origin traffic. That corroborates the Task 3 sender but is not substituted
+for Task 4's timed capture, invalid matrix, RTT run, restart reproduction, or
+binary Gate 0 decision. Final Task 3 specification and quality verdicts remain
+pending before staging.
+
+Independent final Task 3 specification and quality reviewers each returned
+PASS with no Critical, Important, or Minor findings after inspecting the final
+source, scene diff, metadata inventory, tests, and prompt-log evidence. Task 3
+is therefore eligible for its scoped commit. This remains Lens Studio Preview
+evidence only and makes no hardware, latency, security, persistence, scale, or
+Gate 0 claim.

@@ -33,8 +33,8 @@ Playwright Chromium. The Snap Cloud Alpha Plugin is not a runtime dependency.
 **Review status:** Reconciled on 2026-08-25 after an independent Fable 5
 `APPROVE WITH REQUIRED CHANGES` review, then reconciled again after the owner
 approved the normal hosted Supabase amendment. The Specs baseline is open and
-Task 1 is complete at commit `89bcd23`; Task 2 is complete and Task 3 is next.
-No bidirectional realtime traffic or Gate 0 GO is claimed.
+Tasks 1–2 are complete; Task 3 is complete and Task 4 is next. No Gate 0 GO is
+claimed.
 
 ## Global Constraints
 
@@ -832,7 +832,7 @@ Verify `web/.env.local` is absent from `git status --short` and `git ls-files`.
 - Produces: Lens `CLIENT_CONFIGURED`/`SUBSCRIBED`/`RX_GUESS` evidence, a visible
   correct/incorrect state, 10 Hz point messages, and ping acknowledgements.
 
-- [ ] **Step 1: Add the Node resolver and failing Lens-parser tests**
+- [x] **Step 1: Add the Node resolver and failing Lens-parser tests**
 
 The minimum supported local runtime, Node 22.14, exposes asynchronous
 `register`, not the newer synchronous `registerHooks`. Create
@@ -873,7 +873,7 @@ node --experimental-strip-types --import ./tools/core-tests/register.mjs --test 
 
 Expected: fail because `ProbeProtocol.ts` does not exist.
 
-- [ ] **Step 2: Implement the pure Lens-side probe validator**
+- [x] **Step 2: Implement the pure Lens-side probe validator**
 
 Export:
 
@@ -918,7 +918,7 @@ fresh ping as well as the cases above.
 
 Run the prior Node test. Expected: pass.
 
-- [ ] **Step 3: Implement the minimal Lens component from installed APIs**
+- [x] **Step 3: Implement the minimal Lens component from installed APIs**
 
 Use the import path confirmed in Task 1. The documented 2026 connection core
 is:
@@ -976,7 +976,7 @@ That sample is a clue, not authority over the installed package. Record the
 installed finding and never log credential values or user/session tokens. The
 normal public-channel probe performs no Snapchat or Supabase user sign-in.
 
-- [ ] **Step 4: Add channel receive/send behavior**
+- [x] **Step 4: Add channel receive/send behavior**
 
 Join `wordless-relay:${this.channelName}` with
 `broadcast: { self: false }`. Register one `wordless-message` callback.
@@ -995,7 +995,7 @@ Join `wordless-relay:${this.channelName}` with
 - Handle `CLOSED`, `CHANNEL_ERROR`, and `TIMED_OUT` by stopping the timer and
   displaying the literal status.
 
-- [ ] **Step 5: Author the probe scene through one MCP writer**
+- [x] **Step 5: Author the probe scene through one MCP writer**
 
 Use Lens Studio MCP/VirtualScene to create a `RelaySpike` hierarchy containing:
 
@@ -1010,7 +1010,7 @@ in front of existing content, never at an assumed origin. Attach `RelaySpike`,
 assign the ignored `SupabaseProject` asset, status text/visual, and session
 `WAVE42`, then save through the editor API.
 
-- [ ] **Step 6: Compile, run, and inspect actual logs**
+- [x] **Step 6: Compile, run, and inspect actual logs**
 
 Use Lens Studio's TypeScript recompile tool, then Preview run/log collection.
 Expected sequence:
@@ -1027,7 +1027,7 @@ Preview run may be recorded as a separate attempt; never hide a failure with an
 in-probe retry. A compile result without both current runtime lines does not
 pass.
 
-- [ ] **Step 7: Commit the Lens probe**
+- [x] **Step 7: Commit the Lens probe**
 
 ```bash
 git add Assets/Wordless/Scripts/Spike/ProbeProtocol.ts Assets/Wordless/Scripts/Spike/ProbeProtocol.ts.meta Assets/Wordless/Scripts/Spike/RelaySpike.ts Assets/Wordless/Scripts/Spike/RelaySpike.ts.meta tools/core-tests/register.mjs tools/core-tests/resolver.mjs tools/core-tests/spike-protocol.test.mjs Assets/Scene.scene Assets/Scene.scene.meta docs/prompt-log.md

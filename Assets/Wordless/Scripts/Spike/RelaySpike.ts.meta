@@ -1,0 +1,55 @@
+- !<AssetImportMetadata/f451074f-3506-44c7-9266-803292860b68>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> d9390554-324c-4df9-aee5-c90f0a9aa55a
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> d9390554-324c-4df9-aee5-c90f0a9aa55a
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> d230c4df-5222-4b68-921a-b28cd174c4af
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/d230c4df-5222-4b68-921a-b28cd174c4af>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: c0147203-4a6c-4275-a28b-9dfd51438bf9
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    channelName: false
+    statusText: false
+    statusVisual: false
+    supabaseProject: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - supabaseProject: !<reference.SupabaseProject> 00000000-0000-0000-0000-000000000000
+      channelName: WAVE42
+      statusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      statusVisual: !<reference.MaterialMeshVisual> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Asset.SupabaseProject supabaseProject
+    - '// @input string channelName = "WAVE42"'
+    - // @input Component.Text statusText
+    - // @input Component.MaterialMeshVisual statusVisual

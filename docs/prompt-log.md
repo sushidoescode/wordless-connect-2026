@@ -2397,3 +2397,115 @@ general latency, hardware, remote-play, scale, security, or production claim.
 Fresh pre-staging verification is 286/286 core tests, 92/92 web tests, and a
 54-module production browser build. Lens typecheck, `git diff --check`, scene
 reference/metadata audits, and independent application/view review are clean.
+
+## 2026-08-27 — Task 12 Gate 1 vertical slice
+
+Work resumed after the host MacBook lost power. Repository recovery found the
+Task 8–11 commits and the diagnostic commit `e7e83dd` intact, with the ignored
+capture set also present. No tracked product edit was lost. The interrupted
+state had two unfinished items: the evidence prose still promoted an older
+split capture, and four Lens inspection packages remained untracked. Both were
+handled before Gate 1 certification.
+
+Fresh deterministic verification passed 286/286 core tests, 92/92 browser
+unit tests, a 54-module production build, 20/20 Playwright tests, Lens
+typecheck, and `git diff --check`. Clean Lens compilation and Preview refresh
+produced no error or warning, configured the standard Supabase client, and
+subscribed normally.
+
+The required join orders now have inspectable evidence. The accepted v3 run is
+Lens-first: Preview applied `r-IVD83SWC-1`, configured/subscribed, and emitted
+one initial `round.start` after the ordinary browser joined. The separate
+browser-first artifact paused Preview and captured literal `WAITING FOR
+PAINTER` / `JOINING` with no choices. Resuming Preview logged
+`TIMED_OUT -> DISCONNECTED`, counterpart readiness, `APPLY_ROUND
+round=r-IVD83SWC-3`, and `READY -> ACTIVE`; wire ordering was one reset then
+one start for `r-IVD83SWC-3`. Its SHA-256 is
+`a32237799c70ab15705391577585960372951d16f287c033d123f22e17d5aa5d`.
+
+Several attempts were rejected on evidence quality rather than promoted from
+DOM or telemetry alone. The older `r-WU6MZNMB-1` proof combined a browser
+movie with 44 Preview stills and therefore was not a single continuous
+two-surface capture. A readiness/reset-ack timeout invalidated
+`continuous-final`. Two coordinate-mapped takes captured zero points. A later
+take visibly played but its harness sampled too early and skipped replay. Pass
+candidate v1 had a capped/timeout Lens tail. Pass candidate v2 had excellent
+data, but an unrelated Chrome process covered Preview; full visual review
+rejected it. This also corrected an earlier bad inference: full-display native
+recording does preserve the live Lens Preview even though prior region/window
+capture had frozen that GPU region.
+
+The accepted uninterrupted v3 run bound `r-IVD83SWC-1`. Its one full-display
+H.264 movie keeps ordinary Chrome on the left and simulated Lens Studio Preview
+on the right for 19.996667 seconds at 3456×2234, approximately 51.03 fps. The
+movie is 14,656,552 bytes with SHA-256
+`5eeb02397deeeb34c80430253bce58611396af3d7f948fde221f29d0e34a61da`.
+An eight-beat contact sheet and a 20-frame one-per-second sheet were reviewed;
+both product regions change throughout, and the film contains no unrelated
+window, overlay, or cut.
+
+The wire timeline shows initial start at 1.637 s, one stroke begin at 2.931 s,
+14 point batches totaling 36 points, and one stroke end at 4.784 s. Browser
+guess `g-b20757866946e721faad` submitted ROPE at 5.229 s; the matching
+Lens-authored incorrect result arrived at 5.387 s and only ROPE remained
+disabled under coral `TRY AGAIN`. Browser guess
+`g-cf0b09120721008a802c` submitted SNAKE at 6.559 s; the matching Lens result
+arrived at 6.643 s, revealed SNAKE, and the browser was sampled in `CORRECT` at
+6.716 s and `GLYPH_LOCKED` at 7.123 s. Lens observed its scheduled 450 ms
+transition after 468 ms.
+
+The observer decoded 60 application envelopes, including 21 outbound browser
+messages and 39 inbound messages, totaling 12,288 bytes with a 263-byte
+maximum. Browser gameplay output contains two `guess.submit` envelopes and
+zero browser-authored outcomes; the Lens authored both results. Sequence-21
+`stroke.end` precedes result sequences 22 and 25. The correct result carries
+only choice/final-count/guess/outcome/revealed-word fields, contains no
+geometry, and declares `finalPointCount=36`.
+
+The diagnostic line added in `e7e83dd` closed the live local-count ambiguity:
+Lens finishes at `worldPoints=36 publicPoints=36`, matching both the 36 wire
+points and the correct result. Public path hash is `82da10f1`. Independent
+browser normalization produces 36 glyph points / hash `2ed41748`, and the Lens
+logs the same glyph count/hash. This is the normalized sampled drawing, not
+semantic recognition.
+
+Lens Studio MCP-injected Preview touch activated visible `PLAY AGAIN`. Lens
+logged `GLYPH_LOCKED -> READY`, `APPLY_ROUND round=r-IVD83SWC-2`, and resync;
+wire sequence 28 is the old-to-new reset and sequence 29 is the successor
+start. At 8.954 s the browser is `ACTIVE` with MOON / CLOCK / SUN / STAR, an
+empty result, hidden glyph, and zero drawing pixels, and it remains clean to the
+movie's end.
+
+The exact stale-generation glyph callback no-op remains direct deterministic
+evidence: the named Playwright channel-error case and store/engine tests reset
+before the old deadline and prove the successor cannot lock. A supplemental
+live refresh attempt did not produce that exact ordering: its old browser
+projection reached `GLYPH_LOCKED` at offset 1.024 s before the replacement
+painter started at 1.878 s. The new round then stayed clean, which proves
+successor stability but not cancellation before the old callback. This limit
+is recorded rather than overstated.
+
+Capture hashes are recorded in `docs/evidence/vertical-slice.md`; the manifest,
+wire, and Lens-log hashes are respectively
+`fb158f0dfefbd339fe820071ee3b6a11c81998a652622ed1220553d736c128c7`,
+`899efbca54980c97edb4b2159a39508f00f8e2febc0ef965be8848a6057cc96e`,
+and `59ca37b0cdb96abd70d896078aeced30053d2ac82f993faec61c62b36d4a1d23`.
+All captures remain ignored.
+
+Runtime inspection temporarily installed `AiPreviewAgentInspect.lspkg`,
+`AiPreviewAgentInteract.lspkg`, `Leaf.lspkg`, and `Bitmoji 3D.lsc`, plus one
+`AiPreviewAgent Handler` scene root. Post-recovery cleanup stayed inside Lens
+Studio MCP: Virtual Scene removed the exact root and verified Editor API
+`AssetManager.remove(SourcePath)` calls removed all four packages and metadata.
+The clean snapshot is 136 objects / 52 assets with no helper references. Forced
+TypeScript compile succeeded; fresh Preview configured, subscribed, and reached
+`ACTIVE` with zero errors or warnings.
+
+An independent evidence audit verified the continuous film, both changing
+surface regions, all seven beats, bidirectional guess/result correlation,
+point-count equality, matching glyph hash, reset/start ordering, and the clean
+successor. Gate 1 is therefore marked PASS. Feature scope is frozen: no
+scoring, gallery, accounts, persistence, extra players, free text, recognition,
+particles, transport swap, or other new capability will be added. Remaining
+tasks are limited to visual presentation, five-second comprehension,
+robustness, and submission evidence.

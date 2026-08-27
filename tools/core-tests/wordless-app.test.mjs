@@ -684,6 +684,10 @@ test('routes brush and guesses through the engine and guards the 450ms glyph loc
       'round.result',
     ],
   )
+  assert.ok(harness.logs.some((line) =>
+    line.startsWith(
+      '[Wordless] STROKE worldPoints=1 publicPoints=1 bytes=',
+    )))
 
   harness.replay.request(ROUND_ONE)
   assert.equal(harness.app.getSnapshot().roundId, ROUND_ONE)

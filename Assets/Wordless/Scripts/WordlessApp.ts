@@ -858,10 +858,13 @@ export class WordlessAppController
       if (draft === null) continue
       if (draft.type === 'round.start') this.cachedStartDraft = draft
       if (effect.type === 'publish-stroke-points') {
+        const snapshot = this.store.getSnapshot()
+        const worldPointCount = snapshot.worldPoints.length
+        const publicPointCount = snapshot.publicPoints.length
         this.logLine(
-          `[Wordless] STROKE points=${
-            this.store.getSnapshot().publicPoints.length
-          } bytes=${serializedAsciiBytes(draft)}`,
+          `[Wordless] STROKE worldPoints=${worldPointCount} ` +
+          `publicPoints=${publicPointCount} ` +
+          `bytes=${serializedAsciiBytes(draft)}`,
         )
       }
       if (effect.type === 'publish-result') {

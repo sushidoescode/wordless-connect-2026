@@ -1717,3 +1717,233 @@ This is Lens Studio Preview simulation and ordinary hosted Supabase transport
 lifecycle evidence only. It is not hardware footage, a device test, a live
 product-round/point/guess proof, production-readiness evidence, a security
 claim, or latency evidence.
+
+## 2026-08-26 — Task 9 browser surface kickoff
+
+Task 8 was committed at `fa3eca2` only after its independent review, fresh
+controller test/build/typecheck run, metadata/secret/index audit, and Lens
+Studio Preview lifecycle gate passed. Task 9 is released on that clean base.
+The previously approved design and implementation plan already satisfy the
+architectural design/owner-approval gate; the owner's standing instruction is
+to continue serially through Tasks 1–15.
+
+The browser composition uses the typed user-entered six-character join code as
+authority; `VITE_RELAY_SESSION_ID` may prefill but never auto-joins or bypasses
+validation. Presence remains adapter-owned. The pure web store exposes only a
+public projection and display clock, never correctness or transport sequence
+policy. Playwright receives one pre-start `window.__WORDLESS_RELAY_TEST__`
+injection seam for a fake channel boundary, clocks, and bounded ID factories;
+the production bundle ships no fake messages, credentials, or public dev-send
+escape hatch. The solved medallion uses an accessible inner canvas and the
+shared exact-path normalizer, with no recognition, semantic redraw, external
+asset, or AI-generated runtime visual.
+
+### Task 9 store RED
+
+Added all 22 plan-required `WebRoundStore` reducer scenarios before creating
+the store. `npm --prefix web test` exited 1 as intended: Vitest could not find
+`../src/web-round-store` from `tests/web-round-store.test.ts`. The two existing
+test files still passed with 76 tests, while the new missing-module suite
+collected zero tests. This is deterministic local browser evidence only.
+
+Ruling: typed transport state updates change only the browser connection
+projection; they do not author or clear product phase/data. Explicit reconnect
+invalidation owns the destructive partial-projection reset, and only accepted
+Lens-authored messages establish live round authority. This follows the Task 9
+brief's stricter authority boundary.
+
+### Task 9 renderer and composition RED phases
+
+After the store reached 22/22 focused and 98/98 full-web GREEN, one additional
+test-first projection requirement proved that authoritative
+`round.result.choiceIndex` must be retained as `correctChoice`; the focused run
+failed 2 tests until that field was added. This avoids inferring correctness
+from bundled answer text. The final store-focused count returned to 22/22.
+
+Installed only plan-authorized `jsdom`. Eight DOM scenarios were written before
+`render.ts`; `npm --prefix web test` exited 1 because `../src/render` could not
+resolve. The other 3 files and 98 tests passed. After the semantic renderer,
+fixed structure, and responsive CSS were added, the focused renderer count was
+8/8 and the full interim web count was 106/106; the interim production build
+also exited 0.
+
+Installed only plan-authorized `@playwright/test` and its matching Chromium.
+Four scenarios across phone and desktop (8 project tests) were authored before
+the full composition. `npm --prefix web run test:e2e` exited 1 with all 8 RED:
+the old probe main left invalid join feedback empty and valid join never
+produced `WAITING FOR PAINTER`. Failure screenshots stayed in the ignored
+Playwright artifact directory. No live service or credential was used.
+
+### Task 9 integration findings and final deterministic evidence
+
+The first composition GREEN attempt reached 2/8 E2E. Playwright's failure
+snapshot proved the valid-input fixture had become `WAVE4`: HTML
+`maxlength="6"` truncated whitespace-padded input before the required
+trim/uppercase normalization. Removing that pre-normalization cap was the
+single fix; exact six-character validation remains in the submit handler.
+
+The next run reached 5/8. Two failures were a Playwright strict-locator mistake
+even though its captured DOM showed all four buttons disabled, so the assertion
+was corrected to inspect the full collection. The remaining phone-only failure
+was reproduced with a `220x220` glyph backing store inside a `157x157` client
+box. The renderer had mapped points using client dimensions without matching
+the backing dimensions, visually shrinking the exact path. A focused phone
+test remained RED until drawing synchronized the canvas backing store to its
+measured client box. The focused case then passed, followed by all 8 E2E tests.
+
+Self-review found one additional stale-correlation display edge. When a late
+incorrect result marks a choice while a newer same-choice retry remains
+pending, the renderer originally showed `TRY AGAIN` instead of the required
+`SUBMITTED`. The new focused DOM scenario failed 1/9, then passed 9/9 after
+pending display precedence was corrected; correlation and outcome authority
+remained in the store.
+
+Fresh final deterministic verification after deleting the obsolete probe:
+
+- `npm --prefix web test`: 3 files, 88 tests passed.
+- `npm --prefix web run build`: TypeScript and Vite exited 0; 54 modules.
+- `npm --prefix web run test:e2e`: 8/8 Chromium project tests passed across
+  `390x844` and `1440x900`.
+- `npm run check`: 161 core tests and 88 web tests passed; web build exited 0.
+- Corrected collection checks exited 0: `npm --prefix web exec -- vitest
+  --root web list` listed only 88 tests under `web/tests`, and `npm --prefix
+  web exec -- playwright test --config web/playwright.config.ts --list`
+  listed 8 tests in one `web/e2e` spec.
+- The plan-literal `npm --prefix web exec -- vitest list` and Playwright
+  counterpart both exit 1 because this npm version locates the prefixed binary
+  but retains the repository-root cwd. They scan unrelated root tests/config
+  instead of the web package. No root-wide config was added solely to mask this
+  CLI behavior; the explicit-root/config commands above are the valid boundary
+  evidence.
+- `rg -n 'wordlessProbe|RelayProbe' web/src web/tests` returned no matches
+  (expected exit 1). `git diff --check` passed. Frozen Task 8/core/transport and
+  Lens directories had no diff. No production secret-shaped values, external
+  visual references, tracked build/report artifacts, staged files, or added
+  direct packages beyond `jsdom` and `@playwright/test` were found. Four E2E
+  screenshots exist only under ignored `web/playwright-report/artifacts/`.
+
+This evidence uses a deterministic fake browser channel and simulated clock.
+It does not prove live Lens-to-browser product equivalence, hardware/device
+behavior, production readiness, security, persistence, scale, or latency.
+
+### Task 9 independent-review fix round 1
+
+Two independent reviews identified four concrete browser-surface defects and
+four composition-evidence gaps. Focused regressions were added before changing
+production behavior. The first literal focused command, `npm --prefix web exec
+-- vitest run tests/web-round-store.test.ts tests/render.test.ts`, reproduced
+the already-documented npm cwd problem: the store suite collected zero tests
+because the root invocation did not load the web alias. The corrected command,
+`npm --prefix web exec -- vitest --root web run
+tests/web-round-store.test.ts tests/render.test.ts`, exited 1 with exactly 3
+failures and 31 passes: runtime `-1` was accepted as a choice and mutated the
+pending state, the one-point solved glyph's center pixel was transparent
+`[0,0,0,0]`, and a DPR-2 `100x50` canvas retained a `100x50` rather than
+`200x100` backing store.
+
+The focused phone composition command, `npm --prefix web run test:e2e --
+--project=chromium-phone --grep
+"pre-join|one-point|point-count|channel error|rejected application|validates
+join"`, also exited 1 with 2 failures and 4 passes. It exactly reproduced
+`scrollWidth=399` at a `390` CSS-pixel viewport and a transparent authoritative
+one-point glyph center. The four already-green scenarios established that the
+existing composition correctly preserved same-page invalid-to-valid join
+reuse, emitted the exact round-scoped point-count resync, recovered through the
+real `BrowserRelayClient` fake-channel boundary with one successor, and
+contained a rejected application send without leaking its deliberately hostile
+provider-shaped detail. No Task 8 adapter or approved-design conflict emerged.
+
+The minimum production fixes validate `ChoiceIndex` at runtime before the ID
+factory, render a violet radius-half-line-width dot for a one-point path, size
+canvas backing stores by `devicePixelRatio` while resetting/scaling the context
+and retaining CSS-coordinate geometry, and give the join grid/card/input an
+explicit shrinkable full-width constraint. The fake remains only at the
+channel/timer/ID boundary. It records channel and listener registrations,
+outbound wire messages, selected send failure, and unhandled rejections; it
+does not expose store mutation or bundle fake inbound product messages.
+
+Focused GREEN returned 34/34 store/renderer tests and 6/6 phone composition
+tests. Fresh full evidence returned 91/91 web tests, a 54-module build, and
+18/18 Playwright project tests (9 scenarios each at phone and desktop). The
+composed cases now prove a violet pixel at the exact normalized one-point glyph
+coordinate, no join overflow at both `390x844` and focused `320x700`, exact
+guess and `POINT_COUNT_MISMATCH` outbound identity, invalid-then-valid reuse
+with one channel plus one broadcast/status listener, incomplete-projection
+clearing, exactly one recovered connection, a harmless old 450 ms glyph
+callback, and generic failed status with no page/unhandled rejection after a
+rejected send.
+
+`npm run check` passed 161 core tests, 91 web tests, and the 54-module build.
+Corrected collection commands list only 91 web tests and 18 Playwright tests in
+one E2E file. No probe match, frozen adapter/Lens/Core diff, production
+secret-shaped match, external visual reference, tracked artifact, staged file,
+or diff whitespace error was found. Six generated Playwright files (four
+surface screenshots, the HTML report, and `.last-run.json`) remain ignored.
+No dependency, commit, staging, Lens MCP, live service, device, or hardware
+action occurred. Evidence remains deterministic fake-channel browser evidence,
+not live Lens-browser equivalence, production readiness, security, or hardware
+proof.
+
+### Task 9 independent-review fix round 2
+
+Both scoped re-reviews confirmed every round-1 finding and evidence gap was
+addressed, then found one responsive glyph regression introduced by that fix:
+`renderGlyph` applied inline `220px` width and height, overriding the existing
+responsive `#glyph-medallion canvas { width: 100%; height: 100%; }` rule.
+Root-cause inspection showed the backing-store/client synchronization was
+correct, but the inline CSS changed the client box itself and made the
+medallion's `overflow: hidden` clip the right and bottom of the glyph.
+
+Tests were added before production changed. The focused DOM command,
+`npm --prefix web exec -- vitest --root web run tests/render.test.ts`, exited 1
+with 1 failure and 11 passes: the generated glyph reported inline width
+`220px` instead of an empty responsive inline declaration. That same test also
+requires a DPR-2 backing store of `160x140` for an `80x70` current client box.
+The focused phone E2E command, `npm --prefix web run test:e2e --
+--project=chromium-phone --grep "phone glyph canvas"`, exited 1 with its only
+test failed: the canvas right edge was `336.60px` while the visible medallion
+content ended at `273.40px` (`273.90px` including tolerance). The authoritative
+two-point path `[0,0]` to `[1000,1000]` normalizes to the 10%/90% edges; the
+test locks the glyph, requires its right/bottom 90% pixel to be painted, and
+also requires that painted client coordinate and the full canvas bounds remain
+inside the visible content box.
+
+The production fix only removed the two inline width/height assignments.
+Focused GREEN was 12/12 DOM tests and 1/1 phone E2E. Fresh full evidence passed
+92/92 web tests, the 54-module build, and 20/20 Playwright project tests (10
+scenarios on both phone and desktop). `npm run check` passed 161 core tests,
+92 web tests, and the build; corrected collections list 92 web tests and 20 E2E
+tests in one file. No probe, fixed-inline glyph sizing, frozen adapter/Assets
+diff, production secret-shaped match, external visual reference, tracked
+artifact, staged file, or diff whitespace error was found. Six ignored
+Playwright report/artifact files remain. No dependency, commit, staging, Lens
+MCP, live service, device, or hardware action occurred; this remains local
+deterministic fake-channel browser evidence only.
+
+Both final scoped re-reviews returned `All findings addressed, no new
+Critical/Important breakage`. The controller then reran verification from the
+reviewed working tree. `npm run check` passed 161/161 core tests, 92/92 web
+tests, and the 54-module production build. `npm --prefix web run test:e2e`
+passed 20/20 Chromium tests across the `390x844` phone and `1440x900` desktop
+projects. Corrected collection commands again exited zero and listed only 92
+tests in the three `web/tests` suites plus 20 tests in the one
+`web/e2e/wordless.spec.ts` file. The two plan-literal `npm --prefix web exec`
+commands again reproduced the documented repository-root cwd/config failure;
+this is retained as an explicit execution-plan deviation rather than hidden
+with an unrelated root config.
+
+The controller visually inspected the four current ignored E2E screenshots.
+Phone and desktop state frames show the four-card 2x2 grid without horizontal
+clipping, persistent role/title/status hierarchy, and text-based timeout
+feedback. Correct/glyph frames show mint/coral text-plus-icon answer states,
+revealed word text, and the violet exact path within the mint circular
+medallion; the phone medallion is visibly contained after the responsive fix.
+This is implementation/readability inspection before the later Task 13 visual
+polish and is not human comprehension evidence.
+
+The final staged lexical audit matched only intentionally hostile E2E/DOM test
+fixtures (`provider.invalid`, the literal `service_role` label, and the short
+non-token marker `eyJ-secret`) whose purpose is to prove those strings never
+reach the rendered status. No Supabase project URL, JWT-shaped value, client
+key, service-role key, private-key block, `.env` file, binary screenshot, build
+output, or Playwright report is staged.

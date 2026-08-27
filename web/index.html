@@ -3,16 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WORDLESS Relay Probe</title>
+    <meta name="theme-color" content="#200b2b" />
+    <title>WORDLESS Relay</title>
   </head>
   <body>
-    <main>
-      <p id="connection" role="status">CONNECTING</p>
-      <canvas id="stroke" width="1000" height="600" aria-label="Incoming Lens stroke"></canvas>
-      <button id="guess-wrong" type="button">SEND GUESS 1</button>
-      <button id="guess-correct" type="button">SEND GUESS 2</button>
-      <button id="ping" type="button">MEASURE ROUND TRIP</button>
-      <pre id="metrics" aria-live="polite"></pre>
+    <main id="join-view" class="join-shell">
+      <form id="join-form" class="join-card" novalidate>
+        <span class="eyebrow">WORDLESS RELAY</span>
+        <h1>JOIN THE GUESSER</h1>
+        <label for="session-code">Six-character session code</label>
+        <input
+          id="session-code"
+          name="session-code"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          autocapitalize="characters"
+          pattern="[A-Za-z0-9]{6}"
+          required
+        />
+        <button type="submit">JOIN ROUND</button>
+        <p id="join-error" role="alert"></p>
+      </form>
+    </main>
+    <main class="app-shell" hidden>
+      <header class="brand-row">
+        <div>
+          <span class="eyebrow">WORDLESS RELAY</span>
+          <span class="role-label">GUESSER</span>
+          <h1>GUESS THE CLUE</h1>
+        </div>
+        <p id="connection" role="status"><span aria-hidden="true"></span> CONNECTING</p>
+      </header>
+      <p id="timer" aria-label="Time remaining"></p>
+      <section class="play-field" aria-labelledby="play-title">
+        <h2 id="play-title" class="visually-hidden">Live clue from the painter</h2>
+        <canvas id="stroke-canvas" width="1000" height="620" aria-label="Live clue drawing"></canvas>
+        <div id="glyph-medallion" hidden aria-label="Solved clue glyph"></div>
+      </section>
+      <section id="choices" class="choice-grid" aria-label="Answer choices"></section>
+      <p id="result" aria-live="assertive"></p>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

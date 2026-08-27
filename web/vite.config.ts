@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 
@@ -14,4 +15,5 @@ export default defineConfig({
   server: {
     fs: { allow: [repositoryRoot] },
   },
+  test: { include: ['tests/**/*.test.ts'] },
 })

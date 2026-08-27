@@ -96,6 +96,8 @@ function startSession(
 ): void {
   const now = seam?.now ?? Date.now
   const timers = seam?.timers ?? defaultTimers
+  const motionPreference = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')
+  const reducedMotion = (): boolean => motionPreference?.matches === true
   const store = new WebRoundStore({
     sessionId,
     guessIdFactory: seam?.guessIdFactory ?? (() => boundedRandomId('g-', 10)),
@@ -129,12 +131,26 @@ function startSession(
     }, GLYPH_LOCK_DELAY_MS)
   }
 
-  const unsubscribe = store.subscribe((snapshot) => {
+  const presentSnapshot = (snapshot: WebRoundSnapshot): void => {
+    if (snapshot.phase !== 'CORRECT' && glyphTimer !== null) clearGlyphTimer()
+    if (snapshot.phase === 'CORRECT' && reducedMotion()) {
+      clearGlyphTimer()
+      store.lockGlyph(snapshot.roundId, snapshot.roundGeneration)
+      return
+    }
     if (snapshot.phase === 'CORRECT') scheduleGlyphLock(snapshot)
-    else if (glyphTimer !== null) clearGlyphTimer()
-    render(snapshot)
     phaseDiagnostic(snapshot)
-  })
+    render(snapshot, { reducedMotion: reducedMotion() })
+  }
+
+  const unsubscribe = store.subscribe(presentSnapshot)
+  const onMotionPreferenceChange = (): void => {
+    const snapshot = store.getSnapshot()
+    if (snapshot.phase !== 'CORRECT' || !reducedMotion()) return
+    clearGlyphTimer()
+    store.lockGlyph(snapshot.roundId, snapshot.roundGeneration)
+  }
+  motionPreference?.addEventListener('change', onMotionPreferenceChange)
 
   const sendIntent = (intent: WebRoundIntent): void => {
     const activeClient = client
@@ -201,13 +217,14 @@ function startSession(
     tickTimer = null
     clearGlyphTimer()
     unsubscribe()
+    motionPreference?.removeEventListener('change', onMotionPreferenceChange)
     const activeClient = client
     client = null
     if (activeClient) void activeClient.close()
   }
 
   window.addEventListener('beforeunload', stop, { once: true })
-  render(store.getSnapshot())
+  render(store.getSnapshot(), { reducedMotion: reducedMotion() })
   phaseDiagnostic(store.getSnapshot())
   scheduleTick()
   void client.connect().catch(() => {

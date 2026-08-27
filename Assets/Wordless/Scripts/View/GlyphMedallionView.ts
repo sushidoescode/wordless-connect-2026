@@ -1,5 +1,10 @@
+import {
+  easeOutCubic,
+  interpolatePath,
+  type GlyphTransitionPoint,
+} from '../Core/GlyphTransition'
 import { MAX_STROKE_POINTS } from '../Core/Protocol'
-import type { QuantizedPoint } from '../Core/Protocol'
+import type { QuantizedPoint, WorldPoint } from '../Core/Protocol'
 
 export interface OwnedGlyphResourceCounts {
   readonly sceneObjects: number
@@ -32,6 +37,7 @@ const GLYPH_CENTERLINE_DIAMETER_CM =
 const FRAME_INNER_RADIUS_CM = 25
 const FRAME_OUTER_RADIUS_CM = 27
 const FRAME_SEGMENT_COUNT = 64
+const GLYPH_TRANSITION_SECONDS = 0.45
 const MEDALLION_RESOURCE_COUNTS: OwnedGlyphResourceCounts = Object.freeze({
   sceneObjects: 4,
   materials: 2,
@@ -123,16 +129,47 @@ export function layoutGlyphPoints(
   ] as const)
 }
 
+export function layoutTransitionSourcePoints(
+  points: readonly WorldPoint[],
+  toMedallionLocal: (point: WorldPoint) => GlyphTransitionPoint,
+): readonly GlyphLocalPoint[] {
+  if (!Array.isArray(points) || points.length > MAX_STROKE_POINTS) {
+    throw new Error('Invalid world glyph points')
+  }
+  const result: GlyphLocalPoint[] = []
+  for (let index = 0; index < points.length; index += 1) {
+    const point = points[index]
+    const x = point?.x
+    const y = point?.y
+    const z = point?.z
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+      throw new Error('Invalid world glyph points')
+    }
+    const mapped = toMedallionLocal({ x, y, z })
+    const mappedX = mapped[0]
+    const mappedY = mapped[1]
+    if (!Number.isFinite(mappedX) || !Number.isFinite(mappedY)) {
+      throw new Error('Invalid medallion transition point')
+    }
+    result.push([
+      cleanCoordinate(mappedX),
+      cleanCoordinate(mappedY),
+    ])
+  }
+  return result
+}
+
 function glyphVertex(
   x: number,
   y: number,
   u: number,
   v: number,
+  depthCm = 0,
 ): GlyphVertex {
   return [
     cleanCoordinate(x),
     cleanCoordinate(y),
-    0,
+    cleanCoordinate(depthCm),
     0,
     0,
     1,
@@ -185,6 +222,7 @@ function appendGlyphQuad(
   start: GlyphLocalPoint,
   end: GlyphLocalPoint,
   halfWidth: number,
+  depthCm: number,
 ): boolean {
   const deltaX = end[0] - start[0]
   const deltaY = end[1] - start[1]
@@ -195,10 +233,10 @@ function appendGlyphQuad(
   const sideY = deltaX / length * halfWidth
   const base = vertices.length
   vertices.push(
-    glyphVertex(start[0] - sideX, start[1] - sideY, 0, 0),
-    glyphVertex(start[0] + sideX, start[1] + sideY, 0, 1),
-    glyphVertex(end[0] - sideX, end[1] - sideY, 1, 0),
-    glyphVertex(end[0] + sideX, end[1] + sideY, 1, 1),
+    glyphVertex(start[0] - sideX, start[1] - sideY, 0, 0, depthCm),
+    glyphVertex(start[0] + sideX, start[1] + sideY, 0, 1, depthCm),
+    glyphVertex(end[0] - sideX, end[1] - sideY, 1, 0, depthCm),
+    glyphVertex(end[0] + sideX, end[1] + sideY, 1, 1, depthCm),
   )
   indices.push(
     base, base + 2, base + 1,
@@ -212,13 +250,14 @@ function appendPointPrimitive(
   indices: number[],
   point: GlyphLocalPoint,
   halfWidth: number,
+  depthCm: number,
 ): void {
   const base = vertices.length
   vertices.push(
-    glyphVertex(point[0] - halfWidth, point[1] - halfWidth, 0, 0),
-    glyphVertex(point[0] - halfWidth, point[1] + halfWidth, 0, 1),
-    glyphVertex(point[0] + halfWidth, point[1] - halfWidth, 1, 0),
-    glyphVertex(point[0] + halfWidth, point[1] + halfWidth, 1, 1),
+    glyphVertex(point[0] - halfWidth, point[1] - halfWidth, 0, 0, depthCm),
+    glyphVertex(point[0] - halfWidth, point[1] + halfWidth, 0, 1, depthCm),
+    glyphVertex(point[0] + halfWidth, point[1] - halfWidth, 1, 0, depthCm),
+    glyphVertex(point[0] + halfWidth, point[1] + halfWidth, 1, 1, depthCm),
   )
   indices.push(
     base, base + 2, base + 1,
@@ -229,9 +268,13 @@ function appendPointPrimitive(
 export function buildGlyphMeshGeometry(
   points: readonly GlyphLocalPoint[],
   strokeWidthCm: number,
+  depthCm = 0,
 ): GlyphMeshGeometry {
   if (!Number.isFinite(strokeWidthCm) || strokeWidthCm <= 0) {
     throw new Error('Glyph stroke width must be a positive finite number')
+  }
+  if (!Number.isFinite(depthCm)) {
+    throw new Error('Glyph depth must be finite')
   }
 
   const vertices: GlyphVertex[] = []
@@ -249,12 +292,13 @@ export function buildGlyphMeshGeometry(
       points[index - 1],
       points[index],
       halfWidth,
+      depthCm,
     )) {
       segmentCount += 1
     }
   }
   if (segmentCount === 0) {
-    appendPointPrimitive(vertices, indices, points[0], halfWidth)
+    appendPointPrimitive(vertices, indices, points[0], halfWidth, depthCm)
   }
   return { vertices, indices, segmentCount }
 }
@@ -276,6 +320,12 @@ export class GlyphMedallionView extends BaseScriptComponent {
 
   private glyphBuilder: MeshBuilder | null = null
   private frameBuilder: MeshBuilder | null = null
+  private transition: {
+    readonly from: readonly GlyphLocalPoint[]
+    readonly to: readonly GlyphLocalPoint[]
+    readonly fromDepthCm: number
+    readonly startedAtSeconds: number
+  } | null = null
 
   onAwake(): void {
     this.assertBindings()
@@ -288,32 +338,63 @@ export class GlyphMedallionView extends BaseScriptComponent {
     this.glyphVisual.mesh = this.glyphBuilder.getMesh()
     this.glyphVisual.mainMaterial = this.violetGlyphMaterial
     this.glyphVisual.meshShadowMode = MeshShadowMode.None
+    this.createEvent('UpdateEvent').bind(() => this.updateTransition())
     this.createEvent('OnDestroyEvent').bind(() => this.onDestroy())
     this.hide()
   }
 
   hide(): void {
+    this.transition = null
     this.medallionRoot.enabled = false
     this.glyphVisual.enabled = false
     this.revealedWordLabel.text = ''
   }
 
   render(
-    points: readonly QuantizedPoint[],
+    sourcePoints: readonly WorldPoint[],
+    glyphPoints: readonly QuantizedPoint[],
     revealedWord: string,
   ): void {
-    const localPoints = layoutGlyphPoints(points)
-    const hasGeometry = this.rebuild(localPoints)
+    const inverseGlyphWorld = this.glyphVisual
+      .getSceneObject()
+      .getTransform()
+      .getInvertedWorldTransform()
+    let fromDepthCm = 0
+    let hasDepth = false
+    const from = layoutTransitionSourcePoints(sourcePoints, (point) => {
+      const local = inverseGlyphWorld.multiplyPoint(
+        new vec3(point.x, point.y, point.z),
+      )
+      if (!Number.isFinite(local.z)) {
+        throw new Error('Invalid medallion transition depth')
+      }
+      const depth = cleanCoordinate(local.z)
+      if (hasDepth && Math.abs(depth - fromDepthCm) > 1e-4) {
+        throw new Error('World glyph points must share one display plane')
+      }
+      fromDepthCm = depth
+      hasDepth = true
+      return [local.x, local.y]
+    })
+    const to = layoutGlyphPoints(glyphPoints)
+    const initial = interpolatePath(from, to, 0)
+    const hasGeometry = this.rebuild(initial, fromDepthCm)
     this.revealedWordLabel.text = revealedWord
     this.glyphVisual.enabled = hasGeometry
     this.medallionRoot.enabled = true
+    this.transition = hasGeometry
+      ? { from, to, fromDepthCm, startedAtSeconds: this.nowSeconds() }
+      : null
   }
 
   getOwnedResourceCounts(): OwnedGlyphResourceCounts {
     return MEDALLION_RESOURCE_COUNTS
   }
 
-  private rebuild(points: readonly GlyphLocalPoint[]): boolean {
+  private rebuild(
+    points: readonly GlyphLocalPoint[],
+    depthCm = 0,
+  ): boolean {
     const builder = this.glyphBuilder
     if (builder === null) return false
 
@@ -322,10 +403,40 @@ export class GlyphMedallionView extends BaseScriptComponent {
     if (indexCount > 0) builder.eraseIndices(0, indexCount)
     if (vertexCount > 0) builder.eraseVertices(0, vertexCount)
 
-    const geometry = buildGlyphMeshGeometry(points, GLYPH_STROKE_WIDTH_CM)
+    const geometry = buildGlyphMeshGeometry(
+      points,
+      GLYPH_STROKE_WIDTH_CM,
+      depthCm,
+    )
     if (geometry.vertices.length === 0) return false
     this.writeGeometry(builder, geometry)
     return true
+  }
+
+  private updateTransition(): void {
+    const transition = this.transition
+    if (transition === null) return
+    const elapsedSeconds = Math.max(
+      0,
+      this.nowSeconds() - transition.startedAtSeconds,
+    )
+    const progress = Math.min(1, elapsedSeconds / GLYPH_TRANSITION_SECONDS)
+    const easedProgress = easeOutCubic(progress)
+    const depthCm = progress >= 1
+      ? 0
+      : transition.fromDepthCm * (1 - easedProgress)
+    const hasGeometry = this.rebuild(interpolatePath(
+      transition.from,
+      transition.to,
+      progress,
+    ), depthCm)
+    this.glyphVisual.enabled = hasGeometry
+    if (progress >= 1) this.transition = null
+  }
+
+  private nowSeconds(): number {
+    const value = getTime()
+    return Number.isFinite(value) && value >= 0 ? value : 0
   }
 
   private createBuilder(): MeshBuilder {
@@ -348,6 +459,7 @@ export class GlyphMedallionView extends BaseScriptComponent {
   }
 
   private onDestroy(): void {
+    this.transition = null
     this.glyphBuilder = null
     this.frameBuilder = null
   }

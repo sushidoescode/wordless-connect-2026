@@ -268,10 +268,15 @@ class FakeBrush {
 class FakeRibbon {
   constructor() {
     this.renders = []
+    this.payoffStates = []
   }
 
   render(points) {
     this.renders.push(clone(points))
+  }
+
+  setPayoffActive(active) {
+    this.payoffStates.push(active)
   }
 
   getOwnedResourceCounts() {
@@ -303,8 +308,12 @@ class FakeGlyph {
     this.hiddenCount += 1
   }
 
-  render(points, revealedWord) {
-    this.renders.push({ points: clone(points), revealedWord })
+  render(sourcePoints, glyphPoints, revealedWord) {
+    this.renders.push({
+      sourcePoints: clone(sourcePoints),
+      glyphPoints: clone(glyphPoints),
+      revealedWord,
+    })
   }
 
   getOwnedResourceCounts() {
@@ -666,9 +675,11 @@ test('routes brush and guesses through the engine and guards the 450ms glyph loc
   assert.deepEqual(harness.app.getSnapshot().worldPoints, [{ x: 1, y: 2, z: -3 }])
   assert.deepEqual(harness.app.getSnapshot().glyph, [[500, 500]])
   assert.deepEqual(harness.glyph.renders, [{
-    points: [[500, 500]],
+    sourcePoints: [{ x: 1, y: 2, z: -3 }],
+    glyphPoints: [[500, 500]],
     revealedWord: 'SNAKE',
   }])
+  assert.equal(harness.ribbon.payoffStates.at(-1), true)
   assert.deepEqual(harness.replay.availability.at(-1), {
     roundId: ROUND_ONE,
     available: false,
@@ -699,7 +710,8 @@ test('routes brush and guesses through the engine and guards the 450ms glyph loc
 
   assert.equal(harness.app.getSnapshot().phase, 'GLYPH_LOCKED')
   assert.deepEqual(harness.glyph.renders, [{
-    points: [[500, 500]],
+    sourcePoints: [{ x: 1, y: 2, z: -3 }],
+    glyphPoints: [[500, 500]],
     revealedWord: 'SNAKE',
   }])
   assert.deepEqual(harness.replay.availability.at(-1), {
@@ -813,6 +825,7 @@ test('replay applies one successor and waits for a matching reset ack before sta
   assert.deepEqual(harness.app.getSnapshot().guessedIndices, [])
   assert.deepEqual(harness.relay.localRounds, [ROUND_ONE, ROUND_TWO])
   assert.deepEqual(harness.ribbon.renders.at(-1), [])
+  assert.equal(harness.ribbon.payoffStates.at(-1), false)
   assert.deepEqual(harness.relay.sent.slice(sentBeforeReplay), [{
     type: 'round.reset',
     roundId: ROUND_ONE,

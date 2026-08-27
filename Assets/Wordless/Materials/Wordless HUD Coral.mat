@@ -89,5 +89,5 @@
       value: 0
     baseColor:
       typeIdx: 5
-      value: {x: 1.000000, y: 0.419608, z: 0.419608, w: 1.000000}
+      value: {x: 1.000000, y: 0.470588, z: 0.415686, w: 1.000000}
   Pass: !<reference> 7bb99a39-369d-4be9-aa51-d05c8c3c05c0

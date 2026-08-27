@@ -60,6 +60,8 @@ export class StrokeRibbonView extends BaseScriptComponent {
   private readonly ownedSceneObjects: SceneObject[] = []
   private readonly ownedMaterials: Material[] = []
   private lastWorldPoints: readonly WorldPoint[] | null = null
+  private hasGeometry = false
+  private payoffActive = false
 
   onAwake(): void {
     this.outerMesh = new StrokeRibbonMesh(OUTER_WIDTH_CM)
@@ -92,9 +94,8 @@ export class StrokeRibbonView extends BaseScriptComponent {
     })
     const hasGeometry = this.outerMesh.rebuild(localPoints)
     const coreHasGeometry = this.coreMesh.rebuild(localPoints)
-    for (const sceneObject of this.ownedSceneObjects) {
-      sceneObject.enabled = hasGeometry && coreHasGeometry
-    }
+    this.hasGeometry = hasGeometry && coreHasGeometry
+    this.applyVisibility()
 
     const lastPoint = snapshot.length === 0
       ? null
@@ -104,6 +105,12 @@ export class StrokeRibbonView extends BaseScriptComponent {
         new vec3(lastPoint.x, lastPoint.y, lastPoint.z),
       )
     }
+  }
+
+  setPayoffActive(active: boolean): void {
+    if (this.payoffActive === active) return
+    this.payoffActive = active
+    this.applyVisibility()
   }
 
   getOwnedResourceCounts(): OwnedResourceCounts {
@@ -138,6 +145,13 @@ export class StrokeRibbonView extends BaseScriptComponent {
     this.ownedMaterials.push(material)
   }
 
+  private applyVisibility(): void {
+    for (const sceneObject of this.ownedSceneObjects) {
+      sceneObject.enabled = this.hasGeometry && !this.payoffActive
+    }
+    this.drawHeadVisual.enabled = !this.payoffActive
+  }
+
   private onDestroy(): void {
     while (this.ownedSceneObjects.length > 0) {
       const sceneObject = this.ownedSceneObjects.pop()
@@ -147,5 +161,7 @@ export class StrokeRibbonView extends BaseScriptComponent {
     this.outerMesh = null
     this.coreMesh = null
     this.lastWorldPoints = null
+    this.hasGeometry = false
+    this.payoffActive = false
   }
 }

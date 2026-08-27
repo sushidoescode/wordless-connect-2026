@@ -290,6 +290,71 @@ test('pre-join view has no horizontal overflow at 390px or 320px', async ({ page
   }
 })
 
+test('keeps the round surface bounded at the phone, tablet, and desktop craft sizes', async ({ page }, testInfo) => {
+  await join(page)
+  await startRound(page)
+  await emit(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-responsive',
+    points: [[170, 640], [320, 260], [500, 760], [700, 210], [850, 590]],
+  }))
+
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 768, height: 1_024 },
+    { width: 1_440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport)
+    const layout = await page.evaluate(() => {
+      const field = document.querySelector<HTMLElement>('.play-field')!.getBoundingClientRect()
+      const choices = document.querySelector<HTMLElement>('#choices')!.getBoundingClientRect()
+      const result = document.querySelector<HTMLElement>('#result')!.getBoundingClientRect()
+      const cards = [...document.querySelectorAll<HTMLElement>('#choices button')]
+      const cardRects = cards.map((card) => card.getBoundingClientRect())
+      return {
+        overflow: document.documentElement.scrollWidth > window.innerWidth,
+        field: { left: field.left, right: field.right, top: field.top, bottom: field.bottom },
+        choices: {
+          left: choices.left,
+          right: choices.right,
+          top: choices.top,
+          bottom: choices.bottom,
+        },
+        result: { top: result.top, bottom: result.bottom },
+        cards: cardRects.map((card) => ({
+          left: card.left,
+          top: card.top,
+          right: card.right,
+          bottom: card.bottom,
+          width: card.width,
+          height: card.height,
+        })),
+      }
+    })
+
+    expect(layout.overflow).toBe(false)
+    expect(layout.field.left).toBeGreaterThanOrEqual(0)
+    expect(layout.field.right).toBeLessThanOrEqual(viewport.width)
+    expect(layout.choices.left).toBeGreaterThanOrEqual(0)
+    expect(layout.choices.right).toBeLessThanOrEqual(viewport.width)
+    expect(layout.cards).toHaveLength(4)
+    expect(Math.min(...layout.cards.map((card) => card.height))).toBeGreaterThanOrEqual(48)
+    expect(layout.cards[0]?.top).toBeCloseTo(layout.cards[1]!.top, 0)
+    expect(layout.cards[0]?.left).toBeLessThan(layout.cards[1]!.left)
+    expect(layout.cards[2]?.top).toBeGreaterThan(layout.cards[0]!.bottom)
+    if (viewport.width >= 960) {
+      expect(layout.choices.left).toBeGreaterThan(layout.field.right)
+      expect(layout.result.top - layout.field.bottom).toBeLessThanOrEqual(60)
+    }
+    else {
+      expect(layout.choices.top).toBeGreaterThan(layout.field.bottom)
+    }
+    await page.screenshot({
+      path: testInfo.outputPath(`round-${viewport.width}x${viewport.height}.png`),
+      fullPage: true,
+    })
+  }
+})
+
 test('renders four responsive cards and pending, rejection, retry, and timeout states', async ({ page }, testInfo) => {
   await join(page)
   await startRound(page)
@@ -389,6 +454,159 @@ test('shows wrong then authoritative correct, derives the exact glyph, and locks
   await advance(page, 1)
   await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'GLYPH_LOCKED')
   await capture(page, testInfo)
+})
+
+test('reduced motion locks the exact glyph immediately without rendering a moving overlay', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await join(page)
+  await startRound(page)
+  await emit(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-1',
+    points: [[200, 200], [400, 800], [600, 300]],
+  }))
+
+  const cards = page.locator('#choices button')
+  await cards.nth(1).click()
+  const wrongGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'incorrect',
+    guessId: wrongGuessId,
+    choiceIndex: 1,
+  }))
+  expect(await cards.nth(1).evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { duration: style.animationDuration, transform: style.transform }
+  })).toEqual({ duration: '0s', transform: 'none' })
+
+  await cards.first().click()
+  const correctGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 5, {
+    outcome: 'correct',
+    guessId: correctGuessId,
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 3,
+  }))
+
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'GLYPH_LOCKED')
+  await expect(page.locator('#glyph-transition-canvas')).toHaveCount(0)
+  await expect(page.locator('#glyph-medallion')).toBeVisible()
+  await expect(page.locator('#glyph-medallion')).not.toHaveClass(/is-transitioning/)
+})
+
+test('a motion preference change immediately settles an in-flight glyph', async ({ page }) => {
+  await join(page)
+  await startRound(page)
+  await emit(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-1',
+    points: [[200, 200], [400, 800], [600, 300]],
+  }))
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'correct',
+    guessId: 'guess-motion-change',
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 3,
+  }))
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'CORRECT')
+  await expect(page.locator('#glyph-transition-canvas')).toHaveCount(1)
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'GLYPH_LOCKED')
+  await expect(page.locator('#glyph-transition-canvas')).toHaveCount(0)
+  await expect(page.locator('#glyph-medallion')).not.toHaveClass(/is-transitioning/)
+})
+
+test('uses the fixed one-shot connection, wrong, and correct visual timings', async ({ page }) => {
+  await join(page)
+  await emit(page, message('presence.ack', 'lobby', 1, {
+    role: 'painter',
+    connectionId: PAINTER_CONNECTION_ID,
+    acknowledgedConnectionId: BROWSER_CONNECTION_ID,
+  }))
+  await expect(page.getByRole('status')).toContainText('PAINTER READY')
+  expect(await page.locator('#connection').evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { name: style.animationName, duration: style.animationDuration }
+  })).toEqual({ name: 'connection-fade', duration: '0.16s' })
+
+  await emit(page, message('round.start', 'round-1', 2, {
+    choices: CHOICES,
+    durationMs: 20_000,
+    targetConnectionId: BROWSER_CONNECTION_ID,
+  }))
+  await expect(page.locator('#connection')).toHaveClass(/is-changing/)
+  await emit(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-1',
+    points: [[200, 200], [400, 800], [600, 300]],
+  }))
+
+  const cards = page.locator('#choices button')
+  await cards.nth(1).click()
+  const wrongGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'incorrect',
+    guessId: wrongGuessId,
+    choiceIndex: 1,
+  }))
+  expect(await cards.nth(1).evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { name: style.animationName, duration: style.animationDuration }
+  })).toEqual({ name: 'wrong-shake', duration: '0.22s' })
+  await cards.nth(1).evaluate((element) => {
+    ;(window as unknown as { __wordlessWrongNode?: Element }).__wordlessWrongNode = element
+  })
+  await cards.nth(3).focus()
+  await advance(page, 100)
+  expect(await cards.nth(1).evaluate((element) =>
+    element === (window as unknown as { __wordlessWrongNode?: Element }).__wordlessWrongNode,
+  )).toBe(true)
+  await expect(cards.nth(3)).toBeFocused()
+  expect(await cards.nth(1).evaluate((element) =>
+    getComputedStyle(element).animationDuration,
+  )).toBe('0.22s')
+
+  await cards.nth(0).click()
+  const correctGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 5, {
+    outcome: 'correct',
+    guessId: correctGuessId,
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 3,
+  }))
+  expect(await cards.nth(0).evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { name: style.animationName, duration: style.animationDuration }
+  })).toEqual({ name: 'correct-settle', duration: '0.18s' })
+  await expect(page.locator('#glyph-transition-canvas')).toHaveAttribute('data-point-count', '3')
+})
+
+test('a render failure cannot prevent the semantic glyph lock', async ({ page }) => {
+  const phases: string[] = []
+  page.on('console', (message) => {
+    const match = message.text().match(/^\[WORDLESS\] BROWSER PHASE (\S+)$/)
+    if (match) phases.push(match[1]!)
+  })
+  await join(page)
+  await startRound(page)
+  await emit(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-1',
+    points: [[200, 200], [400, 800], [600, 300]],
+  }))
+  await page.locator('#result').evaluate((element) => element.remove())
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'correct',
+    guessId: 'guess-render-failure',
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 3,
+  }))
+
+  await advance(page, 450)
+
+  expect(phases).toContain('GLYPH_LOCKED')
 })
 
 test('reset before completion makes the stale glyph callback harmless', async ({ page }) => {

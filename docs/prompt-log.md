@@ -2509,3 +2509,127 @@ scoring, gallery, accounts, persistence, extra players, free text, recognition,
 particles, transport swap, or other new capability will be added. Remaining
 tasks are limited to visual presentation, five-second comprehension,
 robustness, and submission evidence.
+
+## 2026-08-27 — Task 13 visual payoff (in progress)
+
+Task 13 resumed from the battery-shutdown recovery at clean commit `3ad1afd`.
+The first pure glyph-transition test failed because
+`Core/GlyphTransition.ts` did not exist, as intended. The minimal easing and
+ordered interpolation implementation then passed progress 0, 0.5, 1,
+clamping, count/order, and mismatched-length tests.
+
+The first Lens composition used quantized public coordinates to reconstruct
+the transition source. Independent preflight review rejected that shortcut:
+it could visibly snap at frame zero and did not represent the exact displayed
+Lens path. A replacement test failed on the quantized implementation, then the
+view seam was changed to pass the Lens-local `worldPoints` snapshot through
+the glyph visual's complete inverse world transform, including its authored
+source-plane depth. Focused transition,
+medallion, and application tests are green. The existing ribbon is hidden only
+for `CORRECT`/`GLYPH_LOCKED`; the replacement mesh begins at the same ordered
+source samples, preserves a one-point primitive, reaches the exact normalized
+destination after 450 ms, and replay remains unavailable until the engine's
+existing `GLYPH_LOCKED` boundary. This required plan-adjacent edits to
+`WordlessApp.ts`, its tests, and the existing medallion/ribbon tests; it does
+not alter round authority, protocol, transport, or engine transitions.
+
+A failing HUD test was added before changing result copy and palette. Lens
+feedback now includes literal non-color cues (`× TRY AGAIN`, `✓ WORD!`, and
+`× TIME'S UP`) and uses the production coral `#FF786A` in both runtime text
+and the authored additive material. The focused HUD suite then passed.
+
+Fresh Lens Studio MCP compilation succeeded. A subsequent Preview refresh ran
+the standard hosted-Supabase client, subscribed, reached `ACTIVE`, and
+reported zero errors or warnings. The first high-resolution screenshots used
+the MCP-enumerated `Sunlit Room` and `Evening Room` simulated sources. They
+showed that the additive palette survived both rooms, but prompt, connection,
+result, and replay hierarchy was too small at the full 1722×1590 judged frame.
+Virtual Scene applied only scale/spacing changes to those authored text
+objects plus the coral material; Editor API `Project.save()` persisted the
+scene/material changes. No black backing, glass, shadow, copied reference
+image, new runtime asset, or semantic glyph was introduced. The medium-room
+retain candidate makes `DRAW: SNAKE`, timer, phase, and `WAITING FOR GUESSER`
+legible without a backing panel.
+
+Two attempted medium-room stroke captures are explicitly rejected. The first
+ran after the ordinary browser page had returned to its join view; the second
+coincided with live Vite reloads while the parallel browser implementation was
+still changing source files. Neither produced stroke events, so neither is
+payoff evidence. The existing ignored browser-control harness also exposed a
+module-listener race after reload; a 500 ms harness-only wait now prevents a
+native form submission before the Vite module installs its handler. This
+ignored harness change is not product code. Connected wrong→correct and
+frame-by-frame transformation proof will be captured only after the browser
+source is frozen.
+
+The independent browser review then found four presentation-lifecycle defects
+that ordinary happy-path tests had not exercised. Timer renders replaced keyed
+answer nodes and their CSS Animation objects; an in-flight transition did not
+settle when reduced motion changed dynamically; transition endpoints were not
+remapped after a resize; and a view exception could occur before semantic
+glyph completion was scheduled. Focused render and E2E reproductions failed
+first. Stable keyed nodes, per-frame destination measurement, a live media
+preference listener, and scheduling before rendering made them green without
+changing round authority or phase semantics. The browser reviewer reran 18/18
+focused render tests, 8/8 focused lifecycle E2E cases, 98/98 units, the
+55-module build, and 30/30 Chromium E2E tests and found no remaining Critical
+or Important issue. Safari-specific media-query/animation behavior remains an
+explicit coverage gap.
+
+The independent Lens review rejected two near-misses. Generic interpolation
+made fractional p0/p1 results only arithmetically near their endpoints, and the
+first view mapping discarded the authored source depth. Exact endpoint clone
+branches plus the glyph visual's full inverse transform and `-5.2 -> 0` depth
+interpolation corrected both. The reviewer reran 62/62 focused tests, 294/294
+full core tests, and Lens typecheck and found no remaining blocker.
+
+After browser source froze, one synchronized bright-room take recorded Lens
+and browser windows for 10.016667 seconds each. Their SHA-256 values are
+`ae48145227c8a7bd7f8a29439e6fa040713f8e40c1a4c0370a304a9a895caa98`
+and `17d66f3d1fe5568494ba92bd224fe50f9cc2e6532e8ecf3439232a5463d876a2`.
+The 1920x1080 synchronized review crop runs 10.008333 seconds and hashes to
+`f328f0e68b2c2703104ee66549cafda3cbef40f8b0773df2fcfd4dd5c5ddb6a2`.
+It shows a changing violet path on both surfaces, coral wrong feedback, mint
+correct feedback, five paired transformation beats, and matching final
+medallions. Its transition contact sheet hashes to
+`9b40978e59ee1f4135de3d7ac8844a494f59a98efc48e1ca5ae5cce44a4dd4fc`.
+
+The first fresh medium-room run expired before the answer beat and is rejected.
+A second connected run completed inside one short batch: Lens finished at
+`worldPoints=32 publicPoints=32`; Chrome exposed the transition's exact
+`data-point-count=32`; and Lens locked 456 ms after `CORRECT` with
+`points=32 hash=64395400`. The active, wrong, transition, and locked stills are
+combined in `task13-medium-contact-sheet.png`, SHA-256
+`87a74871615f45e57c490690c3f8a35af2b28a03a1ee696173918a4c9e17c763`.
+The additive violet/lemon/ivory/mint/coral treatment remains readable in both
+Sunlit and Evening Room without a dark panel.
+
+The reviewed revision is baseline `3ad1afd` plus the frozen 17-file source
+manifest SHA-256
+`cc891025b419f77748761de07b6152235e6154bc3ac4c98a27f244c28de9d51f`.
+`docs/evidence/visual-review.md` records the manifest algorithm, reference
+boundary, 4/5 hierarchy, 4/5 relay clarity, 5/5 palette, 5/5 answer
+readability, 4/5 payoff, all capture hashes, and limitations.
+`docs/evidence/polish-ledger.md` binds the defects, smallest changes, reviewers,
+and fresh proof to that revision.
+
+Lens Studio MCP restored Sunlit Room after medium capture, removed the
+regenerated `AiPreviewAgent Handler` and four helper packages through Virtual
+Scene plus Editor API `AssetManager.remove(SourcePath)`, and saved. No direct
+filesystem deletion or `Cache/` mutation was used. Forced TypeScript compile
+succeeded; a fresh Preview run applied `r-M64G88X3-1`, configured and
+subscribed the standard hosted-Supabase client, reached `READY -> ACTIVE`, and
+returned an empty error/warning list.
+
+Fresh deterministic evidence is 294/294 core tests, 98/98 browser unit tests,
+a 55-module production build, 30/30 Playwright tests, clean Lens typecheck, and
+clean `git diff --check`. All screenshots and movies stay ignored under
+`captures/task13/`. They are simulated Lens Studio Preview evidence only,
+never hardware or device footage. Task 13 is marked PASS; Task 14 retains the
+separate unfamiliar-human comprehension and formal accessibility gates.
+
+A final independent holistic reviewer recomputed the 17-file source manifest,
+all cited bright/medium capture hashes and video properties, reran every full
+check, audited architecture/metadata/package hygiene, and reported no Critical
+or Important issue. The only residual is the already-disclosed Chromium-only
+browser automation coverage.

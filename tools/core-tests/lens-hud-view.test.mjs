@@ -145,7 +145,7 @@ test('shows incorrect, revealed correct, and timeout results without pre-reveal 
       phase: 'ACTIVE',
       lastOutcome: 'incorrect',
     })).result,
-    { visible: true, text: 'TRY AGAIN', tone: 'coral' },
+    { visible: true, text: '× TRY AGAIN', tone: 'coral' },
   )
   assert.deepEqual(
     mapLensHudPresentation(snapshot({
@@ -153,7 +153,7 @@ test('shows incorrect, revealed correct, and timeout results without pre-reveal 
       lastOutcome: 'correct',
       revealedWord: 'SNAKE',
     })).result,
-    { visible: true, text: 'SNAKE!', tone: 'mint' },
+    { visible: true, text: '✓ SNAKE!', tone: 'mint' },
   )
   assert.deepEqual(
     mapLensHudPresentation(snapshot({
@@ -161,14 +161,14 @@ test('shows incorrect, revealed correct, and timeout results without pre-reveal 
       lastOutcome: 'correct',
       revealedWord: 'SNAKE',
     })).result,
-    { visible: true, text: 'SNAKE!', tone: 'mint' },
+    { visible: true, text: '✓ SNAKE!', tone: 'mint' },
   )
   assert.deepEqual(
     mapLensHudPresentation(snapshot({
       phase: 'TIMED_OUT',
       lastOutcome: 'timeout',
     })).result,
-    { visible: true, text: "TIME'S UP", tone: 'coral' },
+    { visible: true, text: "× TIME'S UP", tone: 'coral' },
   )
 
   const unrevealed = mapLensHudPresentation(snapshot({
@@ -233,7 +233,7 @@ test('writes presentation into authored resources with additive-safe palette', (
   assert.equal(view.promptText.text, 'DRAW: SNAKE')
   assert.equal(view.timerText.text, '0:16')
   assert.equal(view.connectionText.text, 'CONNECTED')
-  assert.equal(view.resultText.text, 'TRY AGAIN')
+  assert.equal(view.resultText.text, '× TRY AGAIN')
   assert.equal(view.resultText.enabled, true)
   assert.equal(view.connectionDot.enabled, true)
   assert.equal(view.resultMarker.enabled, true)
@@ -243,7 +243,7 @@ test('writes presentation into authored resources with additive-safe palette', (
   assert.deepEqual(colorTuple(view.roleText.textFill.color), [1, 246 / 255, 232 / 255, 1])
   assert.deepEqual(colorTuple(view.timerText.textFill.color), [1, 214 / 255, 90 / 255, 1])
   assert.deepEqual(colorTuple(view.connectionText.textFill.color), [115 / 255, 230 / 255, 174 / 255, 1])
-  assert.deepEqual(colorTuple(view.resultText.textFill.color), [1, 107 / 255, 107 / 255, 1])
+  assert.deepEqual(colorTuple(view.resultText.textFill.color), [1, 120 / 255, 106 / 255, 1])
   for (const text of [
     view.roleText,
     view.phaseText,

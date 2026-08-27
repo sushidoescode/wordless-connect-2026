@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render } from '../src/render'
+import {
+  glyphTransitionFrame,
+  layoutGlyphTransitionPaths,
+  render,
+} from '../src/render'
 import type { WebRoundSnapshot } from '../src/web-round-store'
 
 type CanvasCall = readonly [string, ...unknown[]]
@@ -156,6 +160,8 @@ function installMarkup(): void {
 }
 
 beforeEach(() => {
+  vi.restoreAllMocks()
+  vi.unstubAllGlobals()
   installMarkup()
   canvasCalls = []
   canvasContexts = new WeakMap()
@@ -170,6 +176,217 @@ beforeEach(() => {
 })
 
 describe('render', () => {
+  it('maps every ordered glyph point from the exact canvas position to the exact medallion position', () => {
+    const layout = layoutGlyphTransitionPaths(
+      [[0, 0], [500, 1_000], [1_000, 500]],
+      [[100, 200], [500, 800], [900, 300]],
+      { left: 10, top: 20, width: 160, height: 90 },
+      { left: 30, top: 40, width: 100, height: 50 },
+      { left: 110, top: 70, width: 40, height: 20 },
+    )
+
+    expect(glyphTransitionFrame(layout, 0)).toEqual([
+      [20, 20],
+      [70, 70],
+      [120, 45],
+    ])
+    expect(glyphTransitionFrame(layout, 1)).toEqual([
+      [104, 54],
+      [120, 66],
+      [136, 56],
+    ])
+    expect(glyphTransitionFrame(layout, 0.5)).toHaveLength(3)
+  })
+
+  it('renders CORRECT at the exact source path then yields to the final locked medallion', () => {
+    const rect = (left: number, top: number, width: number, height: number): DOMRect => ({
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
+      x: left,
+      y: top,
+      toJSON: () => ({}),
+    })
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function () {
+      if ((this as Element).classList.contains('play-field')) return rect(10, 20, 160, 90)
+      if ((this as Element).id === 'glyph-transition-canvas') return rect(10, 20, 160, 90)
+      if ((this as Element).id === 'stroke-canvas') return rect(30, 40, 100, 50)
+      if ((this as Element).parentElement?.id === 'glyph-medallion') {
+        return rect(110, 70, 40, 20)
+      }
+      return rect(0, 0, 0, 0)
+    })
+    vi.spyOn(HTMLCanvasElement.prototype, 'clientWidth', 'get').mockImplementation(function () {
+      return this.id === 'glyph-transition-canvas' ? 160 : 0
+    })
+    vi.spyOn(HTMLCanvasElement.prototype, 'clientHeight', 'get').mockImplementation(function () {
+      return this.id === 'glyph-transition-canvas' ? 90 : 0
+    })
+    vi.stubGlobal('requestAnimationFrame', vi.fn(() => 7))
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+
+    const correct = activeSnapshot({
+      phase: 'CORRECT',
+      correctChoice: 0,
+      revealedWord: 'SNAKE',
+      finalPointCount: 3,
+      points: [[0, 0], [500, 1_000], [1_000, 500]],
+      glyph: [[100, 200], [500, 800], [900, 300]],
+      remainingMs: 0,
+    })
+    render(correct)
+
+    const transition = document.querySelector<HTMLCanvasElement>('#glyph-transition-canvas')
+    expect(transition?.dataset.pointCount).toBe('3')
+    expect(transition?.dataset.progress).toBe('0')
+    expect(document.querySelector('#glyph-medallion')?.classList).toContain('is-transitioning')
+    expect(canvasCalls).toContainEqual(['moveTo', 20, 20])
+    expect(canvasCalls).toContainEqual(['lineTo', 70, 70])
+    expect(canvasCalls).toContainEqual(['lineTo', 120, 45])
+
+    render({ ...correct, phase: 'GLYPH_LOCKED' })
+
+    expect(document.querySelector('#glyph-transition-canvas')).toBeNull()
+    expect(document.querySelector('#glyph-medallion')?.classList).not.toContain('is-transitioning')
+  })
+
+  it('preserves progress and remaps the glyph endpoint after a resize', () => {
+    const rect = (left: number, top: number, width: number, height: number): DOMRect => ({
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
+      x: left,
+      y: top,
+      toJSON: () => ({}),
+    })
+    let destinationLeft = 110
+    let destinationTop = 70
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function () {
+      if ((this as Element).id === 'glyph-transition-canvas') return rect(10, 20, 160, 90)
+      if ((this as Element).id === 'stroke-canvas') return rect(30, 40, 100, 50)
+      if ((this as Element).parentElement?.id === 'glyph-medallion') {
+        return rect(destinationLeft, destinationTop, 40, 20)
+      }
+      return rect(0, 0, 0, 0)
+    })
+    vi.spyOn(HTMLCanvasElement.prototype, 'clientWidth', 'get').mockImplementation(function () {
+      return this.id === 'glyph-transition-canvas' ? 160 : 0
+    })
+    vi.spyOn(HTMLCanvasElement.prototype, 'clientHeight', 'get').mockImplementation(function () {
+      return this.id === 'glyph-transition-canvas' ? 90 : 0
+    })
+    vi.spyOn(globalThis.performance, 'now').mockReturnValue(100)
+    const frames: FrameRequestCallback[] = []
+    const requestFrame = vi.fn((callback: FrameRequestCallback) => {
+      frames.push(callback)
+      return frames.length
+    })
+    vi.stubGlobal('requestAnimationFrame', requestFrame)
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+    const correct = activeSnapshot({
+      phase: 'CORRECT',
+      correctChoice: 0,
+      revealedWord: 'SNAKE',
+      finalPointCount: 3,
+      points: [[0, 0], [500, 1_000], [1_000, 500]],
+      glyph: [[100, 200], [500, 800], [900, 300]],
+      remainingMs: 0,
+    })
+
+    render(correct)
+    const firstCanvas = document.querySelector<HTMLCanvasElement>('#glyph-transition-canvas')!
+    frames[0]!(325)
+    expect(firstCanvas.dataset.progress).toBe('0.5')
+    expect(requestFrame).toHaveBeenCalledTimes(2)
+
+    render(correct)
+
+    expect(document.querySelector('#glyph-transition-canvas')).toBe(firstCanvas)
+    expect(firstCanvas.dataset.progress).toBe('0.5')
+    expect(requestFrame).toHaveBeenCalledTimes(2)
+
+    destinationLeft = 210
+    destinationTop = 170
+    frames[1]!(549)
+    expect(Number(firstCanvas.dataset.progress)).toBeLessThan(1)
+    expect(requestFrame).toHaveBeenCalledTimes(3)
+    frames[2]!(550)
+    expect(firstCanvas.dataset.progress).toBe('1')
+    expect(canvasCalls.filter(([name]) => name === 'moveTo').at(-1))
+      .toEqual(['moveTo', 204, 154])
+    expect(canvasCalls.filter(([name]) => name === 'lineTo').slice(-2)).toEqual([
+      ['lineTo', 220, 166],
+      ['lineTo', 236, 156],
+    ])
+    expect(requestFrame).toHaveBeenCalledTimes(3)
+    render({ ...correct, phase: 'GLYPH_LOCKED' })
+  })
+
+  it('animates each newly wrong or correct card only on its first rendered state', () => {
+    const wrong = activeSnapshot({ wrongChoices: [1] })
+
+    render(wrong)
+    const wrongButton = document.querySelector('[data-choice-index="1"]')
+    expect(wrongButton?.classList)
+      .toContain('is-newly-incorrect')
+
+    render(wrong)
+    expect(document.querySelector('[data-choice-index="1"]')).toBe(wrongButton)
+    expect(wrongButton?.classList).toContain('is-newly-incorrect')
+
+    const correct = activeSnapshot({
+      phase: 'CORRECT',
+      wrongChoices: [1],
+      correctChoice: 0,
+      revealedWord: 'SNAKE',
+      finalPointCount: 1,
+      points: [[500, 500]],
+      glyph: [[500, 500]],
+      remainingMs: 0,
+    })
+    render(correct)
+    const correctButton = document.querySelector('[data-choice-index="0"]')
+    expect(correctButton?.classList)
+      .toContain('is-newly-correct')
+
+    render({ ...correct, phase: 'GLYPH_LOCKED' })
+    expect(document.querySelector('[data-choice-index="0"]')).toBe(correctButton)
+    expect(correctButton?.classList).toContain('is-newly-correct')
+  })
+
+  it('preserves the focused answer node across display ticks', () => {
+    const active = activeSnapshot()
+    render(active)
+    const first = document.querySelector<HTMLButtonElement>('[data-choice-index="0"]')!
+    first.focus()
+
+    render({ ...active, remainingMs: active.remainingMs - 100 })
+
+    expect(document.querySelector('[data-choice-index="0"]')).toBe(first)
+    expect(document.activeElement).toBe(first)
+  })
+
+  it('fades connection feedback only when the transport state changes', () => {
+    render(snapshot({ connection: 'waiting' }))
+    const connection = document.querySelector<HTMLElement>('#connection')!
+    expect(connection.classList).not.toContain('is-changing')
+
+    render(snapshot({ connection: 'waiting' }))
+    expect(connection.classList).not.toContain('is-changing')
+
+    render(snapshot({ connection: 'live', phase: 'READY' }))
+    expect(connection.classList).toContain('is-changing')
+
+    render(snapshot({ connection: 'live', phase: 'ACTIVE' }))
+    expect(connection.classList).toContain('is-changing')
+  })
+
   it('shows WAITING FOR PAINTER before counterpart readiness', () => {
     render(snapshot())
 

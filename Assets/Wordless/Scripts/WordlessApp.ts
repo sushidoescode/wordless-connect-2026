@@ -61,6 +61,7 @@ interface BrushPort {
 
 interface RibbonPort {
   render(points: readonly WorldPoint[]): void
+  setPayoffActive(active: boolean): void
   getOwnedResourceCounts(): {
     readonly sceneObjects: number
     readonly materials: number
@@ -77,7 +78,11 @@ interface HudPort {
 
 interface GlyphPort {
   hide(): void
-  render(points: readonly QuantizedPoint[], revealedWord: string): void
+  render(
+    sourcePoints: readonly WorldPoint[],
+    glyphPoints: readonly QuantizedPoint[],
+    revealedWord: string,
+  ): void
   getOwnedResourceCounts(): {
     readonly sceneObjects: number
     readonly materials: number
@@ -466,6 +471,9 @@ export class WordlessAppController
     this.lastPhase = snapshot.phase
 
     this.hud.render(snapshot)
+    this.ribbon.setPayoffActive(
+      snapshot.phase === 'CORRECT' || snapshot.phase === 'GLYPH_LOCKED',
+    )
     this.ribbon.render(snapshot.worldPoints)
 
     if ((snapshot.phase === 'CORRECT' ||
@@ -473,7 +481,11 @@ export class WordlessAppController
         snapshot.revealedWord !== null) {
       if (this.renderedGlyphRoundId !== snapshot.roundId) {
         this.renderedGlyphRoundId = snapshot.roundId
-        this.glyph.render(snapshot.glyph, snapshot.revealedWord)
+        this.glyph.render(
+          snapshot.worldPoints,
+          snapshot.glyph,
+          snapshot.revealedWord,
+        )
       }
       if (snapshot.phase === 'GLYPH_LOCKED') {
         this.logLine(

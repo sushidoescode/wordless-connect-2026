@@ -82,19 +82,19 @@ function resultPresentation(
   snapshot: LensRoundState,
 ): LensHudResultPresentation {
   if (snapshot.phase === 'ACTIVE' && snapshot.lastOutcome === 'incorrect') {
-    return { visible: true, text: 'TRY AGAIN', tone: 'coral' }
+    return { visible: true, text: '× TRY AGAIN', tone: 'coral' }
   }
   if ((snapshot.phase === 'CORRECT' || snapshot.phase === 'GLYPH_LOCKED') &&
       snapshot.lastOutcome === 'correct' &&
       WORD_PATTERN.test(snapshot.revealedWord ?? '')) {
     return {
       visible: true,
-      text: `${snapshot.revealedWord}!`,
+      text: `✓ ${snapshot.revealedWord}!`,
       tone: 'mint',
     }
   }
   if (snapshot.phase === 'TIMED_OUT' && snapshot.lastOutcome === 'timeout') {
-    return { visible: true, text: "TIME'S UP", tone: 'coral' }
+    return { visible: true, text: "× TIME'S UP", tone: 'coral' }
   }
   return { visible: false, text: '', tone: null }
 }
@@ -119,7 +119,7 @@ function colorForTone(tone: LensHudTone): vec4 {
     case 'ivory': return new vec4(1, 246 / 255, 232 / 255, 1)
     case 'lemon': return new vec4(1, 214 / 255, 90 / 255, 1)
     case 'mint': return new vec4(115 / 255, 230 / 255, 174 / 255, 1)
-    case 'coral': return new vec4(1, 107 / 255, 107 / 255, 1)
+    case 'coral': return new vec4(1, 120 / 255, 106 / 255, 1)
   }
 }
 

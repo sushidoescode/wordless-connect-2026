@@ -16,10 +16,17 @@ async function loadDecoratedTypeScript(relativePath) {
     fileName: fileUrl.pathname,
   })
 
-  const protocolUrl = new URL('../Core/Protocol.ts', fileUrl).href
-  const executableSource = output.outputText
-    .replaceAll("'../Core/Protocol'", JSON.stringify(protocolUrl))
-    .replaceAll('"../Core/Protocol"', JSON.stringify(protocolUrl))
+  let executableSource = output.outputText
+  for (const relativeImport of [
+    '../Core/GlyphTransition',
+    '../Core/Protocol',
+    '../Core/StrokeGeometry',
+  ]) {
+    const targetUrl = new URL(`${relativeImport}.ts`, fileUrl).href
+    executableSource = executableSource
+      .replaceAll(`'${relativeImport}'`, JSON.stringify(targetUrl))
+      .replaceAll(`"${relativeImport}"`, JSON.stringify(targetUrl))
+  }
 
   globalThis.component = (target) => target
   globalThis.input = () => undefined
@@ -42,6 +49,7 @@ const {
   buildMedallionFrameGeometry,
   buildGlyphMeshGeometry,
   layoutGlyphPoints,
+  layoutTransitionSourcePoints,
 } = await loadDecoratedTypeScript(
   '../../Assets/Wordless/Scripts/View/GlyphMedallionView.ts',
 )
@@ -108,6 +116,18 @@ test('uniformly reserves stroke width inside the final 34 cm mesh bounds', () =>
   assert.equal(layout.length, source.length)
   assert.equal(Math.max(...layout.map(([x]) => x)) - Math.min(...layout.map(([x]) => x)), 31.6)
   assert.equal(Math.max(...layout.map(([, y]) => y)) - Math.min(...layout.map(([, y]) => y)), 15.8)
+})
+
+test('maps exact displayed world points into glyph-visual surface space', () => {
+  assert.deepEqual(layoutTransitionSourcePoints([
+    { x: -90, y: 55, z: 0 },
+    { x: 0, y: 0, z: 0 },
+    { x: 90, y: -55, z: 0 },
+  ], (point) => [point.x - 55, point.y - 4]), [
+    [-145, 51],
+    [-55, -4],
+    [35, -59],
+  ])
 })
 
 test('rejects malformed quantized glyph points instead of dropping them', () => {
@@ -197,8 +217,26 @@ test('rejects invalid glyph stroke widths', () => {
   }
 })
 
+test('rejects invalid glyph depths', () => {
+  for (const depth of [Number.NaN, Number.POSITIVE_INFINITY]) {
+    assert.throws(
+      () => buildGlyphMeshGeometry([[0, 0]], 2.4, depth),
+      /glyph depth/i,
+    )
+  }
+})
+
 test('runtime view reuses authored ivory and violet resources without allocation churn', () => {
   const builders = []
+  const clock = { seconds: 10 }
+  globalThis.getTime = () => clock.seconds
+  globalThis.vec3 = class {
+    constructor(x, y, z) {
+      this.x = x
+      this.y = y
+      this.z = z
+    }
+  }
   globalThis.MeshTopology = { Triangles: 0 }
   globalThis.MeshIndexType = { UInt16: 1 }
   globalThis.MeshShadowMode = { None: 0 }
@@ -224,8 +262,44 @@ test('runtime view reuses authored ivory and violet resources without allocation
   }
 
   const view = new GlyphMedallionView()
-  view.medallionRoot = { enabled: true }
-  view.glyphVisual = { enabled: true, mesh: null, meshShadowMode: null }
+  view.medallionRoot = {
+    enabled: true,
+    getTransform() {
+      return {
+        getInvertedWorldTransform() {
+          return {
+            multiplyPoint(point) {
+              return { x: point.x - 55, y: point.y - 4, z: point.z - 4 }
+            },
+          }
+        },
+      }
+    },
+  }
+  view.glyphVisual = {
+    enabled: true,
+    mesh: null,
+    meshShadowMode: null,
+    getSceneObject() {
+      return {
+        getTransform() {
+          return {
+            getInvertedWorldTransform() {
+              return {
+                multiplyPoint(point) {
+                  return {
+                    x: point.x - 55,
+                    y: point.y - 4,
+                    z: point.z - 5.2,
+                  }
+                },
+              }
+            },
+          }
+        },
+      }
+    },
+  }
   view.frameVisual = { mainMaterial: null, mesh: null, meshShadowMode: null }
   view.revealedWordLabel = { text: 'STALE' }
   view.ivoryFrameMaterial = { name: 'ivory-frame' }
@@ -247,7 +321,12 @@ test('runtime view reuses authored ivory and violet resources without allocation
   })
 
   const originalMesh = view.glyphVisual.mesh
-  view.render([[100, 100], [900, 900]], 'SNAKE')
+  const source = [
+    { x: -72, y: 44, z: 0 },
+    { x: 72, y: -44, z: 0 },
+  ]
+  const destination = [[100, 100], [900, 900]]
+  view.render(source, destination, 'SNAKE')
   assert.equal(view.medallionRoot.enabled, true)
   assert.equal(view.glyphVisual.enabled, true)
   assert.equal(view.glyphVisual.mesh, originalMesh)
@@ -259,7 +338,61 @@ test('runtime view reuses authored ivory and violet resources without allocation
   assert.equal(builders[1].indices.length, 384)
   assert.equal(builders[1].updateCount, 1)
 
-  view.render([], 'SNAKE')
+  const sourceGeometry = buildGlyphMeshGeometry(
+    layoutTransitionSourcePoints(
+      source,
+      (point) => [point.x - 55, point.y - 4],
+    ),
+    2.4,
+    -5.2,
+  )
+  assert.deepEqual(builders[0].vertices, sourceGeometry.vertices.flat())
+  assert.deepEqual(
+    builders[0].vertices.filter((_, index) => index % 8 === 2),
+    Array(builders[0].vertices.length / 8).fill(-5.2),
+  )
+
+  clock.seconds = 10.225
+  view.testEvents.get('UpdateEvent')()
+  const halfwayVertices = builders[0].vertices.slice()
+  assert.notDeepEqual(halfwayVertices, sourceGeometry.vertices.flat())
+  assert.deepEqual(
+    halfwayVertices.filter((_, index) => index % 8 === 2),
+    Array(halfwayVertices.length / 8).fill(-0.65),
+  )
+
+  clock.seconds = 10.45
+  view.testEvents.get('UpdateEvent')()
+  const destinationGeometry = buildGlyphMeshGeometry(
+    layoutGlyphPoints(destination),
+    2.4,
+  )
+  assert.deepEqual(builders[0].vertices, destinationGeometry.vertices.flat())
+
+  clock.seconds = 10.5
+  view.render([{ x: 0, y: 0, z: 0 }], [[500, 500]], 'DOT')
+  assert.equal(builders[0].vertices.length, 32)
+  assert.deepEqual(
+    builders[0].vertices.filter((_, index) => index % 8 === 2),
+    Array(4).fill(-5.2),
+  )
+
+  view.render(source, destination, 'SNAKE')
+  const updateCountBeforeHide = builders[0].updateCount
+  view.hide()
+  clock.seconds = 20
+  view.testEvents.get('UpdateEvent')()
+  assert.equal(builders[0].updateCount, updateCountBeforeHide)
+
+  assert.throws(
+    () => view.render([
+      { x: 0, y: 0, z: 0 },
+      { x: 1, y: 1, z: 1 },
+    ], [[0, 0], [1000, 1000]], 'SNAKE'),
+    /one display plane/i,
+  )
+
+  view.render([], [], 'SNAKE')
   assert.equal(view.medallionRoot.enabled, true)
   assert.equal(view.glyphVisual.enabled, false)
   assert.equal(view.glyphVisual.mesh, originalMesh)

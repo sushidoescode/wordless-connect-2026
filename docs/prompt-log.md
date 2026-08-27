@@ -1528,3 +1528,192 @@ specification and quality review returned PASS with no Critical, Important, or
 Minor findings. This validates pure geometry and Preview compatibility only;
 it does not imply recognition, hardware testing, production readiness,
 security, persistence, scale, or platform latency.
+
+## 2026-08-26 — Task 8 battery-shutdown recovery
+
+The Mac lost power while the prior Codex parent session was waiting for a Task
+8 fix agent. Recovery inspected the exact parent transcript, git/reflog, current
+diff, file mtimes, and test state. No commit, reset, stash, or terminal command
+was lost. The surviving base is Task 7 commit `56aabfa`; Task 8 remains an
+uncommitted product-adapter replacement. The last successful pre-shutdown edit
+at 16:16 PDT added only browser red-test scaffolding. It did not resolve or
+verify the open review findings.
+
+The browser review had identified active-send reentrancy, duplicate successor
+connections after concurrent `connect()`, fail-open behavior after a thrown
+initial `round.start` delegate, non-awaited/double-unsubscribe cleanup, and
+missing acceptance sequences for stale targets, long outages, old in-flight
+payload suppression, named resync ordering, and a lost initial start. The Lens
+review had identified a critical recovery-authority defect when a known peer's
+ready window exhausts, an ack-introduced unintended ready, a synchronous drain
+reservation race, and the absence of an executable Lens transport harness.
+Passing pre-shutdown counts (122 Core and 67 web, plus web build) therefore are
+baseline evidence only, not Task 8 completion. Task 9 remains blocked until the
+Task 8 red/green fix loop, independent review, Lens Studio MCP compile and
+Preview run, exact log update, and commit all pass. This recovery changes no
+product claim and does not describe Preview evidence as hardware evidence.
+
+The resumed fix loop preserved the dirty Task 8 implementation and added
+behavioral regressions before changing either adapter. The browser focused RED
+run produced 52 pass / 4 fail for awaited partial construction cleanup,
+coalesced reconnect ownership, active-send reservation before synchronous
+lifecycle re-entry, and quarantine after a throwing initial-start delegate. A
+separate failure-cleanup regression then produced 1 fail / 56 skipped because
+the failed state was published before channel removal settled. The executable
+Lens harness transpiles the real decorated component for Node, supplies only
+the external Lens/Supabase runtime boundary, and drives the actual transport
+lifecycle, receive policy, FIFO, cadence, generation, resync, recovery, and
+teardown behavior. Its RED run produced 4 pass / 3 fail for the absent
+root-visible ready-exhaustion timeout, an ack-introduced stray ready, and drain
+work starting before its owning promise was reserved.
+
+The minimal fixes reserve publication/drain ownership before reentrant work,
+coalesce browser cleanup by channel and await it at construction, failure, and
+close boundaries, re-check channel ownership after a shared close, and retain
+browser gameplay quarantine until an initial start commits successfully. Lens
+ready exhaustion now emits `COUNTERPART_TIMED_OUT` before its single local
+recovery, and a transition-introducing targeted ack no longer starts a redundant
+ready burst. Added acceptance coverage includes a fresh browser rejecting an
+old target without a false gap, painter silence longer than six seconds while
+browser pings continue, delivered and withheld old payloads, queued Lens
+points/result and browser guesses, named post-reset resync advancement, and a
+lost initial start recovering without an invented resync round.
+
+Focused GREEN evidence is 57/57 browser relay tests and 7/7 executable Lens
+transport tests. The first repository check exposed one TypeScript-only
+definite-assignment error after all tests passed; correcting that annotation
+made the fresh `npm run check` pass 129/129 Core tests, 76/76 web tests, and the
+Vite production build. `sh tools/typecheck/check.sh` also exited zero with no
+output. This is deterministic local adapter/typecheck/build evidence only.
+Independent review and Lens Studio MCP compile/Preview lifecycle evidence are
+still required before Task 8 can be committed or called complete; Task 9 remains
+blocked.
+
+Round-2 independent review found three concrete adapter defects and one
+acceptance-evidence defect. Focused regressions were added before production
+changes. The browser RED command ran only the reset-atomicity and replacement-
+ack cases and produced 2 fail / 55 skipped: next-round gameplay reached a stale
+projection after a throwing reset delegate, and a replacement-introducing ack
+authored one redundant ready. The Lens liveness RED command produced 1/1 fail:
+at exactly 6,000 ms it emitted timeout status but created no successor channel.
+
+The minimal production changes set browser gameplay quarantine before reset
+delegate dispatch and release it only after a successful commit, confirm an
+ack-introduced tuple without starting another ready burst, and enter the Lens
+single-flight subscription recovery immediately after its six-second peer
+timeout status. Those three focused regressions then passed.
+
+The test runtime was extended to link the real `BrowserRelayClient` and real
+decorated `SupabaseRelayTransport` over one fake broadcast boundary. Neither
+adapter's handshake, policy, sequencing, FIFO, cadence, generation, or recovery
+behavior is reimplemented by the harness. Fifteen linked subtests now cover
+simultaneous/Lens-first/browser-first joins, either initial ready loss, targeted
+ack loss with ready retries and one start, restoration after the Lens's complete
+three-ready window, same-sender connection replacement, browser-only and Lens-
+only recovery, six-second asymmetric expiry, current and stale start targets,
+reset delegate atomicity, transition-driven queued-draft cancellation on both
+adapters, and ambiguous send failure on both adapters. The first linked run was
+14 pass / 1 fail because a single simulated 3.5-second editor update can only
+advance one coalesced Lens ready deadline; changing the harness to execute the
+actual 1,000/1,000/1,500 ms update sequence made it 15/15 without a production
+change.
+
+Fresh round-2 verification passed 145/145 Core tests, 76/76 web tests, the web
+TypeScript/Vite build, and the Lens preflight typecheck. The focused browser
+relay suite passed 57/57; the combined Lens transport, linked-adapter, and pure
+policy command passed 49/49. Scene inspection confirms the attached script
+reference `e52060e1-72f5-4c5b-8ff0-f5e1fc65e948` matches the transport metadata,
+and the independently reviewed `RelayPort.ts.meta` component UID is coherent,
+not a defect. This remains deterministic fake-transport evidence; independent
+re-review and Lens Studio MCP compile/Preview evidence are still required
+before commit or Task 9.
+
+Round-3 scoped re-review correctly found that the preceding 15-test linked
+suite was only a subset of the required binding matrix. New real-adapter tests
+were authored before any round-3 production change. The first linked run was
+19 pass / 5 fail: one assertion incorrectly rejected the required duplicate-
+ready re-ack; held start/reset sends blocked the production Lens FIFO and hence
+could not model silent packet loss; the harness root lacked the named
+`completeLocalResync(peerConnectionId)` call; and the fake bus lacked the
+one-way silence rule. Those were evidence-harness failures, not a demonstrated
+adapter defect. The corrected run reached 22/24; synchronized injected-clock
+advancement and exact timeout/ping tie handling removed the remaining two
+harness artifacts. No production source changed in round 3.
+
+The expanded 30-test linked suite executes both actual adapters and now proves
+all ordered join modes with either initial-ready direction lost, directional
+ack non-echo, duplicate-current-ready re-ack without a second start, silent
+fresh-ack loss immediately before a directly-authorizing current-target start
+and reset, stale-target reset rejection/current-target recovery, exact reset-
+send-before-named-resync ordering, and both delivered/withheld old-payload
+variants in both directions (Lens points/result and browser guess). It also
+proves indefinite subscription after the three-ready window when no peer has
+ever been observed, synchronized six-second asymmetric recovery on each side,
+one healthy peer subscription, zero invented resync, one authoritative reset,
+and lost-initial-start recovery after later painter traffic. The earlier
+“matrix” description is superseded by this complete round-3 evidence.
+
+Fresh evidence: linked adapters 30/30; executable Lens transport + linked
+adapters + receive policy 64/64; full Core 160/160; web 76/76; the 51-module
+TypeScript/Vite build; Lens preflight typecheck; and `git diff --check` all
+passed. Scene UID `e52060e1-72f5-4c5b-8ff0-f5e1fc65e948` still matches its
+transport metadata, and `RelayPort.ts.meta` remains coherent. This is local
+fake-channel and build evidence only. No Lens Studio MCP/Preview claim was
+made, nothing was committed, Task 9 remains blocked, and independent round-3
+review plus controller-owned Lens compile/Preview remain required.
+
+Round-4 scoped review asked for mutation-catching ownership and ordering
+assertions without production changes. Tests were written against missing
+harness observability first. The focused linked RED run produced 24 pass / 7
+fail across 31 counted tests: the ordered ready-loss and pre-reset cases had no
+drop-consumption signal, and the no-peer, browser-silence, and lost-start cases
+had no browser-removal ownership ledger. Node also counted the enclosing join
+test failed for its two child failures. Existing channel counters already
+showed the intended one cleanup and successor subscription; the failures were
+therefore the requested harness-observability RED, not a new adapter defect.
+
+The minimum harness change returns each silent-drop rule with a separate
+`consumed` count and records every browser channel wrapper `remove()` call.
+Production source remained untouched. The assertions now fail if the Lens
+stops authoring the fresh successor-targeted ack before reset, if that silent
+loss is not consumed exactly once, or if an ack reaches the browser before the
+reset directly authorizes the tuple. They freeze one old-browser unsubscribe
+and wrapper removal, one successor subscribe, no duplicate channel, and no
+Lens cleanup for both one-way-silence and lost-initial-start recovery.
+
+The never-observed-peer proof is now symmetric and extends beyond seven
+seconds: Lens-alone and browser-alone each remain on one connection/channel
+after their three ready attempts with no reconnect; the browser remains
+waiting with no invalidation or invented resync. The two specifically ordered
+lost-ready joins additionally prove one consumed loss, one channel/subscription
+per side, zero cleanup or peer-transition effects, confirmed tuples on both
+adapters, targeted ack-before-start FIFO order, and one store start.
+
+Fresh round-4 evidence passed linked adapters 31/31, combined executable Lens
+transport + linked adapters + receive policy 65/65, full Core 161/161, web
+76/76, the 51-module TypeScript/Vite build, Lens preflight typecheck, and
+`git diff --check`. No production file changed in round 4; no Lens MCP, commit,
+or Task 9 work occurred. Independent re-review and controller-owned Lens
+compile/Preview remain the next gates.
+
+Independent round-4 re-review returned `All findings addressed, no new
+Critical/Important breakage`. The controller then ran the required Lens Studio
+MCP lifecycle gate against the attached `SupabaseRelayTransport`. Forced
+TypeScript recompilation returned `status=succeeded` with no compiler errors.
+`RunAndCollectLogsTool` refreshed the simulated Preview and observed first
+post-reset activity after 28 ms; over the 15,007 ms settle window it returned
+`status=success`, `errors=[]`, and `truncated=false`. Runtime prints showed
+`CLIENT_CONFIGURED`, literal `STATUS CONNECTING CONNECTING`, then literal
+`STATUS SUBSCRIBED SUBSCRIBED · TRANSPORT ONLY`, followed by the bounded
+three-message ready burst and two-second ping traffic (`TX count=1..9`, largest
+serialized message 193 bytes during the captured window). With no browser
+counterpart present, the adapter correctly made no app-readiness or product-
+round claim.
+
+The controller paused Preview through Lens Studio MCP and immediately tailed
+the Lens log. The tail returned `status=success`, `errors=[]`,
+`truncated=false`, and no `CHANNEL_REMOVE_FAILED` print or runtime exception.
+This is Lens Studio Preview simulation and ordinary hosted Supabase transport
+lifecycle evidence only. It is not hardware footage, a device test, a live
+product-round/point/guess proof, production-readiness evidence, a security
+claim, or latency evidence.

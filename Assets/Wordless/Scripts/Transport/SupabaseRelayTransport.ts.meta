@@ -1,20 +1,20 @@
-- !<AssetImportMetadata/f451074f-3506-44c7-9266-803292860b68>
+- !<AssetImportMetadata/ff92dc52-5d37-455e-8c6e-625e02ec2464>
   ImportedAssetIds:
-    TypeScriptAsset: !<reference> d9390554-324c-4df9-aee5-c90f0a9aa55a
+    TypeScriptAsset: !<reference> e52060e1-72f5-4c5b-8ff0-f5e1fc65e948
   ImporterName: TypeScriptAssetImporter
-  PrimaryAsset: !<reference> d9390554-324c-4df9-aee5-c90f0a9aa55a
+  PrimaryAsset: !<reference> e52060e1-72f5-4c5b-8ff0-f5e1fc65e948
   PackageType: NotAPackage
   LegacyPackagePolicy: ~
   ExtraData:
     {}
   AssetDataMap:
-    TypeScriptAsset: !<own> d230c4df-5222-4b68-921a-b28cd174c4af
+    TypeScriptAsset: !<own> a46f0efd-0325-43fd-b170-a1ac2dbd7910
   DependentFiles:
     []
   ImporterSettings: !<AssetImporterSettings>
     {}
   CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
-- !<TypeScriptAssetData/d230c4df-5222-4b68-921a-b28cd174c4af>
+- !<TypeScriptAssetData/a46f0efd-0325-43fd-b170-a1ac2dbd7910>
   SvgIcon: ""
   SetupScript:
     code: ""
@@ -24,14 +24,12 @@
   VersionPatch: 0
   VersionPrerelease: ""
   UpdateOrder: 0
-  ComponentUid: c0147203-4a6c-4275-a28b-9dfd51438bf9
+  ComponentUid: 7017db80-fb0c-408f-8c0b-c6e5064b5c31
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    channelName: false
-    pointCursor: false
-    statusText: false
-    statusVisual: false
+    connectOnStart: false
+    sessionId: false
     supabaseProject: false
   ScriptTypesHidden:
     {}
@@ -43,16 +41,12 @@
     []
   DefaultScriptInputs:
     - supabaseProject: !<reference.SupabaseProject> 00000000-0000-0000-0000-000000000000
-      channelName: WAVE42
-      statusText: !<reference.Text> 00000000-0000-0000-0000-000000000000
-      statusVisual: !<reference.MaterialMeshVisual> 00000000-0000-0000-0000-000000000000
-      pointCursor: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      sessionId: WAVE42
+      connectOnStart: false
   ScriptTypes:
     -
       {}
   InputLines:
     - // @input Asset.SupabaseProject supabaseProject
-    - '// @input string channelName = "WAVE42"'
-    - // @input Component.Text statusText
-    - // @input Component.MaterialMeshVisual statusVisual
-    - // @input SceneObject pointCursor
+    - '// @input string sessionId = "WAVE42"'
+    - // @input bool connectOnStart

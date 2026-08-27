@@ -587,26 +587,6 @@
   BlendNormals: false
   BlendShapes:
     {}
-- !<ScriptComponent/1fbfb02c-2a2e-4d27-af71-46434a3c7da2>
-  PrefabRemaps:
-    []
-  Name: RelaySpike
-  Enabled: true
-  ScriptAsset: !<reference> d9390554-324c-4df9-aee5-c90f0a9aa55a
-  ScriptInputsDefault:
-    channelName: true
-  ScriptTypesDefault:
-    {}
-  ScriptInputs:
-    "":
-      supabaseProject: !<reference.SupabaseProject> 6ba48142-cc1e-49ef-8d22-84f2e2859a8e
-      channelName: WAVE42
-      statusText: !<reference.Text> 8a3effd7-885f-4e2f-908e-c82e67ee957c
-      statusVisual: !<reference.MaterialMeshVisual> 0ee58dae-c624-4bb2-ba0d-1a82d8e84bae
-      pointCursor: !<reference.SceneObject> 0ddce73b-2dde-42bc-823a-c597b1b2dd6a
-  ScriptTypes:
-    "":
-      {}
 - !<SceneObject/1fc7fa3e-6910-4741-b8a7-1b6660a39a9d>
   PrefabRemaps:
     []
@@ -682,7 +662,7 @@
     - !<own> 0ddce73b-2dde-42bc-823a-c597b1b2dd6a
     - !<own> 891f992d-f72e-4ff2-b42b-0acea861f933
   Components:
-    - !<own> 1fbfb02c-2a2e-4d27-af71-46434a3c7da2
+    - !<own> 73de73b3-54f3-478d-b311-8b3c014b6161
 - !<SceneObject/264571d0-f879-411b-8deb-ff6d9921317f>
   PrefabRemaps:
     []
@@ -1351,6 +1331,24 @@
     - !<own> 879ce45b-bd5e-40ff-a3fe-d821523427e4
   Components:
     - !<own> 64f27597-c99d-4c59-8a08-05459cc2258d
+- !<ScriptComponent/73de73b3-54f3-478d-b311-8b3c014b6161>
+  PrefabRemaps:
+    []
+  Name: SupabaseRelayTransport
+  Enabled: true
+  ScriptAsset: !<reference> e52060e1-72f5-4c5b-8ff0-f5e1fc65e948
+  ScriptInputsDefault:
+    sessionId: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      supabaseProject: !<reference.SupabaseProject> 6ba48142-cc1e-49ef-8d22-84f2e2859a8e
+      sessionId: WAVE42
+      connectOnStart: true
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/74d13517-1dbf-42e6-b536-27afc4909c65>
   PrefabRemaps:
     []

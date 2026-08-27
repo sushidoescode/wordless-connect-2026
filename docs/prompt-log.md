@@ -1947,3 +1947,214 @@ non-token marker `eyJ-secret`) whose purpose is to prove those strings never
 reach the rendered status. No Supabase project URL, JWT-shaped value, client
 key, service-role key, private-key block, `.env` file, binary screenshot, build
 output, or Playwright report is staged.
+
+## 2026-08-26 — Task 10 spatial brush preflight
+
+Task 10 began from clean committed product state `4b226c0`. Read-only Lens
+Studio MCP inspection re-established the active simulated Preview and current
+editor facts before mutation: the authored camera is at `(0,0,0)` with
+identity rotation and a `63.54°` perspective field of view; the target is
+`SPECS 27`; the existing SIK root is enabled; and there is no current playable
+`Interactable`. The camera-derived drawing anchor is therefore presently
+`camera + forward × 160 cm + world-up × 15 cm = (0,15,-160)`. This value will
+be recomputed from the live camera immediately before authoring rather than
+treated as a permanent origin assumption. Preview was paused after inspection.
+
+Installed-source inspection identifies Spectacles Interaction Kit `0.18.0`.
+`Interactable.getTypeName()` and `InteractableManipulation.getTypeName()` are
+the generated static component lookups. Manipulation exposes typed
+`onManipulationStart`, `onManipulationUpdate`, and `onManipulationEnd`
+`PublicApi<TransformEventArg>` fields; `.add(callback)` returns the unsubscribe
+function. At 160 cm the existing global hand/mouse interactors' 500 cm ray
+range is sufficient, so the brush will use `TargetingMode.Indirect` rather
+than create another interactor. Translation stays enabled while rotation,
+scale, depth stretch, and Z translation are explicitly disabled. Because SIK
+manipulation is world-space, each candidate is converted through the drawing
+anchor's inverse world transform, clamped in anchor-local x/y with z forced to
+zero, converted back to world space, and only then passed to the shared 2.5 cm
+sampler.
+
+The active `MeshBuilder` contract is constructor layout plus
+`appendVertices`/`appendIndices`, `eraseVertices`/`eraseIndices`, `isValid`,
+`updateMesh`, and linked `getMesh`; topology is `Triangles` and the available
+indexed type is `UInt16`. `RenderMeshVisual` accepts that mesh plus a main
+material. Runtime/editor `CullMode` has only front, back, and front-and-back;
+there is no disabled value. Task 10 therefore uses two-sided materials and
+crossed geometry, with reverse-wound triangles available as the deterministic
+fallback. Rebuilds erase prior arrays instead of accumulating geometry.
+
+Two small execution decisions resolve specification ambiguities. The 14 cm
+interaction target is a 7 cm-radius intangible sphere around the independent
+5 cm lemon visual. A pure `BrushStrokeSession` module is added so round-arm,
+held-gesture, clamp/sample, cap, and exactly-once-close rules can be tested
+without faking Lens runtime; the existing private `isProductRoundId` validator
+will be exported and reused without changing the wire/parser contract. Pure
+crossed-ribbon array generation remains in `StrokeRibbonMesh`; actual
+MeshBuilder assignment and SIK/Transform behavior remain compile/Preview
+evidence.
+
+The existing `RelaySpike` still has `connectOnStart=true`; it will be disabled
+for Task 10's local-only proof to keep transport traffic out of harness logs.
+The read-only runtime inspection installed `AiPreviewAgentInspect.lspkg` as an
+untracked editor helper. It is not a product dependency and will not be swept
+into the Task 10 commit; after interaction/capture evidence it will be removed
+through Lens Studio MCP, matching the repository's earlier inspection-package
+cleanup. No hardware, device, live browser-delivery, latency, production,
+security, persistence, or scale claim is made.
+
+Task 10's first scene-input wiring attempt used a declarative Virtual Scene
+`modify` map keyed by the compiled class names. It applied zero mutations and
+reported eight explicit `... not found (only 0 of type)` errors because those
+keys address native component types, not the names of attached
+`ScriptComponent` classes. The fallback stayed inside Lens Studio MCP:
+`scene_graphql.setProperty(..., valueType: REFERENCE)` bound all eight known
+component, SceneObject, and material IDs successfully. A fresh Virtual Scene
+read then proved every typed input non-null, including the two custom-component
+references, with the intended hierarchy and SIK configuration unchanged.
+
+The post-wiring TypeScript compile succeeded, but the required Preview check
+caught a runtime failure twice: `TypeError: undefined is not a function` at
+`BrushPreviewHarness.ts:20:27` on `this.brush.setListener(this)`, followed by
+four `DrawingAnchor -> BrushHead -> Interactable::start(): Component is not yet
+awake` diagnostics and the renderer stopping after five failures. The same
+stack recurred after a second clean forced compile and refresh. This is a local
+Preview failure, so no visibility, interaction, or completion claim is made.
+The current root-cause investigation is comparing the root harness's
+`onAwake` access to a child custom component against installed package patterns
+that defer cross-component use until `OnStart`, and separately tracing the
+early Interactable disable/re-enable lifecycle before any correction is
+accepted.
+
+The lifecycle investigation confirmed both suspected ordering faults. The
+root harness's `OnAwakeEvent` ran before the child controller wrapper had
+installed the custom component prototype, and the controller touched the SIK
+`Interactable` before that component was awake. The smallest correction moved
+the harness's cross-component calls to `OnStartEvent`; the controller now only
+records its desired gate during Awake and discovers, configures, subscribes to,
+and applies the Interactable state during its own Start. A fresh compile and
+Preview refresh then produced zero errors and zero warnings. This GREEN closes
+the lifecycle defect only; it is not Task 10 completion evidence.
+
+Temporary camera-projection diagnostics then disproved the original framing
+assumption. With the frozen 180×110 cm plane at `z=-160`, normalized Preview
+screen coordinates were `head=(-0.1476,0.3582)`,
+`center=(0.5000,0.3582)`, and the four corners were
+`(-0.4714,0.8781)`, `(-0.4714,-0.1617)`, `(1.4714,0.8781)`, and
+`(1.4714,-0.1617)`: both the brush head and substantial portions of the plane
+were outside the frame. Moving only the drawing-anchor depth to `z=-400`
+preserved the specified geometry and remained inside SIK's inspected 500 cm ray
+range. The corresponding coordinates became `head=(0.2410,0.4433)`,
+`center=(0.5000,0.4433)`, with corners `(0.1114,0.6512)`,
+`(0.1114,0.2353)`, `(0.8886,0.6512)`, and `(0.8886,0.2353)`.
+This empirical depth deviation keeps the full drawing plane on screen with an
+inset region available for the later medallion. The temporary projection log
+was diagnostic instrumentation, not product behavior.
+
+Preview interaction inspection installed the untracked editor helpers
+`AiPreviewAgentInteract.lspkg`, `Leaf.lspkg`, and `Bitmoji 3D.lsc` in addition
+to the earlier inspection helper. They are local automation support, not
+WORDLESS dependencies, and remain scheduled for Lens Studio MCP removal before
+the product baseline is committed. The first helper invocation reset and
+compiled Preview while installing its dependencies and therefore did not
+exercise the brush. Its unique-ID Pinch action subsequently timed out because
+that action drives a direct physical fingertip placement while the authored
+brush deliberately accepts indirect targeting. Mouse/render-space gesture
+injection was the correct indirect path, but the first S-shaped injections
+also produced no stroke events. A temporary target-mode experiment was
+immediately restored to the required indirect value and supplied no product
+evidence. An optional editor knowledge-base query could not authenticate; per
+the project contract, no HTTP or REST fallback was attempted.
+
+The next isolated hypothesis found the actual hit-test blocker. The runtime
+`Physics.Filter` default excluded intangible colliders. A ray aimed within
+`0.205 cm` of the brush centerline therefore logged `NO_HIT`. Authoring the
+sphere with `intangible=false` (a tangible interaction target) changed that
+same diagnostic to one hit and produced hover acquisition. A temporary
+`SphereShape` diagnostic then failed because the runtime did not expose the
+type as the attempted global; it was removed immediately rather than retained
+as runtime or acceptance code, and it supplied no acceptance evidence.
+
+With the authored indirect interaction target acquired, the simulated Preview
+S gesture completed once with 51 sampled points, every stored local z exactly
+zero, minimum adjacent spacing `2.610 cm`, and one end notification. The
+emissive violet ribbon with lemon head visibly formed an S in Preview. A second
+manipulation in the same armed round was blocked and did not begin another
+stroke, confirming the one-stroke latch under this simulation.
+
+The first cap probe was intentionally rejected as insufficient evidence: its
+path produced only 33 accepted samples. A longer, denser simulated gesture then
+reached exactly 128 points with minimum adjacent spacing `2.501 cm`,
+`endCount=1`, and the `CAP_REACHED` termination reason. Remaining injected
+moves and the later release added no sample and emitted no duplicate end. This
+is deterministic Lens Studio Preview evidence for clamping, spacing, cap, and
+exactly-once closure; it is not hardware footage, a device or real Spectacles
+test, a live Lens-to-browser relay, a latency measurement, or evidence of
+remote play, security, persistence, scale, or production readiness.
+
+The preliminary review found that the original crossed-ribbon generator emitted
+both forward- and reverse-wound copies while the material was already
+two-sided. Because additive blending could count those coincident faces twice,
+the implementer added a failing pure test first: the focused mesh suite reported
+one failure (`24 !== 12`) while four cases remained green. The correction emits
+two forward-wound crossed quads, six indices per quad, and relies on the
+two-sided pass for reverse visibility. The 128-point maximum now uses 1,524
+indices, safely inside `UInt16`. Focused brush/mesh GREEN was 15/15, the Lens
+typecheck emitted no diagnostics, and the full repository check passed 176 core
+tests, 92 web tests, and the 54-module production browser build.
+
+The corrected-mesh Preview acceptance produced one S-shaped stroke with 52
+accepted samples, `maxAbsLocalZ=0.000`, minimum adjacent spacing `2.531 cm`,
+`endCount=1`, and `capReached=false`. Instrumentation around this acceptance
+reported exactly two ribbon-owned SceneObjects and two material clones both
+before and after the stroke. The earlier cap acceptance remains the separate
+exact-128 proof. Local ignored captures were written to
+`captures/task10/brush-front.jpg` and
+`captures/task10/brush-side-30.jpg`; visual inspection showed the violet/ivory
+crossed ribbon and lemon head readable both head-on and from a 30-degree Preview
+debug-camera orbit. These are Lens Studio Preview captures, not hardware
+footage, device evidence, or a real Spectacles capture.
+
+`BrushController` uses `LateUpdateEvent` to clamp the SIK-authored transform
+after the package's ordinary per-frame manipulation work. This is the explicit
+execution deviation from the plan's `UpdateEvent` wording: it preserves the
+same local-plane invariant while preventing SIK from overwriting the clamp
+later in the frame. After acceptance, every projection, touch, hover, trigger,
+manipulation, physics-ray, and resource-count diagnostic was removed. The
+committed harness retains only bounded local start/end aggregate evidence and
+the controller's cap reason.
+
+Cleanup stayed entirely inside Lens Studio MCP. Virtual Scene restored the
+existing MouseInteractor's `_drawDebug=false` and removed the temporary
+`AiPreviewAgent Handler` scene root. The installed Editor API
+`AssetManager.remove(SourcePath)` removed the exact temporary package roots
+`AiPreviewAgentInspect.lspkg`, `AiPreviewAgentInteract.lspkg`, `Leaf.lspkg`,
+and `Bitmoji 3D.lsc`, including their metadata; no direct filesystem or HTTP
+fallback was used. `model.project.save()` serialized the authoritative editor
+state. A fresh Virtual Scene read reported 126 objects and 49 assets, no helper
+root, `_drawDebug=false`, disabled `RelaySpike`, `DrawingAnchor` at
+`(0,15,-400)`, the intended brush hierarchy, all Task 10 component bindings,
+and the tangible interaction collider. Disk inspection of `Assets/Scene.scene`
+matched those authored components and contained no helper-package reference.
+
+The final diagnostic-free forced TypeScript compile succeeded. A fresh Preview
+refresh produced SIK startup only, with zero errors and zero warnings. Focused
+brush/mesh tests remained 15/15; the typecheck, full `npm run check`, and
+`git diff --check` remained green. Task 10 is ready for immutable independent
+review and staging; this evidence still makes no live Lens-to-browser,
+latency, hardware, security, persistence, scale, remote-play, or production
+readiness claim.
+
+The final specification review returned no Critical or Important findings. The
+independent quality review did find one Important pure-boundary defect before
+staging: `BrushStrokeSession.sample` retained the same mutable world-point
+object that it exposed in the returned action. Its reproduction mutated the
+first emitted point, after which a physically sub-threshold successor was
+measured against the poisoned history and accepted. A focused regression was
+written first; it exited 1 with 10/11 passing and showed an x=1 cm point
+incorrectly emitted after the earlier returned `world.x` was changed from 0 to
+100. The minimum correction keeps the internal accepted point and the emitted
+action point as distinct `{x,y,z}` snapshots. Focused GREEN is now 11/11 for
+the brush and 16/16 with ribbon geometry; the full repository check is 177
+core tests, 92 web tests, and the 54-module build, with clean Lens typecheck and
+diff whitespace checks. The corrected diff is frozen for re-review before
+staging.

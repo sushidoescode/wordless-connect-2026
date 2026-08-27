@@ -1,0 +1,52 @@
+- !<AssetImportMetadata/f948f985-0139-4104-add4-90321c369f1d>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> cc2fae6f-a6ac-404b-a7e4-c1a4f9535e61
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> cc2fae6f-a6ac-404b-a7e4-c1a4f9535e61
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 92622fbe-b782-4b72-82ab-e0d26096df80
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/92622fbe-b782-4b72-82ab-e0d26096df80>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 2e92f2b4-945f-4ee8-89a9-d5599dabf128
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    coreMaterial: false
+    drawHeadVisual: false
+    outerMaterial: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - outerMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      coreMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      drawHeadVisual: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Asset.Material outerMaterial
+    - // @input Asset.Material coreMaterial
+    - // @input SceneObject drawHeadVisual

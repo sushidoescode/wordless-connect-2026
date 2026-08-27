@@ -166,7 +166,7 @@ function isConnectionId(value: unknown): value is string {
   return typeof value === 'string' && CONNECTION_ID_PATTERN.test(value)
 }
 
-function isProductRoundId(value: unknown): value is string {
+export function isProductRoundId(value: unknown): value is string {
   return isBoundedId(value, MAX_ROUND_ID_LENGTH) && value !== LOBBY_ROUND_ID
 }
 

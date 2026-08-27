@@ -256,6 +256,9 @@ class LensRoot {
   suppressed = []
   sends = []
   errors = []
+  expectedLocalClose = false
+  localRecoveryPromise = null
+  localRecoveryFlights = 0
 
   constructor(lens, autoStart = true) {
     this.lens = lens
@@ -263,6 +266,13 @@ class LensRoot {
     lens.setLocalRound(this.currentRoundId)
     lens.onControl((event) => {
       this.controls.push(event)
+      if (event.type === 'PEER_READY') {
+        if (this.resetInFlight &&
+            lens.getConfirmedPeerConnectionId() === event.connectionId) {
+          this.retryReset()
+        }
+        return
+      }
       lens.invalidateApplicationGeneration()
       this.recoveryPending = true
       if (event.type === 'SEQUENCE_GAP') {
@@ -278,11 +288,17 @@ class LensRoot {
     })
     lens.onStatus((status, detail) => {
       this.statuses.push({ status, detail })
-      if (status === 'COUNTERPART_TIMED_OUT' ||
-          (status === 'CONNECTING' && detail !== 'CONNECTING')) {
-        this.gameplayQuarantined = true
-        this.recoveryPending = true
-      }
+      if ((status === 'CLOSED' || status === 'DISCONNECTED') &&
+          this.expectedLocalClose) return
+      if (status !== 'COUNTERPART_TIMED_OUT' &&
+          status !== 'CHANNEL_ERROR' &&
+          status !== 'TIMED_OUT' &&
+          status !== 'CLOSED' &&
+          status !== 'DISCONNECTED') return
+
+      this.gameplayQuarantined = true
+      this.recoveryPending = true
+      this.beginLocalRecovery()
     })
     lens.onMessage((message) => {
       if (message.type === 'guess.submit' && this.gameplayQuarantined) {
@@ -295,12 +311,33 @@ class LensRoot {
         else if (this.autoStart && !this.initialStartSent) this.issueStart()
       }
       else if (message.type === 'round.reset.ack') {
+        if (!this.resetInFlight) return
         this.resetInFlight = false
         this.recoveryPending = false
         this.issueStart()
         this.gameplayQuarantined = false
       }
     })
+  }
+
+  beginLocalRecovery() {
+    if (this.localRecoveryPromise) return this.localRecoveryPromise
+    this.localRecoveryFlights += 1
+    this.expectedLocalClose = true
+    const recovery = (async () => {
+      await this.lens.close()
+      await this.lens.connect()
+    })()
+    this.localRecoveryPromise = recovery
+    void recovery.catch((error) => {
+      this.errors.push(error)
+    }).finally(() => {
+      if (this.localRecoveryPromise === recovery) {
+        this.localRecoveryPromise = null
+        this.expectedLocalClose = false
+      }
+    })
+    return recovery
   }
 
   track(promise) {
@@ -474,7 +511,14 @@ test('real adapters complete join orders and lost initial ready in either direct
         assert.equal(harness.bus.removeAllCalls, 0)
         assert.deepEqual(harness.bus.browserRemovalRecords, [])
         assert.equal(harness.delegate.invalidations, 0)
-        assert.deepEqual(harness.root.controls, [])
+        assert.deepEqual(harness.root.controls.filter(({ type }) =>
+          type !== 'PEER_READY'), [])
+        assert.deepEqual(harness.root.controls.filter(({ type }) =>
+          type === 'PEER_READY'), [{
+          type: 'PEER_READY',
+          senderId: 'browser-a',
+          connectionId: 'BROW0001',
+        }])
         assert.equal(
           harness.browser.getConfirmedPeerConnectionId(),
           harness.bus.messages('lens', 'presence.ready').at(-1).payload.connectionId,
@@ -701,6 +745,11 @@ test('real adapters perform one-sided Lens recovery at six-second asymmetric exp
   assert.equal(harness.bus.removeAllCalls, 1)
   assert.equal(harness.bus.lensChannels.length, 2)
   assert.equal(harness.bus.browserChannels.length, 1)
+  assert.equal(harness.root.localRecoveryFlights, 1)
+  assert.equal(harness.root.statuses.filter(({ status }) =>
+    status === 'DISCONNECTED').length, 1)
+  assert.equal(harness.root.statuses.filter(({ status }) =>
+    status === 'CLOSED').length, 1)
   assert.equal(harness.delegate.dispatched.filter(({ type }) => type === 'round.reset').length, 1)
   assert.equal(harness.delegate.dispatched.filter(({ type }) => type === 'round.start').length, 2)
 })
@@ -1079,4 +1128,5 @@ test('real adapters halt ambiguous application sends and recover without FIFO co
   }))
   await settle()
   assert.equal(lensFailure.bus.lensChannels.length, 2)
+  assert.equal(lensFailure.root.localRecoveryFlights, 1)
 })

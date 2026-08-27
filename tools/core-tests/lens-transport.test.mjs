@@ -170,6 +170,40 @@ async function bindPeer(harness, senderId = 'guesser-a', connectionId = 'BROW000
   return painterConnectionId
 }
 
+async function explicitlyRecoverFromRoot(harness) {
+  const previousWireMessages = harness.channel.sent.map(({ payload }) => payload)
+  const previousReady = previousWireMessages.find(({ type }) =>
+    type === 'presence.ready')
+  const previousSequence = Math.max(...previousWireMessages.map(({ sequence }) =>
+    sequence))
+  const statusCountBeforeClose = harness.statuses.length
+
+  await harness.transport.close()
+
+  assert.deepEqual(harness.statuses.slice(statusCountBeforeClose), [
+    { status: 'DISCONNECTED', detail: 'CLOSING' },
+    { status: 'CLOSED', detail: 'CLOSED' },
+  ])
+  assert.equal(harness.supabase.removeAllCalls, 1)
+  assert.equal(harness.supabase.channels.length, 1)
+
+  await harness.transport.connect()
+  assert.equal(harness.supabase.channels.length, 2)
+  const successor = harness.supabase.channels[1]
+  successor.emitStatus('SUBSCRIBED')
+  await settle()
+
+  const successorReady = messagesOfType(successor, 'presence.ready')[0]
+  assert.ok(successorReady)
+  assert.equal(successorReady.senderId, previousReady.senderId)
+  assert.equal(successorReady.sequence, previousSequence + 1)
+  assert.notEqual(
+    successorReady.payload.connectionId,
+    previousReady.payload.connectionId,
+  )
+  return successor
+}
+
 test('Lens transport executes public-channel lifecycle and awaited teardown', async () => {
   const harness = await createHarness()
 
@@ -181,12 +215,65 @@ test('Lens transport executes public-channel lifecycle and awaited teardown', as
   ])
   assert.equal(messagesOfType(harness.channel, 'presence.ready').length, 1)
 
-  await harness.transport.close()
+  const closing = harness.transport.close()
+  assert.deepEqual(harness.statuses.at(-1), {
+    status: 'DISCONNECTED', detail: 'CLOSING',
+  })
+  await closing
   assert.equal(harness.supabase.removeAllCalls, 1)
-  assert.deepEqual(harness.statuses.at(-1), { status: 'CLOSED', detail: 'CLOSED' })
+  assert.deepEqual(harness.statuses.slice(-2), [
+    { status: 'DISCONNECTED', detail: 'CLOSING' },
+    { status: 'CLOSED', detail: 'CLOSED' },
+  ])
 })
 
-test('Lens known-peer ready exhaustion reports root-owned timeout before one local recovery', async () => {
+test('Lens close cancels a connect still awaiting the prior close', async () => {
+  const harness = await createHarness()
+  await harness.transport.close()
+
+  const reconnect = harness.transport.connect()
+  const teardown = harness.transport.close()
+  await Promise.all([reconnect, teardown])
+
+  assert.equal(harness.supabase.removeAllCalls, 1)
+  assert.equal(harness.supabase.channels.length, 1)
+  assert.deepEqual(harness.transport.getDiagnostics(), {
+    activeChannels: 0,
+    activeTimers: 0,
+    messageListeners: 1,
+  })
+})
+
+test('Lens close during CONNECTING cannot leave a newly created channel', async () => {
+  const supabase = new FakeSupabaseClient()
+  globalThis.__wordlessLensCreateClient = () => supabase
+  const transport = new SupabaseRelayTransport()
+  transport.supabaseProject = {
+    url: 'https://example.supabase.co',
+    publicToken: 'client-safe-public-key',
+  }
+  transport.sessionId = 'WAVE42'
+  transport.connectOnStart = false
+  transport.onAwake()
+
+  let closing = null
+  transport.onStatus((status) => {
+    if (status === 'CONNECTING') closing = transport.close()
+  })
+
+  await transport.connect()
+  await (closing ?? Promise.resolve())
+
+  assert.equal(supabase.channels.length, 0)
+  assert.equal(supabase.removeAllCalls, 1)
+  assert.deepEqual(transport.getDiagnostics(), {
+    activeChannels: 0,
+    activeTimers: 0,
+    messageListeners: 0,
+  })
+})
+
+test('Lens known-peer ready exhaustion reports once and waits for explicit root recovery', async () => {
   const harness = await createHarness()
   harness.channel.emit(ready(1))
   await settle()
@@ -195,15 +282,23 @@ test('Lens known-peer ready exhaustion reports root-owned timeout before one loc
   await tick(harness.transport, 1_000)
   await settle()
 
-  const recoveryStatuses = harness.statuses.slice(2)
-  assert.deepEqual(recoveryStatuses.map(({ status }) => status), [
-    'COUNTERPART_TIMED_OUT', 'CONNECTING', 'CONNECTING',
-  ])
-  assert.equal(harness.supabase.removeAllCalls, 1)
-  assert.equal(harness.supabase.channels.length, 2)
+  assert.deepEqual(harness.statuses.slice(2), [{
+    status: 'COUNTERPART_TIMED_OUT',
+    detail: 'READY_ACK_TIMED_OUT',
+  }])
+  assert.equal(harness.supabase.removeAllCalls, 0)
+  assert.equal(harness.supabase.channels.length, 1)
+
+  await tick(harness.transport, 1_000)
+  assert.deepEqual(harness.statuses.slice(2), [{
+    status: 'COUNTERPART_TIMED_OUT',
+    detail: 'READY_ACK_TIMED_OUT',
+  }])
+
+  await explicitlyRecoverFromRoot(harness)
 })
 
-test('Lens peer liveness expiry recovers exactly once at six seconds', async () => {
+test('Lens peer liveness expiry reports once and leaves lifecycle to the root', async () => {
   const harness = await createHarness()
   await bindPeer(harness)
 
@@ -213,12 +308,48 @@ test('Lens peer liveness expiry recovers exactly once at six seconds', async () 
 
   await tick(harness.transport, 1)
   await settle()
-  assert.equal(
-    harness.statuses.filter(({ status }) => status === 'COUNTERPART_TIMED_OUT').length,
-    1,
-  )
-  assert.equal(harness.supabase.removeAllCalls, 1)
-  assert.equal(harness.supabase.channels.length, 2)
+  assert.deepEqual(harness.statuses.slice(2), [{
+    status: 'COUNTERPART_TIMED_OUT',
+    detail: 'GUESSER_SILENT',
+  }])
+  assert.equal(harness.supabase.removeAllCalls, 0)
+  assert.equal(harness.supabase.channels.length, 1)
+
+  await tick(harness.transport, 6_000)
+  assert.deepEqual(harness.statuses.slice(2), [{
+    status: 'COUNTERPART_TIMED_OUT',
+    detail: 'GUESSER_SILENT',
+  }])
+
+  await explicitlyRecoverFromRoot(harness)
+})
+
+test('Lens ambiguous application send reports once, halts FIFO, and waits for the root', async () => {
+  const harness = await createHarness()
+  harness.channel.sendBehavior = (broadcast) => broadcast.payload.type ===
+    'stroke.begin' ? Promise.resolve('timed out') : Promise.resolve('ok')
+
+  const failed = harness.transport.send({
+    type: 'stroke.begin', roundId: 'round-1', payload: { strokeId: 'stroke-1' },
+  })
+  const queued = harness.transport.send({
+    type: 'stroke.end', roundId: 'round-1', payload: { strokeId: 'stroke-1' },
+  })
+  const queuedOutcome = queued.catch((error) => error)
+
+  await assert.rejects(failed, /ambiguous channel send/)
+  assert.ok(await queuedOutcome instanceof Error)
+  await settle()
+
+  assert.deepEqual(harness.statuses.slice(2), [{
+    status: 'CHANNEL_ERROR',
+    detail: 'SEND_FAILED',
+  }])
+  assert.equal(harness.supabase.removeAllCalls, 0)
+  assert.equal(harness.supabase.channels.length, 1)
+  assert.equal(messagesOfType(harness.channel, 'stroke.end').length, 0)
+
+  await explicitlyRecoverFromRoot(harness)
 })
 
 test('Lens ack-introduced peer transition emits control without authoring another ready', async () => {
@@ -237,6 +368,91 @@ test('Lens ack-introduced peer transition emits control without authoring anothe
   assert.equal(harness.controls.at(-1)?.type, 'PEER_REPLACED')
   assert.equal(messagesOfType(harness.channel, 'presence.ready').length, readyCount)
   assert.equal(harness.received.at(-1)?.type, 'presence.ack')
+})
+
+test('Lens exposes every accepted same-tuple ready after queuing its private ack', async () => {
+  const harness = await createHarness()
+  await bindPeer(harness)
+  assert.deepEqual(harness.controls, [{
+    type: 'PEER_READY',
+    senderId: 'guesser-a',
+    connectionId: 'BROW0001',
+  }])
+
+  harness.controls.length = 0
+  const receivedCount = harness.received.length
+  const wireStart = harness.channel.sent.length
+  let rootSend = null
+  const unsubscribe = harness.transport.onControl((event) => {
+    if (event.type !== 'PEER_READY') return
+    rootSend = harness.transport.send({
+      type: 'stroke.begin',
+      roundId: 'round-1',
+      payload: { strokeId: 'stroke-after-ready' },
+    })
+  })
+
+  harness.channel.emit(ready(3))
+  await settle()
+  assert.ok(rootSend)
+  await rootSend
+  unsubscribe()
+
+  assert.deepEqual(harness.controls, [{
+    type: 'PEER_READY',
+    senderId: 'guesser-a',
+    connectionId: 'BROW0001',
+  }])
+  assert.equal(harness.received.length, receivedCount)
+  assert.deepEqual(
+    harness.channel.sent.slice(wireStart).map(({ payload }) => payload.type),
+    ['presence.ack', 'stroke.begin'],
+  )
+})
+
+test('Lens emits a ready-introduced peer transition before private presence work and ready fact', async () => {
+  const harness = await createHarness()
+  await bindPeer(harness)
+  harness.controls.length = 0
+  const receivedCount = harness.received.length
+  const wireStart = harness.channel.sent.length
+  const controlOrder = []
+  let rootSend = null
+  const unsubscribe = harness.transport.onControl((event) => {
+    controlOrder.push(event.type)
+    if (event.type !== 'PEER_READY') return
+    rootSend = harness.transport.send({
+      type: 'stroke.begin',
+      roundId: 'round-1',
+      payload: { strokeId: 'stroke-after-transition-ready' },
+    })
+  })
+
+  harness.channel.emit(ready(3, 'BROW0002'))
+  await settle()
+  assert.ok(rootSend)
+  await rootSend
+  unsubscribe()
+
+  assert.deepEqual(controlOrder, ['PEER_REJOINED', 'PEER_READY'])
+  assert.deepEqual(harness.controls, [
+    {
+      type: 'PEER_REJOINED',
+      senderId: 'guesser-a',
+      previousConnectionId: 'BROW0001',
+      nextConnectionId: 'BROW0002',
+    },
+    {
+      type: 'PEER_READY',
+      senderId: 'guesser-a',
+      connectionId: 'BROW0002',
+    },
+  ])
+  assert.equal(harness.received.length, receivedCount)
+  assert.deepEqual(
+    harness.channel.sent.slice(wireStart).map(({ payload }) => payload.type),
+    ['presence.ack', 'presence.ready', 'stroke.begin'],
+  )
 })
 
 test('Lens drain is reserved before synchronous close and awaits the started send', async () => {

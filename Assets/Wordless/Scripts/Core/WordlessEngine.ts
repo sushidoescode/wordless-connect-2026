@@ -133,6 +133,7 @@ export class WordlessEngine {
     this.store.replace({
       phase: 'READY',
       roundId,
+      promptWord: this.card.answer,
       choices: this.card.choices,
       durationMs,
       startedAtMs: 0,
@@ -144,6 +145,7 @@ export class WordlessEngine {
       revealedWord: null,
       glyph: [],
       counterpartReady: false,
+      strokeComplete: false,
     })
 
     if (previousRoundId.length === 0) return []
@@ -400,7 +402,12 @@ export class WordlessEngine {
   }
 
   private beginClosing(): void {
-    if (this.strokeState === 'OPEN') this.strokeState = 'CLOSING'
+    if (this.strokeState !== 'OPEN') return
+    this.strokeState = 'CLOSING'
+    const snapshot = this.store.getSnapshot()
+    if (!snapshot.strokeComplete) {
+      this.store.replace({ ...snapshot, strokeComplete: true })
+    }
   }
 
   private emitOpenBatchIfDue(nowMs: number): EngineEffect[] {

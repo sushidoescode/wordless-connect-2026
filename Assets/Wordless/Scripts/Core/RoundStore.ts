@@ -9,6 +9,7 @@ import type {
 export interface LensRoundState {
   readonly phase: RoundPhase
   readonly roundId: string
+  readonly promptWord: string | null
   readonly choices: ChoiceTuple
   readonly durationMs: number
   readonly startedAtMs: number
@@ -20,6 +21,7 @@ export interface LensRoundState {
   readonly revealedWord: string | null
   readonly glyph: readonly QuantizedPoint[]
   readonly counterpartReady: boolean
+  readonly strokeComplete: boolean
 }
 
 export type RoundStoreListener = (snapshot: LensRoundState) => void
@@ -59,6 +61,7 @@ function freezeState(next: LensRoundState): LensRoundState {
   return Object.freeze({
     phase: next.phase,
     roundId: next.roundId,
+    promptWord: next.promptWord,
     choices: freezeChoices(next.choices),
     durationMs: next.durationMs,
     startedAtMs: next.startedAtMs,
@@ -70,12 +73,14 @@ function freezeState(next: LensRoundState): LensRoundState {
     revealedWord: next.revealedWord,
     glyph: freezeQuantizedPoints(next.glyph),
     counterpartReady: next.counterpartReady,
+    strokeComplete: next.strokeComplete,
   })
 }
 
 const INITIAL_STATE = freezeState({
   phase: 'DISCONNECTED',
   roundId: '',
+  promptWord: null,
   choices: ['', '', '', ''],
   durationMs: 0,
   startedAtMs: 0,
@@ -87,6 +92,7 @@ const INITIAL_STATE = freezeState({
   revealedWord: null,
   glyph: [],
   counterpartReady: false,
+  strokeComplete: false,
 })
 
 export class RoundStore {

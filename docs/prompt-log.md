@@ -2158,3 +2158,242 @@ the brush and 16/16 with ribbon geometry; the full repository check is 177
 core tests, 92 web tests, and the 54-module build, with clean Lens typecheck and
 diff whitespace checks. The corrected diff is frozen for re-review before
 staging.
+
+After the owner machine lost power, execution resumed from the clean Task 10
+commit `370f933` and the still-live Task 11 worktree. No partial commit or
+approved scope was lost. The owner reaffirmed the already-written standard
+Supabase amendment and asked execution to continue through the remaining
+numbered plan tasks. Task 11 remains the active block; later Gate 1, capture,
+and submission work is still serially gated by its evidence requirements.
+
+Task 11 began test-first in independent non-scene slices. Adding Lens-local
+`promptWord` and authoritative `strokeComplete` state first made the focused
+engine suite report 29/32 before the engine supplied/reset those fields; GREEN
+was 32/32. Adding recovery disarm first made the brush/session suite report
+11/12 before `BrushStrokeSession.disarm` and `BrushController.disarm` existed;
+GREEN was 12/12 after an active manipulation could be quarantined without an
+old-round end event. The HUD, exact-path glyph medallion, and one-shot replay
+controller each began with missing-module RED. Root's combined rerun of these
+five completed slices is 68/68. The views allocate no per-render SceneObject,
+material, listener, or timer; the medallion preserves the exact quantized path
+count and order under a uniform 34 cm fit, and replay disables its authored
+label/collider/Interactable before emitting one exact terminal-round request.
+
+Recovery integration review found two ownership issues before composition.
+First, issuing local close and reconnect in the same semantic action batch
+could reconnect after teardown arrived while close was settling. The corrected
+contract stages the sole reconnect behind the expected CLOSED/DISCONNECTED
+callback so teardown can make that callback inert. Second, presence ready/ack
+traffic and ready-burst restart are deliberately adapter-authored through the
+private shared FIFO established in Task 8; `RelayPort` exposes no public method
+for the composition root to duplicate them. `RecoveryCoordinator` therefore
+records the synchronous peer transition and waits for the later policy-
+confirmed `presence.ack` tuple; it does not emit root-executed ACK/ready
+commands. An ack-introduced replacement remains ordered correctly because the
+adapter emits control synchronously before delivering that same accepted ack.
+
+## 2026-08-26 — Task 11 composition and live product proof
+
+The first immutable composition review found one additional teardown race:
+once recovery had already issued `CONNECT_LOCAL` and was waiting for the new
+subscription, teardown made later callbacks inert but did not close that
+newly-opened or in-flight channel. The focused regression first left 41/42
+recovery cases green and then passed 42/42 after `TEARDOWN` emitted one
+token-scoped `CLOSE_LOCAL` from `AWAITING_LOCAL_SUBSCRIPTION`. Teardown before
+close settlement still suppresses reconnect, teardown after resubscription
+closes once, and duplicate teardown/status callbacks remain inert. The complete
+composition matrix then added four pending-reset carryover combinations
+(local ambiguous-send/peer transition × delivered/undelivered), stale engine
+generation cancellation, timeout replay, every terminal point-count mismatch,
+and all five required transport failure statuses. Its focused result was 33/33;
+mutation RED checks confirmed that the assertions fail when the covered
+ordering guards are removed, and no further production correction was needed.
+
+Task 11 scene authoring stayed inside Lens Studio MCP. One material duplication
+attempt exposed an editor aliasing hazard: `duplicateAsset` produced duplicate
+UUID views and renamed the original brush material through those aliases. The
+original was restored by exact ID, six known stray material files/metadata were
+removed through the Editor API, and the three HUD materials were recreated from
+the unlit preset. The generated `unlit 2.graphShader` is retained because all
+three HUD materials directly reference its pass. A placeholder HUD script meta
+was repaired by a harmless documented source edit and editor reimport; the
+resulting asset has a normal UID and all 13 compiled inputs.
+
+The disabled spike root became enabled `WordlessAppRoot`; its old probe cursor,
+status-card subtree, and brush harness component/asset were removed. The
+existing transport remains first on that root with `connectOnStart=false`, and
+one `WordlessApp` component has non-null relay, brush, ribbon, HUD, glyph, and
+replay bindings. The authored HUD and result resources are world-anchored under
+`DrawingAnchor`; no opaque dark card or head-locked overlay was introduced.
+The replay `Interactable` was changed from indirect-only to the combined
+Direct/Indirect targeting mode after the actual Preview interaction primitive
+could not acquire an otherwise visible terminal control. A held Pinch followed
+by Release then triggered the exact label. A non-held Pinch timed out waiting
+for `onTriggerEnd` because the one-shot controller correctly disables itself on
+`onTriggerStart`; that tool timeout was rejected as product-failure evidence.
+
+The first replay-helper invocation reset Preview while installing its bridge
+and was rejected as interaction evidence. Subsequent actual terminal replay was
+successful. A timed-out browser round moved through Lens
+`TIMED_OUT -> READY`, applied `r-BTVKOCDP-2`, emitted the old-to-new resync,
+held `listeners=1 timers=2 channels=1 sceneObjects=14 materials=7`, and reached
+`READY -> ACTIVE` only after the reset/ack barrier. The browser visibly replaced
+the disabled timeout card with the active successor; no test seam called
+`applyRound` directly.
+
+The complete live product path was then exercised between one Lens Studio
+Preview and one ordinary local Chrome page over the configured ordinary hosted
+Supabase project. The real indirect S gesture produced 58,469 non-transparent
+browser canvas pixels. Submitting BIRD first left the round active, disabled
+only BIRD, and showed `TRY AGAIN`; submitting FISH next yielded `CORRECT · FISH`
+and then `GLYPH_LOCKED`, with one visible browser medallion canvas and 58,236
+non-transparent pixels. The Lens simultaneously showed the local ribbon,
+revealed word, exact-path result, and `PLAY AGAIN`. This is simulated Preview
+and browser evidence, not hardware footage, a device test, or a real Spectacles
+capture.
+
+That judged capture also exposed a visual defect that static bounds did not:
+the preset torus frame was about 43 cm across but left only about a 14 cm inner
+opening, so its bright body obscured most of the required 34 cm glyph. A focused
+test first failed 1/12 because `buildMedallionFrameGeometry` did not exist. The
+view now allocates a second MeshBuilder once during Awake and creates an
+original 64-segment flat annulus with a 25 cm inner radius and 27 cm outer
+radius. Its 50 cm opening contains even the farthest possible 34 cm glyph
+corner; no per-render object, material, builder, listener, or timer was added.
+The obsolete torus asset and scene reference were removed through Lens Studio
+MCP, and the frame object's authored transform was reset to identity. Focused
+GREEN was 12/12 and Lens typecheck emitted no diagnostics.
+
+Fresh live validation of that correction used an actual terminal replay, then
+another real Preview S stroke and a browser correct choice for HEART. Before
+the guess the browser canvas contained 58,346 non-transparent pixels; after the
+independently rendered result it contained 58,110. Lens logs recorded 52 exact
+points, `ACTIVE -> CORRECT -> GLYPH_LOCKED`, guess index 1 as correct, and
+coordinate hash `d9a67e3a`. Visual inspection of the ignored local capture
+`captures/task11/live-glyph-locked-thin-frame.jpg` shows the whole violet path
+inside the thin ivory frame, the same path still visible as the large ribbon,
+the separate HEART reveal, connection truth, and replay affordance. The path is
+an S despite the HEART prompt, directly demonstrating that the runtime froze
+the sample rather than recognizing or redrawing the semantic object.
+
+Final helper cleanup again used only Lens Studio MCP. The exact temporary
+`AiPreviewAgent Handler` scene root was deleted first; installed Editor API
+`AssetManager.remove(SourcePath)` then removed
+`AiPreviewAgentInspect.lspkg`, `AiPreviewAgentInteract.lspkg`, `Leaf.lspkg`, and
+`Bitmoji 3D.lsc` with their metadata, and `model.project.save()` serialized the
+result. The post-cleanup Virtual Scene snapshot contains 136 product/template
+objects and 52 assets, no helper-named root or package asset, an identity
+runtime-frame transform with no stale torus reference, and the complete app
+wiring. The final forced Lens TypeScript compile succeeded; a fresh Preview
+refresh produced zero errors/warnings, configured one client, subscribed, saw
+the still-live browser counterpart, and advanced `READY -> ACTIVE`.
+
+Final repository verification after cleanup is 286/286 core tests, 92/92 web
+tests, and a 54-module production browser build. Lens typecheck and
+`git diff --check` are clean, every primary `Assets/Wordless` file has adjacent
+metadata, and ignored captures, browser build output, and local configuration
+remain outside the change. The bounded application RTT comparison is recorded
+below. This Task 11 evidence makes no hardware, security, persistence, scale,
+remote-play, or production-readiness claim.
+
+## 2026-08-27 — Task 11 deferred live matrix and review closure
+
+Immutable composition review reproduced two variants of one important
+teardown race before staging. First, a reconnect awaiting an already-settled
+close could mistake a newer teardown close for the old promise, clear the newer
+close request, and create a second channel. The exact transport RED ended with
+two channels instead of one. Second, `openSubscription` emitted synchronous
+`CONNECTING` before creating its channel; a listener that closed or destroyed
+the app from that callback could complete teardown against `channel=null`,
+after which subscription creation left one active channel behind. Its exact
+RED ended with `activeChannels=1` after teardown. The transport now increments
+a close-request generation for every close call, checks the captured generation
+after every awaited close/teardown boundary, carries it into subscription
+opening, and rechecks immediately after the synchronous `CONNECTING` callback.
+Concrete transport regressions cover both interleavings, and a
+`WordlessAppController` plus concrete transport regression covers destroy while
+reconnect is awaiting the prior close. Focused transport/app GREEN was 47/47;
+the reviewer's wider recovery/app/transport rerun was 89/89 with no remaining
+Critical or Important finding.
+
+The malformed/authority matrix was deliberately sent through a temporary,
+uncommitted ordinary-browser module using only the configured public channel.
+The first attempt sent all cases together, including a spoofed painter-role
+ready. Lens rejected the bad packets, but the real browser quite correctly
+treated the syntactically valid painter-role packet as a new public-channel
+peer and hid its projection. That combined run was rejected as cross-surface
+non-mutation evidence. It is also concrete evidence for retaining the existing
+limitation: the public-token channel and message-role checks are game
+concealment, not authentication or cryptographic security.
+
+The clean rerun isolated the product Lens adapter with the browser participant
+unjoined. Seven Supabase sends returned client acceptance and Lens separately
+logged rejection of wrong protocol version (`MALFORMED`), wrong session
+(`WRONG_SESSION`), unknown type (`MALFORMED`), a nine-point batch
+(`MALFORMED`), an out-of-range axis (`MALFORMED`), a 1,266-byte packet
+(`OVERSIZED`), and a browser-authored result (`UNKNOWN_SENDER`). A separate
+wrong-role presence send logged `WRONG_AUTHORITY`. No apply-round or phase
+transition followed any isolated rejection. As throughout Gate 0, send status
+`ok` records only client acceptance; the Lens rejection logs are the product
+evidence. The temporary source module was deleted before staging.
+
+Both live join orders passed. In the Lens-first run, Preview was already
+subscribed with the browser unjoined; joining `WAVE42` produced one
+`COUNTERPART_READY`, one `READY -> ACTIVE`, four choices, and literal
+`PAINTER READY`. In the browser-first run, Preview was paused, the browser
+entered literal `WAITING FOR PAINTER` / `JOINING`, and Preview resumed within
+one ready interval. Lens then logged exactly one `READY -> ACTIVE`, while the
+browser showed four enabled choices and `PAINTER READY`. An earlier, longer
+paused attempt accumulated multiple browser connection epochs and ended in
+ready-ack timeout; it was rejected rather than counted as join-order evidence.
+
+A clean full browser reload changed the guesser connection tuple on the healthy
+Lens channel. Lens moved `ACTIVE -> DISCONNECTED -> READY`, applied exactly one
+successor, emitted one old-to-new reset, accepted its ack, and emitted one
+`READY -> ACTIVE`; the browser returned to a fresh 20-second four-choice round.
+The associated diagnostic remained `listeners=1 timers=2 channels=1
+sceneObjects=14 materials=7`. The final refresh/reload cleanup repeated that
+single successor ordering, the forced Lens compile and Preview refresh had zero
+errors or warnings, and Virtual Scene remained 136 authored objects / 52 assets
+with no helper package or helper scene root.
+
+Symmetric liveness passed against literal UI and log state. After the browser
+page was reloaded and left unjoined, the Lens last accepted a guesser message at
+`00:06:37.524` and logged `GUESSER_SILENT`, `PEER_TIMEOUT`, and
+`ACTIVE -> DISCONNECTED` at `00:06:43.545`: 6,021 ms. In the reverse direction,
+pausing Preview while the browser stayed active made the browser show literal
+`RECONNECTING` / `DISCONNECTED` after a 6,500 ms observation. Resuming Preview
+then produced one reset-authorized successor and returned the browser to
+`PAINTER READY` / `ACTIVE` within the next 1,800 ms, without merging old
+geometry.
+
+The deferred live cap path ran through the product adapters with an external
+Chrome DevTools wire observer that did not import product code or credentials.
+It observed exactly one `stroke.begin`, 28 `stroke.points` batches, exactly 128
+browser-delivered points, and exactly one later `stroke.end`. Batch sizes were
+one to five points, the largest point message was 232 bytes, and Lens log/send
+starts under the backlog were at least 101 ms apart. Lens independently logged
+`CAP_REACHED count=128`, rendered 128 local/glyph points, and ignored a second
+manipulation attempt; the wire observer still saw only one begin. The browser
+canvas contained 308,109 non-transparent pixels and accepted the immediately
+subsequent correct SNAKE guess, after which both surfaces reached the correct
+terminal state. A fresh short manual-close repeat delivered 52 points in 21
+batches, one begin, one end, and an accepted correct guess; Lens log starts for
+that stroke were at least 103 ms apart.
+
+The final application RTT sample used browser-origin `transport.ping` and
+Lens-authored matching `transport.ack` messages on the real product channel.
+An 11-sample preliminary window had median 80 ms but one 243 ms outlier made
+that small window's nearest-rank p95 equal its maximum, so it was not used to
+pass the regression gate. The fresh 44-second window contained 22 matched
+samples: median 78 ms, p95 91 ms, and maximum 93 ms. Against the Gate 0 local
+baseline of median 86 ms / p95 106 ms, the 20-percent ceilings are 103.2 ms and
+127.2 ms; the observed medians and p95 are respectively 9.3 percent and 14.2
+percent lower, so the Task 11 regression gate passes. These are bounded
+measurements for one simulated Lens Studio Preview and one ordinary local
+Chrome participant over the configured ordinary hosted Supabase project, not a
+general latency, hardware, remote-play, scale, security, or production claim.
+
+Fresh pre-staging verification is 286/286 core tests, 92/92 web tests, and a
+54-module production browser build. Lens typecheck, `git diff --check`, scene
+reference/metadata audits, and independent application/view review are clean.

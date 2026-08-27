@@ -208,6 +208,23 @@ test('rearming while held requires release before a new stroke', () => {
   assert.equal(session.beginManipulation()[0]?.strokeId, 'stroke-2')
 })
 
+test('disarm cancels active input without leaking an end into recovery', () => {
+  const session = new BrushStrokeSession(identity)
+
+  session.armForRound(ROUND_A)
+  assert.equal(session.beginManipulation()[0]?.strokeId, 'stroke-1')
+  session.sample(point(0, 0))
+  session.disarm()
+
+  assert.deepEqual(session.sample(point(5, 0)), [])
+  assert.deepEqual(session.endManipulation(), [])
+  assert.equal(session.getDiagnostics().endCount, 0)
+  assert.equal(session.armForRound(ROUND_A), false)
+
+  session.armForRound(ROUND_B)
+  assert.equal(session.beginManipulation()[0]?.strokeId, 'stroke-2')
+})
+
 test('non-finite local or mapped world points fail closed', () => {
   const session = new BrushStrokeSession((local) => local.x === 7
     ? point(Number.POSITIVE_INFINITY, 0)

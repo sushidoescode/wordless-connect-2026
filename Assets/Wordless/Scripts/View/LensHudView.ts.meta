@@ -1,0 +1,82 @@
+- !<AssetImportMetadata/2a14619f-a4d0-44af-87ca-081ecb6c45f6>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 26d9b340-575b-44cd-8f95-8feb6fd9c4ff
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 26d9b340-575b-44cd-8f95-8feb6fd9c4ff
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 92b590fe-f18f-4b47-ac68-f40b190dd323
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/92b590fe-f18f-4b47-ac68-f40b190dd323>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 9dd8f50c-d28d-4b04-80dc-0ec4edb383ab
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    connectionDot: false
+    connectionDotVisual: false
+    connectionText: false
+    coralMaterial: false
+    lemonMaterial: false
+    mintMaterial: false
+    phaseText: false
+    promptText: false
+    resultMarker: false
+    resultMarkerVisual: false
+    resultText: false
+    roleText: false
+    timerText: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - roleText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      phaseText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      promptText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      timerText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      connectionText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      resultText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      connectionDot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      connectionDotVisual: !<reference.RenderMeshVisual> 00000000-0000-0000-0000-000000000000
+      resultMarker: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      resultMarkerVisual: !<reference.RenderMeshVisual> 00000000-0000-0000-0000-000000000000
+      lemonMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      mintMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      coralMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Component.Text roleText
+    - // @input Component.Text phaseText
+    - // @input Component.Text promptText
+    - // @input Component.Text timerText
+    - // @input Component.Text connectionText
+    - // @input Component.Text resultText
+    - // @input SceneObject connectionDot
+    - // @input Component.RenderMeshVisual connectionDotVisual
+    - // @input SceneObject resultMarker
+    - // @input Component.RenderMeshVisual resultMarkerVisual
+    - // @input Asset.Material lemonMaterial
+    - // @input Asset.Material mintMaterial
+    - // @input Asset.Material coralMaterial

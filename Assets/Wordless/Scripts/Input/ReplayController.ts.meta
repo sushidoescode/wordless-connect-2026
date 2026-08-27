@@ -1,0 +1,52 @@
+- !<AssetImportMetadata/c855450a-401d-4508-8dd2-316eed0329dd>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 46e67677-1fa1-45ca-a632-cc5d0bb3357f
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 46e67677-1fa1-45ca-a632-cc5d0bb3357f
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 32fffe25-8934-4f4c-866e-3f5628693c01
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/32fffe25-8934-4f4c-866e-3f5628693c01>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: e07b7d4e-6178-415d-9ca4-d1325bb51f2c
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    replayCollider: false
+    replayInteractable: false
+    replayLabel: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - replayLabel: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      replayCollider: !<reference.ColliderComponent> 00000000-0000-0000-0000-000000000000
+      replayInteractable: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject replayLabel
+    - // @input Component.ColliderComponent replayCollider
+    - // @input AssignableType_1 replayInteractable

@@ -23,6 +23,7 @@ export interface BrushListener {
 
 export interface BrushRoundControl {
   armForRound(roundId: string): void
+  disarm(): void
 }
 
 const EMPTY_DIAGNOSTICS: BrushStrokeDiagnostics = Object.freeze({
@@ -125,6 +126,14 @@ export class BrushController extends BaseScriptComponent
       this.interactableShouldBeEnabled = true
       this.applyInteractableEnabled()
     }
+  }
+
+  disarm(): void {
+    this.pendingRoundId = null
+    this.session?.disarm()
+    this.interactionActive = false
+    this.interactableShouldBeEnabled = false
+    this.applyInteractableEnabled()
   }
 
   getStrokeDiagnostics(): BrushStrokeDiagnostics {

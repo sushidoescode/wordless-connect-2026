@@ -1,0 +1,61 @@
+- !<AssetImportMetadata/b9bafe83-c0e1-4e05-9239-1a9f5efb0e02>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 38c35135-1fc8-4776-a7cb-ca33f9506334
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 38c35135-1fc8-4776-a7cb-ca33f9506334
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 6cbc43c9-cfd9-49d4-ac10-72b91711cfeb
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/6cbc43c9-cfd9-49d4-ac10-72b91711cfeb>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: e3940556-19b2-4141-a397-a7759320c12e
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    brush: false
+    glyph: false
+    hud: false
+    relay: false
+    replay: false
+    ribbon: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - relay: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      brush: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      ribbon: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      hud: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
+      glyph: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
+      replay: !<MappingBased.AssignableType_6> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input AssignableType_1 relay
+    - // @input AssignableType_2 brush
+    - // @input AssignableType_3 ribbon
+    - // @input AssignableType_4 hud
+    - // @input AssignableType_5 glyph
+    - // @input AssignableType_6 replay

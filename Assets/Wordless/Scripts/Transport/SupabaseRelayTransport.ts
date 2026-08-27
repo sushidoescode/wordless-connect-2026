@@ -161,11 +161,10 @@ export class SupabaseRelayTransport extends BaseScriptComponent
   private subscribed = false
   private destroyed = false
   private explicitCloseRequested = false
-  private lifecycleEpoch = 0
-  private recoveryPromise: Promise<void> | null = null
   private teardownPromise: Promise<void> | null = null
   private closePromise: Promise<void> | null = null
   private closeStarted = false
+  private closeRequestGeneration = 0
 
   private readonly messageListeners: MessageListener[] = []
   private readonly statusListeners: StatusListener[] = []
@@ -215,17 +214,19 @@ export class SupabaseRelayTransport extends BaseScriptComponent
     }
     if (this.closeStarted && !this.closePromise) return
 
+    const closeRequestGeneration = this.closeRequestGeneration
     const closing = this.closePromise
     if (closing) await closing
-    if (this.destroyed) return
+    if (this.destroyed ||
+        closeRequestGeneration !== this.closeRequestGeneration) return
     this.closePromise = null
     this.closeStarted = false
     this.explicitCloseRequested = false
-    const recovery = this.recoveryPromise
-    if (recovery) await recovery
     const teardown = this.teardownPromise
     if (teardown) await teardown
-    if (this.destroyed || this.explicitCloseRequested ||
+    if (this.destroyed ||
+        closeRequestGeneration !== this.closeRequestGeneration ||
+        this.explicitCloseRequested ||
         this.subscribed || this.channel) return
 
     try {
@@ -243,7 +244,7 @@ export class SupabaseRelayTransport extends BaseScriptComponent
         )
         print('[WordlessTransport] CLIENT_CONFIGURED')
       }
-      await this.openSubscription()
+      await this.openSubscription(closeRequestGeneration)
     }
     catch (error) {
       this.emitStatus('CHANNEL_ERROR', 'CONNECT_FAILED')
@@ -291,12 +292,12 @@ export class SupabaseRelayTransport extends BaseScriptComponent
 
   close(): Promise<void> {
     if (this.destroyed) return Promise.resolve()
+    this.closeRequestGeneration += 1
     const existingClose = this.closePromise
     if (existingClose) return existingClose
     if (this.closeStarted) return Promise.resolve()
     this.closeStarted = true
     this.explicitCloseRequested = true
-    this.lifecycleEpoch += 1
     this.emitStatus('DISCONNECTED', 'CLOSING')
     this.subscribed = false
     this.stopTimers()
@@ -307,8 +308,6 @@ export class SupabaseRelayTransport extends BaseScriptComponent
   }
 
   private async performExplicitClose(): Promise<void> {
-    const recovery = this.recoveryPromise
-    if (recovery) await recovery
     if (this.destroyed) return
 
     const existing = this.teardownPromise
@@ -390,9 +389,12 @@ export class SupabaseRelayTransport extends BaseScriptComponent
     return this.policy
   }
 
-  private async openSubscription(): Promise<void> {
+  private async openSubscription(
+    closeRequestGeneration: number,
+  ): Promise<void> {
     const client = this.client
-    if (!client || this.destroyed || this.explicitCloseRequested) return
+    if (!client || this.destroyed || this.explicitCloseRequested ||
+        closeRequestGeneration !== this.closeRequestGeneration) return
 
     const policy = this.ensurePolicy()
     const connectionId = createRuntimeIdentifier(CONNECTION_ID_LENGTH)
@@ -404,6 +406,8 @@ export class SupabaseRelayTransport extends BaseScriptComponent
     this.reportedReadyTuple = null
     this.lastUpdateMs = this.monotonicNow()
     this.emitStatus('CONNECTING', 'CONNECTING')
+    if (this.destroyed || this.explicitCloseRequested ||
+        closeRequestGeneration !== this.closeRequestGeneration) return
 
     try {
       const channel = client.channel(`wordless-relay:${this.sessionId}`, {
@@ -498,6 +502,11 @@ export class SupabaseRelayTransport extends BaseScriptComponent
       if (transition || (confirmed === null && !this.readyBurstActive)) {
         this.startReadyBurst(this.monotonicNow())
       }
+      this.emitControl({
+        type: 'PEER_READY',
+        senderId: message.senderId,
+        connectionId: message.payload.connectionId,
+      })
       return
     }
 
@@ -797,8 +806,10 @@ export class SupabaseRelayTransport extends BaseScriptComponent
       this.stopQueue(new RelayUnavailableError('relay FIFO halted'))
       return
     }
+    void this.stopQueue(
+      new RelayUnavailableError('relay FIFO halted after ambiguous send'),
+    )
     this.emitStatus('CHANNEL_ERROR', 'SEND_FAILED')
-    this.beginSubscriptionRecovery('SEND_FAILURE_RECOVERY')
   }
 
   private stopQueue(error: Error): Promise<void> {
@@ -897,7 +908,6 @@ export class SupabaseRelayTransport extends BaseScriptComponent
     if (peerLastSeenMs !== null && nowMs - peerLastSeenMs >= PEER_TIMEOUT_MS) {
       this.peerLastSeenMs = null
       this.emitStatus('COUNTERPART_TIMED_OUT', 'GUESSER_SILENT')
-      this.beginSubscriptionRecovery('PEER_TIMEOUT_RECOVERY')
       return
     }
 
@@ -968,35 +978,6 @@ export class SupabaseRelayTransport extends BaseScriptComponent
 
   private beginReadyExhaustionRecovery(): void {
     this.emitStatus('COUNTERPART_TIMED_OUT', 'READY_ACK_TIMED_OUT')
-    this.beginSubscriptionRecovery('READY_RETRY_EXHAUSTED')
-  }
-
-  private beginSubscriptionRecovery(detail: string): void {
-    if (this.recoveryPromise || this.destroyed || this.explicitCloseRequested) {
-      return
-    }
-    this.invalidateApplicationGeneration()
-    const epoch = ++this.lifecycleEpoch
-    this.emitStatus('CONNECTING', detail)
-    const recovery = this.recoverSubscription(epoch)
-    this.recoveryPromise = recovery
-    void recovery.finally(() => {
-      if (this.recoveryPromise === recovery) this.recoveryPromise = null
-    })
-  }
-
-  private async recoverSubscription(epoch: number): Promise<void> {
-    try {
-      await this.teardownChannel()
-      if (this.destroyed || this.explicitCloseRequested ||
-          epoch !== this.lifecycleEpoch) return
-      await this.openSubscription()
-    }
-    catch {
-      if (!this.destroyed && !this.explicitCloseRequested) {
-        this.emitStatus('CHANNEL_ERROR', 'RECOVERY_FAILED')
-      }
-    }
   }
 
   private async teardownChannel(): Promise<void> {
@@ -1031,7 +1012,6 @@ export class SupabaseRelayTransport extends BaseScriptComponent
     this.destroyed = true
     this.closeStarted = true
     this.explicitCloseRequested = true
-    this.lifecycleEpoch += 1
     this.subscribed = false
     this.stopTimers()
     const queueDrain = this.stopQueue(

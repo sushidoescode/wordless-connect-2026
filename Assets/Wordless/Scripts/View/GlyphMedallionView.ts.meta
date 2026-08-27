@@ -1,0 +1,61 @@
+- !<AssetImportMetadata/e8136ab7-713f-4d7b-8420-78c573883c1d>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> c9b0aeb3-aa94-43bb-b14d-c9486922a325
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> c9b0aeb3-aa94-43bb-b14d-c9486922a325
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> a6abde80-174f-45cd-aaed-07c5033be3d0
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/a6abde80-174f-45cd-aaed-07c5033be3d0>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: b27e4471-a30f-494f-a53c-09b475e71a57
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    frameVisual: false
+    glyphVisual: false
+    ivoryFrameMaterial: false
+    medallionRoot: false
+    revealedWordLabel: false
+    violetGlyphMaterial: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - medallionRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      frameVisual: !<reference.RenderMeshVisual> 00000000-0000-0000-0000-000000000000
+      glyphVisual: !<reference.RenderMeshVisual> 00000000-0000-0000-0000-000000000000
+      revealedWordLabel: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      ivoryFrameMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      violetGlyphMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input SceneObject medallionRoot
+    - // @input Component.RenderMeshVisual frameVisual
+    - // @input Component.RenderMeshVisual glyphVisual
+    - // @input Component.Text revealedWordLabel
+    - // @input Asset.Material ivoryFrameMaterial
+    - // @input Asset.Material violetGlyphMaterial

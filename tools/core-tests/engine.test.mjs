@@ -63,6 +63,7 @@ function readyState(roundId) {
   return {
     phase: 'READY',
     roundId,
+    promptWord: 'SNAKE',
     choices: ['SNAKE', 'RIVER', 'ROPE', 'WAVE'],
     durationMs: 20_000,
     startedAtMs: 0,
@@ -74,6 +75,7 @@ function readyState(roundId) {
     revealedWord: null,
     glyph: [],
     counterpartReady: false,
+    strokeComplete: false,
   }
 }
 
@@ -290,6 +292,8 @@ test('applyRound is the only full reset and publishes no secret', () => {
 
   const dirty = harness.store.getSnapshot()
   assert.equal(dirty.phase, 'ACTIVE')
+  assert.equal(dirty.promptWord, 'SNAKE')
+  assert.equal(dirty.strokeComplete, false)
   assert.deepEqual(dirty.worldPoints, [worldPoint(0)])
   assert.deepEqual(dirty.publicPoints, [publicPoint(0)])
   assert.deepEqual(dirty.guessedIndices, [1])
@@ -300,6 +304,7 @@ test('applyRound is the only full reset and publishes no secret', () => {
   const clean = harness.store.getSnapshot()
   assert.equal(clean.phase, 'READY')
   assert.equal(clean.roundId, 'round-b')
+  assert.equal(clean.promptWord, 'SNAKE')
   assert.deepEqual(clean.worldPoints, [])
   assert.deepEqual(clean.publicPoints, [])
   assert.deepEqual(clean.guessedIndices, [])
@@ -307,6 +312,7 @@ test('applyRound is the only full reset and publishes no secret', () => {
   assert.equal(clean.revealedWord, null)
   assert.deepEqual(clean.glyph, [])
   assert.equal(clean.counterpartReady, false)
+  assert.equal(clean.strokeComplete, false)
   assert.deepEqual(types(resetEffects), ['publish-reset'])
 
   assert.equal(Object.isFrozen(clean), true)
@@ -795,9 +801,11 @@ test('manual close rejects a second stroke until applyRound', () => {
   activate(harness)
   harness.engine.beginStroke('stroke-a', 0)
   assert.deepEqual(types(harness.engine.endStroke(1)), ['publish-stroke-end'])
+  assert.equal(harness.store.getSnapshot().strokeComplete, true)
   assert.deepEqual(harness.engine.beginStroke('stroke-b', 2), [])
 
   harness.engine.applyRound('round-b', SNAKE, 3)
+  assert.equal(harness.store.getSnapshot().strokeComplete, false)
   harness.engine.setCounterpartReady(true, 4)
   assert.deepEqual(types(harness.engine.beginStroke('stroke-b', 5)), [
     'publish-stroke-begin',
@@ -813,6 +821,7 @@ test('point-cap close rejects a second stroke until applyRound', () => {
   }
 
   assert.equal(harness.store.getSnapshot().publicPoints.length, 128)
+  assert.equal(harness.store.getSnapshot().strokeComplete, true)
   assert.deepEqual(
     harness.engine.appendPoint(worldPoint(128), publicPoint(128), 1_002),
     [],

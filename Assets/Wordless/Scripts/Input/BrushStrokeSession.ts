@@ -134,6 +134,12 @@ export class BrushStrokeSession {
     }]
   }
 
+  disarm(): void {
+    this.roundConsumed = true
+    this.activeStrokeId = null
+    this.strokeEnded = true
+  }
+
   sample(rawPlaneLocal: WorldPoint): readonly BrushStrokeAction[] {
     const strokeId = this.activeStrokeId
     if (!this.manipulationHeld || strokeId === null || this.strokeEnded) return []

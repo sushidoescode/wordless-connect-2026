@@ -18,6 +18,11 @@ export type RelayControlEvent =
       readonly observedSequence: number
     }
   | {
+      readonly type: 'PEER_READY'
+      readonly senderId: string
+      readonly connectionId: string
+    }
+  | {
       readonly type: 'PEER_REPLACED'
       readonly previousSenderId: string
       readonly nextSenderId: string

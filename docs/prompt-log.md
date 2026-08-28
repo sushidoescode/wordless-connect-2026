@@ -2633,3 +2633,449 @@ all cited bright/medium capture hashes and video properties, reran every full
 check, audited architecture/metadata/package hygiene, and reported no Critical
 or Important issue. The only residual is the already-disclosed Chromium-only
 browser automation coverage.
+
+## 2026-08-27 — Task 14 five-second comprehension and accessibility (pending human)
+
+Task 14 began from clean Task 13 commit `c5620c0`. Accessibility was developed
+red-first. The initial Axe run found serious 1.3:1 lemon-on-ivory contrast in
+the join eyebrow. After changing only that eyebrow to plum, Axe exposed
+`aria-prohibited-attr` on the timer paragraph. After replacing the label with
+native `role="timer"`, the accessible-tree test still found zero live drawing
+images. Giving the live canvas and generated glyph canvas named `role="img"`
+semantics made the focused suite green. `@axe-core/playwright` 4.13.0 is locked
+in the web package. The final tests cover seven public states in desktop and
+390×844 phone projects, all four buttons in DOM keyboard order, the computed
+3 px plum outline and 6 px lemon halo, accessible canvas/result semantics,
+textual `×`/`✓` cues, phone bounds, and reduced-motion completion. Every Axe
+scan reported no violations at any severity.
+
+The first exact five-second clip candidate used fresh connected round
+`r-L69QGCBZ-1`. Browser and Lens raw recordings hash to
+`61bf831c60830652371e63840c9491345e698d89272b92b3005220a254c777db`
+and `6787d0a21a97a516276db568159006367d0cb5e40fded378b29eb252e1d0c34c`.
+The 1920×1080, 60 fps, 300-frame, silent H.264 cut hashes to
+`44a08c467acf48656602976e31b067d82a133831e2361911e501970331c6de8c`.
+Its real macOS down/120 ms hold/up event lands on `ROPE` around 03.0; frame 204
+and frame 299 show bilateral coral feedback. The disclosure is an original
+ImageMagick text treatment containing only `LENS STUDIO PREVIEW — SIMULATED`,
+SHA-256
+`5c638418a76fb042e3ce5593017081a580b8433b42cf9b788dbce9735d113ccc`.
+
+Two context-isolated LLM screens both identified a drawing/guessing game and
+distinct drawing/guessing participants, but neither spontaneously said that
+the browser action changed both surfaces. The strict criterion therefore
+failed twice and the maximum possible result with one human was only one of
+three. V1 was rejected before burdening a human. Per the fixed remediation
+order, only item 1 was allowed: the authored Lens `PAINTER` scale changed from
+2.15 to 3.0 through Virtual Scene and `model.project.save()`, and the browser
+`GUESSER` minimum changed from 14.08 px to 18 px. The first role-prominence
+Playwright run failed at the measured 14.08 px before the CSS correction made
+it green. No prompt, cards, line, clip timing, feature, or onboarding signal
+changed.
+
+The first v2 recording attempt is explicitly rejected. Its browser join helper
+was still waiting for `live` while Preview restarted, followed by a transport
+recovery during the stroke; the browser observation was `DISCONNECTED` with no
+shared line or result. Both raw movies were renamed with `rejected` and are not
+proof. The ignored capture harness now navigates through `about:blank`, allows
+three seconds for asynchronous channel cleanup, joins while Preview is paused,
+and returns at literal `waiting` rather than racing the Lens restart. This is a
+capture-harness sequencing correction, not product code.
+
+The accepted v2 candidate used fresh round `r-GEG5FX2R-1`. Browser and Lens raw
+recordings hash to
+`7339a37ccae5236fa9cb44aa4986e62867f25e4ab501470ff2992f663c3c7fb6`
+and `e4398b98033e03dd5a60ac4e1fe790b33e276999abe44507ef640b51eba0dd02`.
+The final candidate is H.264/yuv420p, 1920×1080, 60 fps, exactly 300 frames and
+5.000000 seconds with no audio and a clean full decode; SHA-256 is
+`65e3d189cca745957440b2391dce255df7737bdb2ea512519883002f428cbd49`.
+Frames 0/60/120 show matched path growth; frames 174/180 show the physical OS
+click on `ROPE`; frames 204/299 show `× ROPE · TRY AGAIN` in Chrome and coral
+`× TRY AGAIN` in simulated Preview. The seven-frame contact sheet hashes to
+`04061910e1a5dad08417acc43f2aa89d5e781ba9bc065ab48f0e9cd8b6ae606a`.
+Lens logged `READY -> ACTIVE`, equal final `worldPoints=48 publicPoints=48`,
+and authoritative `GUESS index=2 outcome=incorrect`; Chrome observed 23,131
+painted pixels and kept the other three cards enabled.
+
+The formal v2 model reads are intentionally strict. L1 understood the game,
+roles, two surfaces, and wrong browser submission but did not explicitly bind
+the result to both surfaces, so it fails. L2 explicitly reported that the same
+line changed on both sides and that after the guesser selected `ROPE`, both
+views displayed `TRY AGAIN`, so it passes. Verbatim answers are preserved in
+`docs/evidence/layperson-read.md`. The third reviewer must be a genuinely
+unfamiliar human. A human pass yields the required human-inclusive two of
+three; a human fail requires fixed remediation item 2 and an entirely new
+panel. No completion claim is made while that response is absent.
+
+The frozen candidate is baseline `c5620c0` plus the seven-file source manifest
+SHA-256
+`ed2302eb1f06bd6dcf391d224868965a9b4355de27e22d718fcfef237ad5fb77`.
+Fresh verification is 294/294 core tests, 98/98 browser unit tests, a 55-module
+production build, 34/34 Chromium Playwright tests, clean Lens typecheck, and a
+fresh Lens Studio compile/runtime with no errors. Task 14 and its ledger row
+remain pending the unfamiliar-human gate; Task 15 has not started.
+
+Two final read-only audits found no Critical or Important issue. The code audit
+rechecked the diff, production build, focused Task 14 browser checks, seven
+zero-violation Axe states, and authored Lens role/prompt separation. The spec
+audit independently recomputed the clip and seven-file manifest hashes,
+re-probed the exact five-second media properties, inspected the required visual
+beats, and confirmed the strict L1 failure/L2 pass rulings and pending-human
+gate. Residual accessibility coverage is Chromium-only: no manual VoiceOver,
+Safari, zoom, or high-contrast pass exists, and transient submitted, rejected,
+reconnecting, failed, and closed projections are not separately Axe-scanned.
+
+## 2026-08-27 — Owner-approved submission presentation direction
+
+The owner confirmed that the exact five-second artifact remains the Task 14
+comprehension proof rather than the complete demo, and approved the existing
+under-sixty-second submission target as a separate 59-second Task 16 cut. The
+final presentation will maintain a split-screen composition throughout. The
+Lens pane will use Lens Studio's bundled interactive `Sunlit Room`: an ordinary
+home setting supports the Connect theme's person-to-person play while remaining
+quieter and more legible behind the ultraviolet, mint, and coral runtime UI
+than the busier bundled alternatives. Every Preview segment retains the exact
+`LENS STUDIO PREVIEW — SIMULATED` disclosure.
+
+The owner also approved sparse ElevenLabs narration using the `Chris` voice for
+continuity with two prior projects, with matching captions. The local root
+`.env` exists and `git check-ignore -v .env` resolves to the repository's
+`.gitignore`; its value was not read into output. The API credential must never
+be printed, copied into documentation, staged, committed, or pushed. Generated
+narration and the final export remain local until the owner chooses the final
+artifact. Task 16 must record the narration provider/voice and measured
+loudness/true peak without recording any secret.
+
+This approval does not waive the sequential gates. No ElevenLabs request,
+Task 15 implementation, or Task 16 capture begins before the unfamiliar-human
+Task 14 panel member returns a passing verbatim response and Task 14 is
+verified and committed.
+
+## 2026-08-28 — Task 14 v2 human read fails; remediation 2 begins
+
+The owner supplied H1's four answers verbatim:
+
+```text
+1. "One side draws and the other side guesses".
+2. "A game of pictionary with multiple choice".
+3. "A drawing was happening".
+4. "The guesser needs to guess the drawing"
+```
+
+H1 identifies a Pictionary-style game, a drawing participant, and a distinct
+guesser, but reports neither a guess action nor a shared result-state change.
+Under the frozen strict rubric H1 is a FAIL. Together with L1 FAIL and L2 PASS,
+v2 scores 1/3 and cannot pass. The owner has been asked to confirm the reviewer's
+unfamiliar status for composition bookkeeping; it cannot change the content
+ruling. The fixed remediation order now requires item 2 only: move the four
+cards higher/earlier, cut a new five-second clip, and convene an entirely new
+three-reviewer panel including a genuinely unfamiliar human who must pass.
+Task 15 remains gated.
+
+## 2026-08-28 — Task 14 remediation 2 verified; v3 blind screen fails
+
+The v2 failure pattern was isolated to the narrow capture layout. The raw
+Chrome movie was 1824×2184; at 2× backing scale its content viewport was below
+the browser's 960 px desktop breakpoint. In that stacked flow,
+`web/index.html` placed the moving drawing field before the four answer cards,
+so the first-time read was dominated by drawing and the action surface arrived
+later. A read-only independent layout analysis reached the same conclusion.
+
+The remediation-2 Playwright assertion was written first at an 800×893
+viewport. It required `#choices.bottom < .play-field.top` and failed against
+the pre-change DOM (`559.328` versus `139.75`). The only product change moved
+the existing `#choices` section before `.play-field`; no copy, styling, game
+logic, transport, or Lens behavior changed. The focused test passed after the
+move. Measured checks also put the cards before the field at 828×1013 and
+912×1092, while the explicit ≥960 px grid areas retained the existing desktop
+side rail. The 390×844 terminal-state bounds checks remained green.
+
+Several local capture attempts were deliberately rejected instead of being
+promoted as proof. One recording ended before the stroke because of tool-call
+latency. One browser sender fell into recovery before the refreshed Lens
+subscribed. Two attempts began against the tail of an old ACTIVE round because
+the preflight observed only phase, not a fresh timer. Another contained the
+wrong browser result but no stroke because the indirect brush had not first
+acquired hover. A later run captured a stroke but not the physical result
+because the Chrome page was raised without activating the Chrome application.
+All corresponding raw files carry `attempt*-rejected` names.
+
+The accepted sequence drained queued Preview resets, then used one forced Lens
+TypeScript compile plus one `RunAndCollectLogsTool` refresh as the authoritative
+round boundary. The capture preflight required ACTIVE with 18–20 seconds. The
+indirect interaction exactly reproduced its proven order: a hover-acquisition
+tap, a separate touch start, 30 delayed move injections, and a separate end.
+Chrome was explicitly activated only after the stroke closed, then a real
+`cliclick` down/120 ms hold/up event selected `ROPE`. This produced 23,330
+painted browser pixels, `× ROPE · TRY AGAIN`, three enabled alternatives, and
+15 seconds remaining. Round `r-NQ9AWBMI-1` logged `READY -> ACTIVE`, 44 equal
+world/public points, and authoritative `GUESS index=2 outcome=incorrect`.
+Lens TypeScript compilation succeeded and there was no Lens script/runtime
+error; Lens Studio also emitted two editor-level QNetworkAccessManager
+`Host requires authentication` warnings, which are recorded rather than
+misstated as product proof.
+
+The accepted raw SHA-256 values are
+`d2f7e6f9941c543df815004f06f3cd6fb83f92c5918ea29ac790cb8efc2f5977`
+for Chrome and
+`f1b3d146803bfdfaf707f90751c38ad29e60058517c0fdab58e8d1c0d284cfd3`
+for Lens Studio. The final split cut begins with a partial matched stroke,
+keeps all four cards high from frame zero, uses the exact simulated-Preview
+disclosure, shows the physical submission at frame 155, and shows bilateral
+coral feedback from frame 160. It is silent H.264/yuv420p, 1920×1080, 60 fps,
+exactly 300 frames and 5.000000 seconds with a clean full decode; SHA-256 is
+`0de29169f11dafe6cb25241affaab23e96ce9b3af2e8c423e87eed5224d11798`.
+The exact-frame sheet (`0/60/120/155/160/180/299`) hashes to
+`cc31f3a5613f8d7ec2d4358d2f0f03fd2af03f2c47919b7bce770074145bd433`.
+The reviewed revision is baseline `c5620c0` plus seven-file source-manifest
+SHA-256
+`f8c90558d701b9ace282b375aa09616da57897188ad7e14b83392cc3d6d558a9`.
+
+Two entirely new context-isolated multimodal LLM screens received only that
+silent clip and the four fixed questions. Both identified the game, painter,
+distinct guesser, relayed/matched line, `ROPE` selection, and incorrect
+`TRY AGAIN` result. Neither explicitly attributed the result to both surfaces.
+Consistency with the strict v1/v2 rubric therefore makes both FAIL. A passing
+human could reach only one of three, so no human was burdened with v3. The
+fixed order now requires remediation item 3 only: enlarge the existing
+prompt/heading, recut a new clip, and use an entirely new panel. Task 15 stays
+gated.
+
+## 2026-08-28 — Task 14 remediation 3 verified; v4 blind screen fails
+
+The remediation-3 browser test was written red-first at the exact 800×893
+capture viewport. It required the computed `GUESS THE CLUE` heading to be at
+least 44 px and initially measured 40 px. The only product change increased
+the existing fluid component from `5vw` to `5.5vw`. The focused assertion and
+responsive-bounds checks then passed. The clamp still leaves the 390 px phone
+floor at 28.8 px and the 1440 px desktop cap at 52 px. No Lens visual, copy,
+card order, game behavior, or clip timing changed.
+
+The accepted v4 recording used fresh round `r-R7EEM077-1`. Browser and Lens
+raw SHA-256 values are
+`64278d836a88f3241840a24a8f5de4b8a85871b91304d684672c28c823383a58`
+and
+`7a6d424ded7ee41d730142c18d902934142b5ddfdf65e7d93c2a606d32349e23`.
+The final split cut begins with a partial matched stroke, keeps both roles,
+the larger prompt, four cards, and the simulated-Preview disclosure visible,
+shows the real OS submission around frame 170, and shows bilateral coral
+feedback from frame 175. It is silent H.264/yuv420p, 1920×1080, 60 fps,
+exactly 300 frames and 5.000000 seconds with a clean full decode; SHA-256 is
+`e5685045eee6db41fd33cf2fbef17f695b73d56990dd65e59b638224563b03bb`.
+The exact-frame sheet (`0/60/120/170/175/180/299`) hashes to
+`14ca29d5c192466ea6db702303842731a6651a94f7aa9727f8fc4e42f0647adf`.
+
+Lens Studio logged `READY -> ACTIVE`, 39 equal world/public points, and the
+Lens-authoritative `GUESS index=2 outcome=incorrect`; Chrome observed 20,765
+painted pixels, `× ROPE · TRY AGAIN`, three enabled alternatives, and 14
+seconds remaining. Forced Lens TypeScript compilation succeeded. Runtime log
+collection also ended with one editor-level QNetworkAccessManager `Host
+requires authentication` warning; it is disclosed without misclassifying it
+as a product script error. Fresh verification passed 294/294 core, 98/98 web,
+the 55-module production build, Lens typecheck, and 36/36 Chromium Playwright
+tests. The source manifest is baseline `c5620c0` plus seven files, SHA-256
+`c8f588d92ce64b0b75b178e71748d097f7786f2f008823a7c276da4b686a0a2f`.
+
+Two entirely new context-isolated multimodal LLM screens received only the
+silent v4 clip and the four fixed questions. Both described the drawing game,
+separate drawer and guesser, path growth, the `ROPE` selection, and its wrong
+`TRY AGAIN` result. Neither explicitly said that the browser action changed
+both surfaces. Both therefore fail the same strict shared-causality rule used
+for v1–v3. Even a passing human could produce only one of three, so no human
+was asked to review v4. Fixed-order remediation item 4 now applies: strengthen
+the visible line match, recut, and replace the entire panel. Task 15 remains
+gated.
+
+## 2026-08-28 — Task 14 remediation 4 strengthens relay read; v5 panel still fails
+
+Read-only code and visual analyses agreed that the two exact path silhouettes
+were insufficiently linked in the five-second composition. Pixel-component
+measurement found a concrete scale mismatch at v4 frame 120: 506×274 px on
+the browser versus 334×182 px on Lens, approximately a uniform 1.5× ratio.
+The smallest remediation changed only the Lens crop from 1748×1898 to
+1172×1274 around the same focal center, a 1.49× zoom. No runtime source,
+browser crop, gesture, timing, or disclosure changed.
+
+The new crop kept the role/prompt HUD, Sunlit Room context, and disclosure.
+At v5 frame 60, measured path bounds are 260×143 versus 284×152, within 10%
+on both axes; at frames 120 and 180 they are 506×275/274 versus 500×272,
+within approximately 1.2%. A first preflight was explicitly rejected because
+the PNG overlay ended it at 299 frames/4.983333 seconds. Repeating the overlay
+and capping output at 300 frames produced the accepted technical candidate.
+
+V5 reuses the v4 Chrome/Lens raw hashes
+`64278d836a88f3241840a24a8f5de4b8a85871b91304d684672c28c823383a58`
+and
+`7a6d424ded7ee41d730142c18d902934142b5ddfdf65e7d93c2a606d32349e23`.
+The v5 clip is silent H.264/yuv420p, 1920×1080, 60 fps, exactly 300 frames and
+5.000000 seconds with a clean full decode; SHA-256 is
+`eef202c90339d379ed9ad598e89385b5aa22bc4ffee94c01d36926daecf2545b`.
+Its exact-frame sheet (`0/60/120/170/175/180/299`) hashes to
+`1ee342cdbb0d8038a309b711c08e2fb4dcc1714d6584ae8d14112ef257624aed`.
+The unchanged seven-file source manifest remains
+`c8f588d92ce64b0b75b178e71748d097f7786f2f008823a7c276da4b686a0a2f`.
+
+Both entirely fresh isolated LLM screens now explicitly described the same
+line or a line on both views, confirming the intended relay improvement. Both
+also understood the drawing game, distinct roles, and incorrect `ROPE`
+submission, but neither explicitly said that its result changed both views.
+Under the unchanged strict rubric, both fail. A human could produce only 1/3,
+so none was burdened. Fixed remediation item 5 is now the only remaining
+permitted change: begin the staging later in the already-moving stroke and use
+an entirely new panel. Task 15 remains gated.
+
+## 2026-08-28 — Task 14 remediation 5 fails; fixed order exhausted
+
+Onset inspection found the earliest useful common partial-path frame at v5
+frame 18. V6 therefore changes only the common raw trim from 1.45 to 1.75
+seconds, a 0.30-second shift. It retains the 1.49× Lens crop, all runtime
+source, the browser crop, the connected round, physical gesture, and the
+simulated-Preview disclosure. Frame 0 now visibly contains a partial violet
+path and lemon endpoint on both surfaces. The real browser submission appears
+at frame 151 (2.52 seconds), Lens `× TRY AGAIN` appears at frame 155, and both
+surfaces show the wrong state at frame 156.
+
+V6 is silent H.264/yuv420p, 1920×1080, 60 fps, exactly 300 frames and
+5.000000 seconds, has no audio stream, and completed a clean full decode. Its
+SHA-256 is
+`60ff5fbbd3d2ec20b038fdcc82c02e15ac5bb96ac2453d1608cac3be77f45da6`.
+The exact-frame sheet (`0/60/120/151/155/156/299`) hashes to
+`4b7be2c67cccf9bf0f2b169d01ccb200429fd54c2edda48f5f17d06ea7716496`.
+Because this was another capture-only change, the seven-file source manifest
+remains
+`c8f588d92ce64b0b75b178e71748d097f7786f2f008823a7c276da4b686a0a2f`
+and the prior fresh 294/98/55-module/36-Playwright/typecheck verification still
+binds the exact source.
+
+Two entirely new context-isolated LLM screens received only v6 and the four
+fixed questions. Both identified the drawing/guessing game, separate roles,
+line growth, `ROPE` submission, and wrong `TRY AGAIN` result. Neither
+explicitly attributed the result to both surfaces, so both fail under the
+unchanged rubric. A passing human could still reach only 1/3; none was asked.
+
+All five approved remediation items are now exhausted. No sixth change was
+silently introduced. A read-only code analysis identified the smallest
+candidate design amendment: while the authoritative wrong-answer state is
+active, recolor the existing exact stroke from violet to coral on both browser
+and Lens, retaining geometry, width, draw head, copy, and timing. This would
+make the path itself the shared reaction. It remains proposed and unimplemented
+pending owner authorization. Task 14 and Task 15 remain gated.
+
+## 2026-08-28 — Owner approves bilateral path reaction; v7 screen becomes viable
+
+The owner approved the proposed bilateral wrong-answer reaction and separately
+requested a simple painter color palette. The coral reaction was implemented
+first without expanding the game loop: the browser resolves its existing live
+path to coral only for authoritative active/wrong projection state, the Lens
+composition root tells the existing ribbon view to apply the same temporary
+coral override, and a fresh round restores violet. Geometry, point data, draw
+head, answer authority, timing, and exact-glyph behavior remain unchanged.
+
+The change was test-driven. A new browser render assertion first failed with
+violet where coral was required. A real `StrokeRibbonView` test first failed
+because no incorrect-feedback state existed, and the composition-root test
+first failed because no state reached the ribbon. The smallest production
+changes made those cases pass. Fresh full verification then passed 296/296
+core tests, 99/99 browser unit tests, the 55-module production build, 36/36
+Chromium Playwright tests with the existing zero-violation Axe coverage, Lens
+typecheck, and Lens Studio compile/Preview subscription. The repeated
+QNetworkAccessManager `Host requires authentication` editor warning is still
+disclosed; no product script/transport error accompanied it.
+
+A fresh connected run relayed 36 equal world/public points and accepted the
+physical browser `GUESS index=2 outcome=incorrect` through Lens authority.
+Chrome then measured 22,318 painted pixels and displayed
+`× ROPE · TRY AGAIN`; both its exact path and the Lens Preview ribbon were
+coral. The Lens pane remained the bundled interactive Sunlit Room with the
+simulated-Preview disclosure. Two recorder attempts that omitted the browser
+result or froze before a valid stroke were rejected.
+
+The frozen v7 cut uses a common 3.750-second trim. It begins mid-stroke on both
+surfaces, shows browser submission at +2.300 seconds, Lens coral at +2.350,
+browser result/coral at +2.433, and holds the bilateral coral reaction for the
+final approximately 154 frames. It is silent H.264/yuv420p, 1920×1080, 60 fps,
+exactly 300 frames and 5.000000 seconds, with no audio stream and a clean full
+decode. Clip SHA-256 is
+`a239cd38d461f5d692be53beaee9a0c0ac2362b0d581adb4c85095e0a31d9573`;
+the twelve-file source-manifest SHA-256 is
+`f0d5e57584afd876d74d26ce7783bf0b1d61003f2c753aa905fa223debaf53e5`.
+
+Two fresh context-isolated multimodal LLM screens received only v7 and the
+fixed questions. One fails for omitting bilateral result attribution; one
+passes because it explicitly identifies the changing line on both sides and
+carries that referent into the wrong-answer coral reaction. The panel is now
+viable, but the unfamiliar-human review is intentionally deferred. A palette
+changes protocol/state and would invalidate a completed source-bound panel, so
+the palette design must first be explicitly approved and either implemented or
+deferred. Task 14 and Task 15 remain pending.
+
+## 2026-08-28 — Owner approves bounded painter palette architecture
+
+The owner approved the exact three-swatch palette design presented for review:
+violet, lemon, and mint are painter-only bounded selections; violet is the
+default; selection is accepted only before stroke begin; an ivory ring/check
+provides a non-color marker; protocol v2 carries the token once on
+`stroke.begin`; the browser renders but never selects it; coral remains the
+temporary authoritative wrong-answer override; correct handling restores the
+selection into the exact glyph; and only Lens-process memory carries the last
+choice across replay.
+
+The approved design authority was amended in place at
+`docs/superpowers/specs/2026-08-24-wordless-relay-design.md`. The amendment also
+freezes malformed/late-color rejection, no points before accepted begin, reset
+and reconnect clearing on the browser, full Lens restart returning to violet,
+and no protocol-v1 compatibility layer. No runtime implementation began before
+this approval and written contract.
+
+## 2026-08-28 — Task 3 adds the authoritative Lens painter palette adapter
+
+The owner-approved Task 3 scope was limited to the Lens input adapter,
+composition routing, and color-aware ribbon/glyph payoff views for the bounded
+violet, lemon, and mint painter palette. The palette adapter emits intent only;
+`WordlessAppController` routes an accepted selection through
+`WordlessEngine.selectStrokeColor`, and every visible selection and lock state
+returns from the frozen Lens `RoundStore` snapshot. The browser never selects a
+color. Task 3 deliberately did not mutate `Assets/Scene.scene`, create the
+palette hierarchy, or claim runtime interaction proof; that editor wiring and
+Preview proof remain Task 4.
+
+Implementation followed test-driven development. The first
+`npm run test:core` RED run exited 1 for the intended missing behavior:
+`PainterPaletteController.ts` did not yet exist (`ENOENT`),
+`StrokeRibbonView.setStrokeColor` was absent in both ribbon color tests, the
+composition palette render and glyph color forwarding were `undefined`, and
+the glyph view still exposed the old two-material contract. After the minimal
+implementation, the GREEN run exited 0 with 304/304 core tests passing and no
+failures or skips. The tests cover intent-only selection, enum rejection,
+1/1.08/1.15 scale states, ivory selected ring, lock disabling all three
+colliders/interactables, nine interaction unsubscriptions, READY rejection,
+ACTIVE authoritative selection, lock rendering before `stroke.begin` send,
+listener teardown, exact violet/lemon/mint and temporary coral ribbon colors,
+material reuse, exact glyph material identity, and no shared-material color
+mutation.
+
+Fresh verification passed `sh tools/typecheck/check.sh` with no diagnostics.
+`npm run check` exited 0: core remained 304/304, the web suite passed 3 files
+and 106/106 tests, and the production TypeScript/Vite build transformed 55
+modules successfully. `git diff --check` also exited 0. Lens Studio MCP
+`RecompileTypeScriptTool` returned `status: succeeded` twice, once after the
+implementation and again after the full verification matrix. Lens Studio
+generated the adjacent
+`Assets/Wordless/Scripts/Input/PainterPaletteController.ts.meta` through its
+`TypeScriptAssetImporter`; the metadata was not hand-authored.
+
+Both successful compiles were followed by MCP
+`RunAndCollectLogsTool(mode: refresh)` inspection. The final refresh returned
+`status: success` and observed first activity at 28 ms, but Preview was not
+runtime-clean because the intentionally unchanged scene cannot yet provide the
+new bindings. The exact expected Task 4 boundary was
+`Error: Input palette was not provided for the object WordlessAppRoot`.
+The same Console capture also recorded
+`[DrawingAnchor -> StrokeRibbonView::start()] Component is not yet awake`
+(four occurrences), `Rendering failed 5 times in a row`, and the editor/network
+warning `(@QNetworkAccessManager thread) stream 9 finished with error: "Host requires authentication"`.
+Those diagnostics are preserved rather than omitted or promoted as product
+proof. Task 4 must wire `PainterPaletteController`, `WordlessApp.palette`, and
+the new glyph material inputs before clean runtime behavior can be claimed.
+All Task 3 Preview evidence is simulated Lens Studio Preview evidence, not a
+hardware test or real Spectacles capture.

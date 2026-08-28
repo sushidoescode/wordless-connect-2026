@@ -206,6 +206,16 @@ describe('WebRoundStore', () => {
     store.dispatch(begin('round-2', 'lemon', 8))
     store.invalidateForReconnect()
     expect(colorSnapshot(store).strokeColorId).toBeNull()
+    store.dispatch(roundReset('round-2', 'round-3', 9))
+    store.dispatch(roundStart('round-3', 10))
+    store.dispatch(points([[300, 400]], 'round-3', 11))
+    expect(colorSnapshot(store).points).toEqual([])
+    store.dispatch(begin('round-3', 'mint', 12, 'successor-stroke'))
+    store.dispatch(envelope('stroke.points', 'round-3', {
+      strokeId: 'successor-stroke',
+      points: [[300, 400]],
+    }, 13))
+    expect(colorSnapshot(store).points).toEqual([[300, 400]])
   })
 
   it('leaves the snapshot untouched for malformed begins at the unsafe dispatch boundary', () => {

@@ -206,7 +206,7 @@ function message(
   connectionId = PAINTER_CONNECTION_ID,
 ) {
   return {
-    v: 1,
+    v: 2,
     type,
     sessionId: SESSION_ID,
     roundId,

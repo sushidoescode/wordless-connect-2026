@@ -20,7 +20,7 @@ function envelope<T extends RelayMessage['type']>(
   sequence = 1,
 ): MessageOf<T> {
   return {
-    v: 1,
+    v: 2,
     type,
     sessionId: SESSION_ID,
     roundId,

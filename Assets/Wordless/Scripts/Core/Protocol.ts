@@ -1,4 +1,4 @@
-export const PROTOCOL_VERSION = 1 as const
+export const PROTOCOL_VERSION = 2 as const
 export const BROADCAST_EVENT = 'wordless-message' as const
 export const LOBBY_ROUND_ID = 'lobby' as const
 export const MAX_BATCH_POINTS = 8
@@ -17,6 +17,7 @@ export const INSTANCE_NONCE_LENGTH = 8
 
 export type ChoiceIndex = 0 | 1 | 2 | 3
 export type ChoiceTuple = readonly [string, string, string, string]
+export type StrokeColorId = 'violet' | 'lemon' | 'mint'
 export type QuantizedPoint = readonly [number, number]
 export interface WorldPoint { readonly x: number; readonly y: number; readonly z: number }
 export type GlyphNormalizer = (
@@ -55,7 +56,7 @@ export type RoundResultPayload =
     }
 
 interface BaseMessage<T extends string, P> {
-  readonly v: 1
+  readonly v: 2
   readonly type: T
   readonly sessionId: string
   readonly roundId: string
@@ -80,7 +81,7 @@ export type RelayMessage =
       durationMs: number
       targetConnectionId: string
     }>
-  | BaseMessage<'stroke.begin', { strokeId: string }>
+  | BaseMessage<'stroke.begin', { strokeId: string; colorId: StrokeColorId }>
   | BaseMessage<'stroke.points', {
       strokeId: string
       points: readonly QuantizedPoint[]
@@ -172,6 +173,10 @@ export function isProductRoundId(value: unknown): value is string {
 
 function isChoiceIndex(value: unknown): value is ChoiceIndex {
   return value === 0 || value === 1 || value === 2 || value === 3
+}
+
+export function isStrokeColorId(value: unknown): value is StrokeColorId {
+  return value === 'violet' || value === 'lemon' || value === 'mint'
 }
 
 function isTimestamp(value: unknown): value is number {
@@ -352,10 +357,17 @@ export function parseRelayMessage(value: unknown): RelayMessage | null {
           targetConnectionId: payload.targetConnectionId,
         })
       }
-      case 'stroke.begin':
+      case 'stroke.begin': {
+        if (!isBoundedId(payload.strokeId, MAX_STROKE_ID_LENGTH) ||
+            !isStrokeColorId(payload.colorId)) return null
+        return withBase(input, 'stroke.begin', {
+          strokeId: payload.strokeId,
+          colorId: payload.colorId,
+        })
+      }
       case 'stroke.end': {
         if (!isBoundedId(payload.strokeId, MAX_STROKE_ID_LENGTH)) return null
-        return withBase(input, input.type, { strokeId: payload.strokeId })
+        return withBase(input, 'stroke.end', { strokeId: payload.strokeId })
       }
       case 'stroke.points': {
         if (!isBoundedId(payload.strokeId, MAX_STROKE_ID_LENGTH)) return null

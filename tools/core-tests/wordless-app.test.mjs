@@ -342,7 +342,7 @@ class FakeReplay {
 
 function message(type, roundId, payload, overrides = {}) {
   return {
-    v: 1,
+    v: 2,
     type,
     sessionId: 'WAVE42',
     roundId,
@@ -457,6 +457,8 @@ test('maps every engine effect into a versionless authority-safe draft', () => {
     glyph: [],
     counterpartReady: true,
     strokeComplete: false,
+    strokeColorId: 'lemon',
+    paletteInputLocked: false,
   }
   const meta = { roundId: ROUND_ONE, generation: 7 }
   const cases = [
@@ -473,11 +475,16 @@ test('maps every engine effect into a versionless authority-safe draft', () => {
       },
     ],
     [
-      { ...meta, type: 'publish-stroke-begin', strokeId: 'stroke-1' },
+      {
+        ...meta,
+        type: 'publish-stroke-begin',
+        strokeId: 'stroke-1',
+        colorId: 'lemon',
+      },
       {
         type: 'stroke.begin',
         roundId: ROUND_ONE,
-        payload: { strokeId: 'stroke-1' },
+        payload: { strokeId: 'stroke-1', colorId: 'lemon' },
       },
     ],
     [

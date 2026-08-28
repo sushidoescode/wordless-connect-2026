@@ -41,7 +41,7 @@ function message(
   },
 ) {
   const parsed = parseRelayMessage({
-    v: 1,
+    v: 2,
     type,
     sessionId,
     roundId,
@@ -127,7 +127,7 @@ function strokeBegin(senderId, sequence, roundId = ROUND_A) {
     senderId,
     sequence,
     roundId,
-    payload: { strokeId: `stroke-${sequence}` },
+    payload: { strokeId: `stroke-${sequence}`, colorId: 'violet' },
   })
 }
 

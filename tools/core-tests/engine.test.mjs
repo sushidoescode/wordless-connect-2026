@@ -76,8 +76,49 @@ function readyState(roundId) {
     glyph: [],
     counterpartReady: false,
     strokeComplete: false,
+    strokeColorId: 'violet',
+    paletteInputLocked: false,
   }
 }
+
+test('painter color is selectable only before the first stroke and persists to replay', () => {
+  const harness = makeHarness()
+  harness.engine.applyRound('round-1', SNAKE, 0, 20_000)
+  assert.equal(harness.engine.selectStrokeColor('lemon'), false)
+
+  harness.engine.setCounterpartReady(true, 10)
+  assert.equal(harness.engine.selectStrokeColor('lemon'), true)
+  assert.equal(harness.store.getSnapshot().strokeColorId, 'lemon')
+  assert.equal(harness.store.getSnapshot().paletteInputLocked, false)
+
+  const begin = harness.engine.beginStroke('stroke-1', 20)
+  assert.deepEqual(begin.at(-1), {
+    type: 'publish-stroke-begin',
+    strokeId: 'stroke-1',
+    colorId: 'lemon',
+    roundId: 'round-1',
+    generation: harness.engine.getRoundGeneration(),
+  })
+  assert.equal(harness.store.getSnapshot().paletteInputLocked, true)
+  assert.equal(harness.engine.selectStrokeColor('mint'), false)
+  assert.equal(harness.store.getSnapshot().strokeColorId, 'lemon')
+
+  harness.engine.appendPoint(worldPoint(0), publicPoint(0), 21)
+  harness.engine.endStroke(22)
+  harness.engine.tick(120)
+  harness.engine.submitGuess('guess-correct', 0, 121)
+  harness.engine.lockGlyph('round-1', harness.engine.getRoundGeneration())
+  harness.engine.applyRound('round-2', SNAKE, 130, 20_000)
+  assert.equal(harness.store.getSnapshot().strokeColorId, 'lemon')
+  assert.equal(harness.store.getSnapshot().paletteInputLocked, false)
+
+  const fresh = makeHarness()
+  fresh.engine.applyRound('round-fresh', SNAKE, 0, 20_000)
+  assert.equal(fresh.store.getSnapshot().strokeColorId, 'violet')
+  assert.equal(fresh.store.getSnapshot().paletteInputLocked, false)
+  assert.equal(fresh.engine.selectStrokeColor('coral'), false)
+  assert.equal(fresh.store.getSnapshot().strokeColorId, 'violet')
+})
 
 test('throwing store listener cannot abort effects or skip later listeners', () => {
   const harness = makeHarness()

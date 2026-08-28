@@ -1,4 +1,5 @@
 import {
+  isStrokeColorId,
   MAX_STROKE_POINTS,
   POINT_BATCH_INTERVAL_MS,
 } from './Protocol'
@@ -8,6 +9,7 @@ import type {
   GuessRejectionReason,
   PointBatcher,
   QuantizedPoint,
+  StrokeColorId,
   WorldPoint,
 } from './Protocol'
 import type { LensRoundState } from './RoundStore'
@@ -37,7 +39,11 @@ export interface EngineEffectMeta {
 
 type EngineEffectBody =
   | { type: 'publish-round-start' }
-  | { type: 'publish-stroke-begin'; strokeId: string }
+  | {
+      type: 'publish-stroke-begin'
+      strokeId: string
+      colorId: StrokeColorId
+    }
   | {
       type: 'publish-stroke-points'
       strokeId: string
@@ -91,6 +97,7 @@ export class WordlessEngine {
   private pendingTerminal: PendingTerminal | null = null
   private deferredGeneration = 0
   private lastNowMs: number | null = null
+  private preferredStrokeColorId: StrokeColorId = 'violet'
 
   constructor(
     store: RoundStore,
@@ -146,6 +153,8 @@ export class WordlessEngine {
       glyph: [],
       counterpartReady: false,
       strokeComplete: false,
+      strokeColorId: this.preferredStrokeColorId,
+      paletteInputLocked: false,
     })
 
     if (previousRoundId.length === 0) return []
@@ -178,6 +187,16 @@ export class WordlessEngine {
     return [this.effect({ type: 'publish-round-start' })]
   }
 
+  selectStrokeColor(colorId: StrokeColorId): boolean {
+    if (!isStrokeColorId(colorId)) return false
+    const snapshot = this.store.getSnapshot()
+    if (snapshot.phase !== 'ACTIVE' || this.strokeState !== 'NOT_STARTED' ||
+        snapshot.paletteInputLocked) return false
+    this.preferredStrokeColorId = colorId
+    this.store.replace({ ...snapshot, strokeColorId: colorId })
+    return true
+  }
+
   beginStroke(strokeId: string, nowMs: number): EngineEffect[] {
     if (!this.acceptTime(nowMs)) return []
     const advanced = this.advanceDeadline(nowMs)
@@ -190,6 +209,8 @@ export class WordlessEngine {
       return advanced.effects
     }
 
+    const snapshot = this.store.getSnapshot()
+    this.store.replace({ ...snapshot, paletteInputLocked: true })
     this.strokeState = 'OPEN'
     this.strokeId = strokeId
     this.lastPointBatchAtMs = nowMs
@@ -197,6 +218,7 @@ export class WordlessEngine {
     return [...advanced.effects, this.effect({
       type: 'publish-stroke-begin',
       strokeId,
+      colorId: snapshot.strokeColorId,
     })]
   }
 
@@ -358,6 +380,7 @@ export class WordlessEngine {
       phase: 'DISCONNECTED',
       remainingMs: 0,
       counterpartReady: false,
+      paletteInputLocked: true,
     })
   }
 

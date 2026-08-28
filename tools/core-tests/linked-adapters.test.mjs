@@ -858,7 +858,7 @@ test('real reset retry stays atomic after delegate failure and suppresses next-r
   await harness.lens.send({
     type: 'stroke.begin',
     roundId: harness.root.currentRoundId,
-    payload: { strokeId: 'stale-stroke' },
+    payload: { strokeId: 'stale-stroke', colorId: 'violet' },
   })
   await settle()
   assert.equal(harness.delegate.dispatched.some(
@@ -879,7 +879,7 @@ test('real Lens peer transition cancels queued Lens application drafts', async (
   const held = harness.bus.holdNext('lens', 'stroke.begin', false)
   const started = harness.lens.send({
     type: 'stroke.begin', roundId: harness.root.currentRoundId,
-    payload: { strokeId: 'stroke-1' },
+    payload: { strokeId: 'stroke-1', colorId: 'violet' },
   })
   const points = harness.lens.send({
     type: 'stroke.points', roundId: harness.root.currentRoundId,
@@ -926,7 +926,7 @@ test('real old started payload is suppressed delivered or withheld and reset is 
       const held = harness.bus.holdNext('lens', 'stroke.begin', deliverOldPayload)
       const started = harness.lens.send({
         type: 'stroke.begin', roundId: harness.root.currentRoundId,
-        payload: { strokeId: 'old-stroke' },
+        payload: { strokeId: 'old-stroke', colorId: 'violet' },
       })
       const queuedPoints = harness.lens.send({
         type: 'stroke.points', roundId: harness.root.currentRoundId,
@@ -1016,7 +1016,7 @@ test('real lost initial start recovers by re-subscribe without invented resync',
 
   await harness.lens.send({
     type: 'stroke.begin', roundId: harness.root.currentRoundId,
-    payload: { strokeId: 'later-painter-traffic' },
+    payload: { strokeId: 'later-painter-traffic', colorId: 'violet' },
   })
   await settle()
 
@@ -1124,7 +1124,7 @@ test('real adapters halt ambiguous application sends and recover without FIFO co
   lensFailure.bus.failNext('lens', 'stroke.begin')
   await assert.rejects(lensFailure.lens.send({
     type: 'stroke.begin', roundId: lensFailure.root.currentRoundId,
-    payload: { strokeId: 'stroke-fail' },
+    payload: { strokeId: 'stroke-fail', colorId: 'violet' },
   }))
   await settle()
   assert.equal(lensFailure.bus.lensChannels.length, 2)

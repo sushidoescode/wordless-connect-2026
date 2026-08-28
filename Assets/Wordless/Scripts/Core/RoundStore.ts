@@ -3,6 +3,7 @@ import type {
   ChoiceTuple,
   QuantizedPoint,
   RoundPhase,
+  StrokeColorId,
   WorldPoint,
 } from './Protocol'
 
@@ -22,6 +23,8 @@ export interface LensRoundState {
   readonly glyph: readonly QuantizedPoint[]
   readonly counterpartReady: boolean
   readonly strokeComplete: boolean
+  readonly strokeColorId: StrokeColorId
+  readonly paletteInputLocked: boolean
 }
 
 export type RoundStoreListener = (snapshot: LensRoundState) => void
@@ -74,6 +77,8 @@ function freezeState(next: LensRoundState): LensRoundState {
     glyph: freezeQuantizedPoints(next.glyph),
     counterpartReady: next.counterpartReady,
     strokeComplete: next.strokeComplete,
+    strokeColorId: next.strokeColorId,
+    paletteInputLocked: next.paletteInputLocked,
   })
 }
 
@@ -93,6 +98,8 @@ const INITIAL_STATE = freezeState({
   glyph: [],
   counterpartReady: false,
   strokeComplete: false,
+  strokeColorId: 'violet',
+  paletteInputLocked: true,
 })
 
 export class RoundStore {

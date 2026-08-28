@@ -25,7 +25,7 @@ import {
 } from '../../Assets/Wordless/Scripts/Core/Protocol.ts'
 
 const base = (type, payload, overrides = {}) => ({
-  v: 1,
+  v: 2,
   type,
   sessionId: 'WAVE42',
   roundId: 'round-1',
@@ -37,7 +37,7 @@ const base = (type, payload, overrides = {}) => ({
 })
 
 test('frozen public constants retain the literal wire contract', () => {
-  assert.equal(PROTOCOL_VERSION, 1)
+  assert.equal(PROTOCOL_VERSION, 2)
   assert.equal(BROADCAST_EVENT, 'wordless-message')
   assert.equal(LOBBY_ROUND_ID, 'lobby')
   assert.equal(MAX_BATCH_POINTS, 8)
@@ -53,6 +53,30 @@ test('frozen public constants retain the literal wire contract', () => {
   assert.equal(MAX_PING_ID_LENGTH, 32)
   assert.equal(MAX_WORD_LENGTH, 12)
   assert.equal(INSTANCE_NONCE_LENGTH, 8)
+})
+
+test('stroke begin accepts only the v2 painter color tokens', () => {
+  for (const colorId of ['violet', 'lemon', 'mint']) {
+    const parsed = parseRelayMessage(base('stroke.begin', {
+      strokeId: 'stroke-1', colorId,
+    }, { v: 2 }))
+    assert.equal(parsed?.type, 'stroke.begin')
+    assert.equal(parsed?.payload.colorId, colorId)
+  }
+
+  for (const colorId of [undefined, 'coral', 'ivory', 'plum', '#8B5CF6',
+    'rgb(139,92,246)', '', 1, null]) {
+    assert.equal(parseRelayMessage(base('stroke.begin',
+      colorId === undefined
+        ? { strokeId: 'stroke-1' }
+        : { strokeId: 'stroke-1', colorId },
+      { v: 2 },
+    )), null)
+  }
+
+  assert.equal(parseRelayMessage(base('stroke.begin', {
+    strokeId: 'stroke-1', colorId: 'violet',
+  }, { v: PROTOCOL_VERSION - 1 })), null)
 })
 
 test('round start exposes choices but no answer index', () => {
@@ -224,7 +248,9 @@ test('connection IDs plus start and reset targets are exact and bounded', () => 
 
 test('snapshots base and nested accessors once before validation and projection', () => {
   let senderReads = 0
-  const senderMessage = base('stroke.begin', { strokeId: 'stroke-1' })
+  const senderMessage = base('stroke.begin', {
+    strokeId: 'stroke-1', colorId: 'violet',
+  })
   Object.defineProperty(senderMessage, 'senderId', {
     enumerable: true,
     get() {
@@ -235,9 +261,10 @@ test('snapshots base and nested accessors once before validation and projection'
 
   let strokeReads = 0
   const changingPayload = new Proxy({}, {
-    ownKeys: () => ['strokeId'],
+    ownKeys: () => ['strokeId', 'colorId'],
     getOwnPropertyDescriptor: () => ({ configurable: true, enumerable: true }),
     get(_target, property) {
+      if (property === 'colorId') return 'violet'
       if (property !== 'strokeId') return undefined
       strokeReads += 1
       return strokeReads <= 2 ? 'stroke-1' : 't'.repeat(2_000)
@@ -264,7 +291,7 @@ test('lobby and product message scopes are exact', () => {
     pingId: 'ping-1', originSentAtMs: 50,
   })), null)
   assert.equal(parseRelayMessage(base('stroke.begin', {
-    strokeId: 'stroke-1',
+    strokeId: 'stroke-1', colorId: 'violet',
   }, { roundId: LOBBY_ROUND_ID })), null)
 })
 
@@ -281,7 +308,7 @@ test('every maximal legal message variant stays under the wire cap', () => {
   const choices = ['A', 'B', 'C', 'D'].map((letter) =>
     letter.repeat(MAX_WORD_LENGTH))
   const common = {
-    v: 1,
+    v: 2,
     sessionId,
     senderId,
     sequence: Number.MAX_SAFE_INTEGER,
@@ -301,7 +328,7 @@ test('every maximal legal message variant stays under the wire cap', () => {
     message('round.start', {
       choices, durationMs: Number.MAX_SAFE_INTEGER, targetConnectionId: connectionId,
     }),
-    message('stroke.begin', { strokeId }),
+    message('stroke.begin', { strokeId, colorId: 'violet' }),
     message('stroke.points', {
       strokeId,
       points: Array.from({ length: MAX_BATCH_POINTS }, () => [1000, 1000]),

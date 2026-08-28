@@ -328,7 +328,7 @@ test('a very long stall emits once and rebases without an unbounded loop', () =>
 
 test('point send preparation stamps the wire boundary and logs no payload data', () => {
   const draft = {
-    v: 1,
+    v: 2,
     kind: 'points',
     sessionId: 'DO_NOT_LOG',
     seq: 41,

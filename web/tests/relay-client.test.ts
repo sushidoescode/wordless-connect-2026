@@ -367,7 +367,7 @@ function painterMessage<T extends RelayMessage['type']>(
   overrides: Partial<Pick<RelayMessage, 'sessionId' | 'senderId' | 'sentAtMs'>> = {},
 ): Extract<RelayMessage, { type: T }> {
   return {
-    v: 1,
+    v: 2,
     type,
     sessionId: overrides.sessionId ?? 'WAVE42',
     roundId,
@@ -907,7 +907,9 @@ describe('BrowserRelayClient handshake and liveness', () => {
     await bindAndStart(harness, channel)
 
     await harness.clock.advanceBy(5_000)
-    channel.emit(painterMessage('stroke.begin', 4, 'round-1', { strokeId: 'stroke-1' }))
+    channel.emit(painterMessage('stroke.begin', 4, 'round-1', {
+      strokeId: 'stroke-1', colorId: 'violet',
+    }))
     await settle()
     await harness.clock.advanceBy(5_000)
     expect(harness.channels.channels).toHaveLength(1)
@@ -1112,12 +1114,16 @@ describe('BrowserRelayClient authoritative product routing', () => {
     harness.delegate.throwNextDispatch = true
 
     channel.emit(start(2))
-    channel.emit(painterMessage('stroke.begin', 3, 'round-1', { strokeId: 'stroke-1' }))
+    channel.emit(painterMessage('stroke.begin', 3, 'round-1', {
+      strokeId: 'stroke-1', colorId: 'violet',
+    }))
     await settle()
     expect(harness.delegate.dispatched).toEqual([])
 
     channel.emit(start(4))
-    channel.emit(painterMessage('stroke.begin', 5, 'round-1', { strokeId: 'stroke-1' }))
+    channel.emit(painterMessage('stroke.begin', 5, 'round-1', {
+      strokeId: 'stroke-1', colorId: 'violet',
+    }))
     await settle()
     expect(harness.delegate.dispatched.map(({ type }) => type)).toEqual([
       'round.start', 'stroke.begin',
@@ -1181,7 +1187,9 @@ describe('BrowserRelayClient authoritative product routing', () => {
     harness.delegate.throwNextDispatch = true
 
     channel.emit(reset(2, 'round-1', 'round-2'))
-    channel.emit(painterMessage('stroke.begin', 3, 'round-2', { strokeId: 'stale-stroke' }))
+    channel.emit(painterMessage('stroke.begin', 3, 'round-2', {
+      strokeId: 'stale-stroke', colorId: 'violet',
+    }))
     await settle()
     expect(messagesOfType(channel, 'round.reset.ack')).toHaveLength(0)
     expect(harness.delegate.dispatched).toEqual([])
@@ -1240,7 +1248,9 @@ describe('BrowserRelayClient authoritative product routing', () => {
     const channel = await subscribe(harness)
     await bindAndStart(harness, channel)
 
-    channel.emit(painterMessage('stroke.begin', 4, 'round-1', { strokeId: 'stroke-1' }))
+    channel.emit(painterMessage('stroke.begin', 4, 'round-1', {
+      strokeId: 'stroke-1', colorId: 'violet',
+    }))
     channel.emit(painterMessage('stroke.points', 5, 'round-1', {
       strokeId: 'stroke-1', points: [[100, 200], [300, 400]],
     }))
@@ -1284,7 +1294,9 @@ describe('BrowserRelayClient authoritative product routing', () => {
     channel.emit(targetedAck(2))
     harness.client.setLocalRound('round-1')
 
-    channel.emit(painterMessage('stroke.begin', 3, 'round-1', { strokeId: 'stroke-1' }))
+    channel.emit(painterMessage('stroke.begin', 3, 'round-1', {
+      strokeId: 'stroke-1', colorId: 'violet',
+    }))
     harness.client.completeLocalResync('painter-a')
     await settle()
 

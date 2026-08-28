@@ -91,7 +91,7 @@ function settle() {
 
 function guesserMessage(type, sequence, roundId, payload, overrides = {}) {
   return {
-    v: 1,
+    v: 2,
     type,
     sessionId: overrides.sessionId ?? 'WAVE42',
     roundId,
@@ -330,7 +330,8 @@ test('Lens ambiguous application send reports once, halts FIFO, and waits for th
     'stroke.begin' ? Promise.resolve('timed out') : Promise.resolve('ok')
 
   const failed = harness.transport.send({
-    type: 'stroke.begin', roundId: 'round-1', payload: { strokeId: 'stroke-1' },
+    type: 'stroke.begin', roundId: 'round-1',
+    payload: { strokeId: 'stroke-1', colorId: 'violet' },
   })
   const queued = harness.transport.send({
     type: 'stroke.end', roundId: 'round-1', payload: { strokeId: 'stroke-1' },
@@ -388,7 +389,7 @@ test('Lens exposes every accepted same-tuple ready after queuing its private ack
     rootSend = harness.transport.send({
       type: 'stroke.begin',
       roundId: 'round-1',
-      payload: { strokeId: 'stroke-after-ready' },
+      payload: { strokeId: 'stroke-after-ready', colorId: 'violet' },
     })
   })
 
@@ -424,7 +425,7 @@ test('Lens emits a ready-introduced peer transition before private presence work
     rootSend = harness.transport.send({
       type: 'stroke.begin',
       roundId: 'round-1',
-      payload: { strokeId: 'stroke-after-transition-ready' },
+      payload: { strokeId: 'stroke-after-transition-ready', colorId: 'violet' },
     })
   })
 
@@ -468,7 +469,7 @@ test('Lens drain is reserved before synchronous close and awaits the started sen
   const send = harness.transport.send({
     type: 'stroke.begin',
     roundId: 'round-1',
-    payload: { strokeId: 'stroke-1' },
+    payload: { strokeId: 'stroke-1', colorId: 'violet' },
   })
   await settle()
 
@@ -488,7 +489,8 @@ test('Lens FIFO cancels queued application drafts without allocating their seque
   }
 
   const started = harness.transport.send({
-    type: 'stroke.begin', roundId: 'round-1', payload: { strokeId: 'stroke-1' },
+    type: 'stroke.begin', roundId: 'round-1',
+    payload: { strokeId: 'stroke-1', colorId: 'violet' },
   })
   const points = harness.transport.send({
     type: 'stroke.points', roundId: 'round-1',

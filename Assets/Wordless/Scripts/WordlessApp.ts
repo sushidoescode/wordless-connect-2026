@@ -188,7 +188,7 @@ export function mapEngineEffectToDraft(
       return {
         type: 'stroke.begin',
         roundId: effect.roundId,
-        payload: { strokeId: effect.strokeId },
+        payload: { strokeId: effect.strokeId, colorId: effect.colorId },
       }
     case 'publish-stroke-points':
       return {

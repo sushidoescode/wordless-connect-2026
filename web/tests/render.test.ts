@@ -7,6 +7,7 @@ import {
   render,
 } from '../src/render'
 import type { WebRoundSnapshot } from '../src/web-round-store'
+import type { StrokeColorId } from '@wordless/core/Protocol'
 
 type CanvasCall = readonly [string, ...unknown[]]
 
@@ -98,9 +99,13 @@ function createTestContext(): TestCanvasContext {
   return context
 }
 
+type PaletteSnapshot = WebRoundSnapshot & {
+  readonly strokeColorId: StrokeColorId | null
+}
+
 function snapshot(
   overrides: Partial<WebRoundSnapshot> = {},
-): WebRoundSnapshot {
+): PaletteSnapshot {
   return {
     connection: 'waiting',
     phase: 'JOINING',
@@ -118,13 +123,14 @@ function snapshot(
     finalPointCount: null,
     glyph: [],
     remainingMs: 0,
+    strokeColorId: null,
     ...overrides,
   }
 }
 
 function activeSnapshot(
   overrides: Partial<WebRoundSnapshot> = {},
-): WebRoundSnapshot {
+): PaletteSnapshot {
   return snapshot({
     connection: 'live',
     phase: 'ACTIVE',
@@ -132,6 +138,7 @@ function activeSnapshot(
     roundGeneration: 1,
     choices: ['SNAKE', 'RIVER', 'ROPE', 'WAVE'],
     remainingMs: 18_400,
+    strokeColorId: 'violet',
     ...overrides,
   })
 }
@@ -446,6 +453,67 @@ describe('render', () => {
     expect(wrong?.textContent).toContain('×')
     expect(wrong?.textContent).toContain('TRY AGAIN')
     expect(wrong?.disabled).toBe(true)
+  })
+
+  it.each([
+    ['violet', '#8B5CF6'],
+    ['lemon', '#FFD65A'],
+    ['mint', '#73E6AE'],
+  ] as const)('renders a %s live path with its fixed production paint', (colorId, color) => {
+    const canvas = document.querySelector<HTMLCanvasElement>('#stroke-canvas')!
+
+    render(activeSnapshot({
+      points: [[100, 200], [900, 800]],
+      strokeColorId: colorId,
+    }))
+
+    expect(canvas.getContext('2d')!.strokeStyle).toBe(color)
+  })
+
+  it('uses coral only as the temporary ACTIVE wrong-answer override, then restores mint', () => {
+    const canvas = document.querySelector<HTMLCanvasElement>('#stroke-canvas')!
+    const observedPaints: string[] = []
+
+    render(activeSnapshot({
+      points: [[100, 200], [900, 800]],
+      strokeColorId: 'mint',
+    }))
+    observedPaints.push(canvas.getContext('2d')!.strokeStyle)
+
+    render(activeSnapshot({
+      points: [[100, 200], [900, 800]],
+      strokeColorId: 'mint',
+      wrongChoices: [2],
+    }))
+    observedPaints.push(canvas.getContext('2d')!.strokeStyle)
+
+    render(activeSnapshot({
+      phase: 'CORRECT',
+      correctChoice: 0,
+      revealedWord: 'SNAKE',
+      finalPointCount: 2,
+      points: [[100, 200], [900, 800]],
+      glyph: [[100, 200], [900, 800]],
+      remainingMs: 0,
+      strokeColorId: 'mint',
+    }))
+    const glyphCanvas = document.querySelector<HTMLCanvasElement>('#glyph-medallion canvas')!
+    const transitionCanvas = document.querySelector<HTMLCanvasElement>('#glyph-transition-canvas')!
+    observedPaints.push(glyphCanvas.getContext('2d')!.strokeStyle)
+
+    expect(observedPaints).toEqual(['#73E6AE', '#FF786A', '#73E6AE'])
+    expect(transitionCanvas.getContext('2d')!.strokeStyle).toBe('#73E6AE')
+  })
+
+  it('does not paint an unsafe ACTIVE path fixture without an authoritative color binding', () => {
+    const canvas = document.querySelector<HTMLCanvasElement>('#stroke-canvas')!
+
+    render(activeSnapshot({
+      points: [[100, 200], [900, 800]],
+      strokeColorId: null,
+    }))
+
+    expect(canvasCalls.filter(([name]) => name === 'stroke')).toEqual([])
   })
 
   it('reveals the authoritative correct word and draws an accessible exact-path glyph canvas', () => {

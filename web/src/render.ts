@@ -1,4 +1,4 @@
-import type { ChoiceIndex, QuantizedPoint } from '@wordless/core/Protocol'
+import type { ChoiceIndex, QuantizedPoint, StrokeColorId } from '@wordless/core/Protocol'
 import {
   easeOutCubic,
   interpolatePath,
@@ -6,10 +6,15 @@ import {
 } from '@wordless/core/GlyphTransition'
 import type { WebRoundSnapshot } from './web-round-store'
 
-const VIOLET = '#8B5CF6'
-const LEMON = '#FFD65A'
+const CORAL = '#FF786A'
 const GLYPH_SIZE_PX = 220
 const GLYPH_TRANSITION_MS = 450
+
+const STROKE_COLORS: Readonly<Record<StrokeColorId, string>> = {
+  violet: '#8B5CF6',
+  lemon: '#FFD65A',
+  mint: '#73E6AE',
+}
 
 interface ActiveGlyphTransition {
   readonly key: string
@@ -29,6 +34,12 @@ export interface SurfaceRect {
 export interface GlyphTransitionLayout {
   readonly from: readonly GlyphTransitionPoint[]
   readonly to: readonly GlyphTransitionPoint[]
+}
+
+function baseStrokeColor(snapshot: WebRoundSnapshot): string | null {
+  return snapshot.strokeColorId === null
+    ? null
+    : STROKE_COLORS[snapshot.strokeColorId]
 }
 
 function mapPointToSurface(
@@ -110,10 +121,11 @@ function paintPath(
   context: CanvasRenderingContext2D,
   points: readonly GlyphTransitionPoint[],
   lineWidth: number,
+  color: string,
 ): void {
   if (points.length === 0) return
-  context.strokeStyle = VIOLET
-  context.fillStyle = VIOLET
+  context.strokeStyle = color
+  context.fillStyle = color
   context.lineWidth = lineWidth
   context.lineCap = 'round'
   context.lineJoin = 'round'
@@ -134,9 +146,10 @@ function drawPath(
   canvas: HTMLCanvasElement,
   points: readonly QuantizedPoint[],
   showEndpoint: boolean,
+  color: string | null,
 ): void {
   const { context, width: cssWidth, height: cssHeight } = prepareCanvas(canvas)
-  if (points.length === 0) return
+  if (points.length === 0 || color === null) return
 
   const mapX = (value: number) => value / 1_000 * cssWidth
   const mapY = (value: number) => value / 1_000 * cssHeight
@@ -144,6 +157,7 @@ function drawPath(
     context,
     points.map((point) => [mapX(point[0]), mapY(point[1])]),
     pathLineWidth(cssWidth, cssHeight),
+    color,
   )
 
   if (!showEndpoint) return
@@ -156,7 +170,7 @@ function drawPath(
     0,
     Math.PI * 2,
   )
-  context.fillStyle = LEMON
+  context.fillStyle = color
   context.fill()
 }
 
@@ -241,19 +255,24 @@ function renderChoices(snapshot: WebRoundSnapshot): void {
   }
 }
 
-function renderGlyph(snapshot: WebRoundSnapshot, transitioning: boolean): HTMLCanvasElement | null {
+function renderGlyph(
+  snapshot: WebRoundSnapshot,
+  transitioning: boolean,
+  color: string | null,
+): HTMLCanvasElement | null {
   const medallion = requiredElement<HTMLElement>('glyph-medallion')
   medallion.replaceChildren()
-  medallion.hidden = snapshot.glyph.length === 0
+  medallion.hidden = snapshot.glyph.length === 0 || color === null
   medallion.classList.toggle('is-transitioning', transitioning)
-  if (snapshot.glyph.length === 0) return null
+  if (snapshot.glyph.length === 0 || color === null) return null
 
   const canvas = document.createElement('canvas')
   canvas.width = GLYPH_SIZE_PX
   canvas.height = GLYPH_SIZE_PX
+  canvas.setAttribute('role', 'img')
   canvas.setAttribute('aria-label', 'Solved clue glyph drawing')
   medallion.append(canvas)
-  drawPath(canvas, snapshot.glyph, false)
+  drawPath(canvas, snapshot.glyph, false, color)
   return canvas
 }
 
@@ -272,6 +291,7 @@ function startGlyphTransition(
   snapshot: WebRoundSnapshot,
   sourceCanvas: HTMLCanvasElement,
   glyphCanvas: HTMLCanvasElement,
+  color: string,
 ): void {
   const playField = sourceCanvas.closest<HTMLElement>('.play-field')
   if (!playField || snapshot.points.length === 0) return
@@ -299,7 +319,7 @@ function startGlyphTransition(
     const destinationWidth = pathLineWidth(destinationRect.width, destinationRect.height)
     const eased = easeOutCubic(progress)
     const lineWidth = sourceWidth + (destinationWidth - sourceWidth) * eased
-    paintPath(prepared.context, glyphTransitionFrame(layout, progress), lineWidth)
+    paintPath(prepared.context, glyphTransitionFrame(layout, progress), lineWidth, color)
     transitionCanvas.dataset.progress = String(Math.max(0, Math.min(1, progress)))
   }
 
@@ -373,14 +393,24 @@ export function render(snapshot: WebRoundSnapshot, options: RenderOptions = {}):
 
   const canvas = requiredElement<HTMLCanvasElement>('stroke-canvas')
   const solved = snapshot.phase === 'CORRECT' || snapshot.phase === 'GLYPH_LOCKED'
-  drawPath(canvas, solved ? [] : snapshot.points, snapshot.phase === 'ACTIVE')
+  const baseColor = baseStrokeColor(snapshot)
+  const livePathColor = baseColor !== null &&
+    snapshot.phase === 'ACTIVE' && snapshot.wrongChoices.length > 0
+    ? CORAL
+    : baseColor
+  drawPath(
+    canvas,
+    solved ? [] : snapshot.points,
+    snapshot.phase === 'ACTIVE',
+    livePathColor,
+  )
   renderChoices(snapshot)
   const shouldTransition = snapshot.phase === 'CORRECT' && options.reducedMotion !== true
   const glyphCanvas = preserveTransition
     ? requiredElement<HTMLElement>('glyph-medallion').querySelector<HTMLCanvasElement>('canvas')
-    : renderGlyph(snapshot, shouldTransition)
-  if (!preserveTransition && shouldTransition && glyphCanvas !== null) {
-    startGlyphTransition(snapshot, canvas, glyphCanvas)
+    : renderGlyph(snapshot, shouldTransition, baseColor)
+  if (!preserveTransition && shouldTransition && glyphCanvas !== null && baseColor !== null) {
+    startGlyphTransition(snapshot, canvas, glyphCanvas, baseColor)
   }
   requiredElement<HTMLElement>('result').textContent = resultLabel(snapshot)
 }

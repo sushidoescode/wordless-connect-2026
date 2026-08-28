@@ -1,10 +1,12 @@
 import { normalizeGlyph } from '@wordless/core/StrokeGeometry'
+import { isStrokeColorId } from '@wordless/core/Protocol'
 import type {
   ChoiceIndex,
   ChoiceTuple,
   QuantizedPoint,
   RelayMessage,
   RoundPhase,
+  StrokeColorId,
 } from '@wordless/core/Protocol'
 
 const PENDING_DELIVERY_MS = 3_000
@@ -19,6 +21,7 @@ export interface WebRoundSnapshot {
   readonly roundGeneration: number
   readonly choices: ChoiceTuple | null
   readonly points: readonly QuantizedPoint[]
+  readonly strokeColorId: StrokeColorId | null
   readonly pendingChoice: ChoiceIndex | null
   readonly pendingGuessId: string | null
   readonly pendingDeadlineAtMs: number | null
@@ -99,6 +102,7 @@ export class WebRoundStore {
   private deadlineAtMs: number | null = null
   private invalidatedRoundId: string | null = null
   private resyncRequested = false
+  private activeStrokeId: string | null = null
 
   constructor(options: WebRoundStoreOptions) {
     if (!SESSION_ID_PATTERN.test(options.sessionId)) {
@@ -114,6 +118,7 @@ export class WebRoundStore {
       roundGeneration: 0,
       choices: null,
       points: [],
+      strokeColorId: null,
       pendingChoice: null,
       pendingGuessId: null,
       pendingDeadlineAtMs: null,
@@ -157,6 +162,9 @@ export class WebRoundStore {
       case 'round.reset':
         this.acceptRoundReset(message)
         return []
+      case 'stroke.begin':
+        this.acceptStrokeBegin(message)
+        return []
       case 'stroke.points':
         this.acceptPoints(message)
         return []
@@ -182,6 +190,7 @@ export class WebRoundStore {
     if (oldRoundId) this.invalidatedRoundId = oldRoundId
     this.deadlineAtMs = null
     this.resyncRequested = false
+    this.activeStrokeId = null
     this.replace({
       ...this.snapshot,
       connection: 'reconnecting',
@@ -190,6 +199,7 @@ export class WebRoundStore {
       roundGeneration: this.snapshot.roundGeneration + 1,
       choices: null,
       points: [],
+      strokeColorId: null,
       pendingChoice: null,
       pendingGuessId: null,
       pendingDeadlineAtMs: null,
@@ -275,6 +285,7 @@ export class WebRoundStore {
     this.deadlineAtMs = nowMs + message.payload.durationMs
     this.invalidatedRoundId = null
     this.resyncRequested = false
+    this.activeStrokeId = null
     this.replace({
       ...this.snapshot,
       connection: 'live',
@@ -285,6 +296,7 @@ export class WebRoundStore {
         : this.snapshot.roundGeneration + 1,
       choices: message.payload.choices,
       points: [],
+      strokeColorId: null,
       pendingChoice: null,
       pendingGuessId: null,
       pendingDeadlineAtMs: null,
@@ -303,6 +315,7 @@ export class WebRoundStore {
     this.deadlineAtMs = null
     this.invalidatedRoundId = null
     this.resyncRequested = false
+    this.activeStrokeId = null
     this.replace({
       ...this.snapshot,
       connection: 'live',
@@ -311,6 +324,7 @@ export class WebRoundStore {
       roundGeneration: this.snapshot.roundGeneration + 1,
       choices: null,
       points: [],
+      strokeColorId: null,
       pendingChoice: null,
       pendingGuessId: null,
       pendingDeadlineAtMs: null,
@@ -323,8 +337,23 @@ export class WebRoundStore {
     })
   }
 
+  private acceptStrokeBegin(
+    message: Extract<RelayMessage, { type: 'stroke.begin' }>,
+  ): void {
+    if (this.snapshot.phase !== 'ACTIVE' ||
+        message.roundId !== this.snapshot.roundId ||
+        this.activeStrokeId !== null ||
+        this.snapshot.strokeColorId !== null ||
+        !isStrokeColorId(message.payload.colorId)) return
+    this.activeStrokeId = message.payload.strokeId
+    this.replace({ ...this.snapshot, strokeColorId: message.payload.colorId })
+  }
+
   private acceptPoints(message: Extract<RelayMessage, { type: 'stroke.points' }>): void {
-    if (this.snapshot.phase !== 'ACTIVE' || message.roundId !== this.snapshot.roundId) return
+    if (this.snapshot.phase !== 'ACTIVE' ||
+        message.roundId !== this.snapshot.roundId ||
+        this.activeStrokeId !== message.payload.strokeId ||
+        this.snapshot.strokeColorId === null) return
     this.replace({
       ...this.snapshot,
       points: [...this.snapshot.points, ...message.payload.points],

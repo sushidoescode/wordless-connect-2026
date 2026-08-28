@@ -1,4 +1,5 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 
 const SESSION_ID = 'WAVE42'
 const PAINTER_ID = 'painter-1'
@@ -146,11 +147,35 @@ async function join(page: Page): Promise<void> {
 
 async function emit(page: Page, payload: unknown): Promise<void> {
   await page.evaluate((message) => {
-    const seam = (window as unknown as {
+    const testWindow = window as unknown as {
       __WORDLESS_RELAY_TEST__: { emit(payload: unknown): void }
-    }).__WORDLESS_RELAY_TEST__
-    seam.emit(message)
+      __wordlessSequenceOffset?: number
+    }
+    const relayMessage = message as { readonly sequence?: number; readonly type?: string }
+    const sequenceOffset = testWindow.__wordlessSequenceOffset ?? 0
+    testWindow.__WORDLESS_RELAY_TEST__.emit({
+      ...relayMessage,
+      sequence: (relayMessage.sequence ?? 0) + sequenceOffset,
+    })
+    if (relayMessage.type === 'stroke.begin') {
+      testWindow.__wordlessSequenceOffset = sequenceOffset + 1
+    }
   }, payload)
+}
+
+async function emitStroke(page: Page, payload: unknown, colorId = 'violet'): Promise<void> {
+  const pointMessage = payload as {
+    readonly type: string
+    readonly roundId: string
+    readonly payload: { readonly strokeId: string }
+  }
+  if (pointMessage.type !== 'stroke.points') throw new Error('expected stroke.points fixture')
+  await emit(page, {
+    ...pointMessage,
+    type: 'stroke.begin',
+    payload: { strokeId: pointMessage.payload.strokeId, colorId },
+  })
+  await emit(page, pointMessage)
 }
 
 async function advance(page: Page, milliseconds: number): Promise<void> {
@@ -247,6 +272,60 @@ async function capture(page: Page, testInfo: TestInfo): Promise<void> {
   await page.screenshot({ path: testInfo.outputPath('surface.png'), fullPage: true })
 }
 
+async function auditAxeState(
+  page: Page,
+  state: string,
+  testInfo: TestInfo,
+): Promise<void> {
+  const results = await new AxeBuilder({ page }).analyze()
+  const counts = results.violations.reduce<Record<string, number>>((total, violation) => {
+    const impact = violation.impact ?? 'unknown'
+    total[impact] = (total[impact] ?? 0) + 1
+    return total
+  }, {})
+  const blocking = results.violations.filter((violation) =>
+    violation.impact === 'serious' || violation.impact === 'critical')
+  console.log(`[AXE] ${state} ${JSON.stringify({ counts, rules: results.violations.map((violation) => ({
+    id: violation.id,
+    impact: violation.impact,
+    nodes: violation.nodes.length,
+  })) })}`)
+  await testInfo.attach(`axe-${state}.json`, {
+    body: JSON.stringify(results, null, 2),
+    contentType: 'application/json',
+  })
+  expect(blocking, `${state} has serious or critical Axe violations`).toEqual([])
+}
+
+async function expectRoundElementsInsideViewport(page: Page): Promise<void> {
+  const evidence = await page.evaluate(() => {
+    const elements = [
+      ...document.querySelectorAll<HTMLElement>('#choices button'),
+      document.querySelector<HTMLElement>('#result'),
+    ].filter((element): element is HTMLElement => element !== null)
+    return {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      elements: elements.map((element) => {
+        const rect = element.getBoundingClientRect()
+        return {
+          id: element.id || element.textContent,
+          left: rect.left,
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+        }
+      }),
+    }
+  })
+  for (const rect of evidence.elements) {
+    expect(rect.left, `${rect.id} left`).toBeGreaterThanOrEqual(0)
+    expect(rect.top, `${rect.id} top`).toBeGreaterThanOrEqual(0)
+    expect(rect.right, `${rect.id} right`).toBeLessThanOrEqual(evidence.width)
+    expect(rect.bottom, `${rect.id} bottom`).toBeLessThanOrEqual(evidence.height)
+  }
+}
+
 test.beforeEach(async ({ page }) => {
   await installFakeRelay(page)
 })
@@ -276,6 +355,152 @@ test('validates join input without bypassing the six-character code', async ({ p
   })
 })
 
+test('has no serious or critical Axe violations across every public round state', async ({ page }, testInfo) => {
+  await page.goto('/')
+  await auditAxeState(page, 'join', testInfo)
+
+  await page.getByLabel('Six-character session code').fill(SESSION_ID)
+  await page.getByRole('button', { name: 'JOIN ROUND' }).click()
+  await expect(page.getByRole('status')).toContainText('WAITING FOR PAINTER')
+  await auditAxeState(page, 'waiting', testInfo)
+
+  await startRound(page)
+  await auditAxeState(page, 'active', testInfo)
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-accessibility',
+    points: [[200, 200], [400, 800], [600, 300]],
+  }))
+
+  const cards = page.locator('#choices button')
+  await cards.nth(1).click()
+  const wrongGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'incorrect',
+    guessId: wrongGuessId,
+    choiceIndex: 1,
+  }))
+  await expect(page.locator('#result')).toHaveText('TRY AGAIN')
+  await auditAxeState(page, 'wrong', testInfo)
+
+  await cards.first().click()
+  const correctGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 5, {
+    outcome: 'correct',
+    guessId: correctGuessId,
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 3,
+  }))
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'CORRECT')
+  await auditAxeState(page, 'correct', testInfo)
+  await advance(page, 450)
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'GLYPH_LOCKED')
+  await auditAxeState(page, 'locked', testInfo)
+
+  await join(page)
+  await startRound(page)
+  await emit(page, message('round.timeout', 'round-1', 3, { finalPointCount: 0 }))
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'TIMED_OUT')
+  await auditAxeState(page, 'timeout', testInfo)
+})
+
+test('exposes keyboard order, focus visibility, names, live outcomes, and phone bounds', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await join(page)
+  await startRound(page)
+
+  const roleLabelFontSize = await page.locator('.role-label').evaluate((element) =>
+    Number.parseFloat(getComputedStyle(element).fontSize),
+  )
+  expect(roleLabelFontSize).toBeGreaterThanOrEqual(18)
+
+  await expect(page.locator('#stroke-canvas')).toHaveAttribute('aria-label', 'Live clue drawing')
+  await expect(page.getByRole('img', { name: 'Live clue drawing' })).toHaveCount(1)
+  await expect(page.locator('#result')).toHaveAttribute('aria-live', 'assertive')
+
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  for (let index = 0; index < CHOICES.length; index += 1) {
+    await page.keyboard.press('Tab')
+    const card = page.locator('#choices button').nth(index)
+    await expect(card).toBeFocused()
+    expect(await card.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return {
+        outlineStyle: style.outlineStyle,
+        outlineWidth: style.outlineWidth,
+        outlineColor: style.outlineColor,
+        boxShadow: style.boxShadow,
+      }
+    })).toEqual({
+      outlineStyle: 'solid',
+      outlineWidth: '3px',
+      outlineColor: 'rgb(32, 11, 43)',
+      boxShadow: 'rgb(255, 214, 90) 0px 0px 0px 6px',
+    })
+  }
+
+  await expectRoundElementsInsideViewport(page)
+
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-accessible-result',
+    points: [[200, 200], [400, 800], [600, 300]],
+  }))
+  const cards = page.locator('#choices button')
+  await cards.nth(1).click()
+  const wrongGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'incorrect',
+    guessId: wrongGuessId,
+    choiceIndex: 1,
+  }))
+  await expect(cards.nth(1)).toContainText('×')
+  await expect(cards.nth(1)).toContainText('TRY AGAIN')
+  await expect(page.locator('#result')).toHaveText('TRY AGAIN')
+  await expectRoundElementsInsideViewport(page)
+
+  await cards.first().click()
+  const correctGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 5, {
+    outcome: 'correct',
+    guessId: correctGuessId,
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 3,
+  }))
+  await expect(cards.first()).toContainText('✓')
+  await expect(cards.first()).toContainText('CORRECT')
+  await expect(page.locator('#result')).toHaveText('CORRECT · SNAKE')
+  await expect(page.locator('#glyph-medallion')).toHaveAttribute('aria-label', 'Solved clue glyph')
+  await expect(page.locator('#glyph-medallion canvas')).toHaveAttribute(
+    'aria-label',
+    'Solved clue glyph drawing',
+  )
+  await expect(page.getByRole('img', { name: 'Solved clue glyph drawing' })).toHaveCount(1)
+  await expectRoundElementsInsideViewport(page)
+
+  await advance(page, 450)
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'GLYPH_LOCKED')
+  await expectRoundElementsInsideViewport(page)
+
+  await join(page)
+  await startRound(page)
+  await emit(page, message('round.timeout', 'round-1', 3, { finalPointCount: 0 }))
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'TIMED_OUT')
+  await expect(page.locator('#result')).toContainText('TIME’S UP')
+  await expectRoundElementsInsideViewport(page)
+})
+
+test('keeps the guesser prompt prominent at the split-screen capture width', async ({ page }) => {
+  await page.setViewportSize({ width: 800, height: 893 })
+  await join(page)
+  await startRound(page)
+
+  const headingFontSize = await page.locator('.brand-row h1').evaluate((element) =>
+    Number.parseFloat(getComputedStyle(element).fontSize),
+  )
+  expect(headingFontSize).toBeGreaterThanOrEqual(44)
+})
+
 test('pre-join view has no horizontal overflow at 390px or 320px', async ({ page }) => {
   for (const viewport of [
     { width: 390, height: 844 },
@@ -293,7 +518,7 @@ test('pre-join view has no horizontal overflow at 390px or 320px', async ({ page
 test('keeps the round surface bounded at the phone, tablet, and desktop craft sizes', async ({ page }, testInfo) => {
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-responsive',
     points: [[170, 640], [320, 260], [500, 760], [700, 210], [850, 590]],
   }))
@@ -301,6 +526,7 @@ test('keeps the round surface bounded at the phone, tablet, and desktop craft si
   for (const viewport of [
     { width: 390, height: 844 },
     { width: 768, height: 1_024 },
+    { width: 800, height: 893 },
     { width: 1_440, height: 900 },
   ]) {
     await page.setViewportSize(viewport)
@@ -346,7 +572,7 @@ test('keeps the round surface bounded at the phone, tablet, and desktop craft si
       expect(layout.result.top - layout.field.bottom).toBeLessThanOrEqual(60)
     }
     else {
-      expect(layout.choices.top).toBeGreaterThan(layout.field.bottom)
+      expect(layout.choices.bottom).toBeLessThan(layout.field.top)
     }
     await page.screenshot({
       path: testInfo.outputPath(`round-${viewport.width}x${viewport.height}.png`),
@@ -407,7 +633,7 @@ test('renders four responsive cards and pending, rejection, retry, and timeout s
 test('shows wrong then authoritative correct, derives the exact glyph, and locks after 450 ms', async ({ page }, testInfo) => {
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[200, 200], [400, 800], [600, 300]],
   }))
@@ -456,11 +682,58 @@ test('shows wrong then authoritative correct, derives the exact glyph, and locks
   await capture(page, testInfo)
 })
 
+test('renders a bound lemon stroke, coral wrong-answer override, and lemon solved payoff', async ({ page }) => {
+  await join(page)
+  await startRound(page)
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-lemon',
+    points: [[200, 200], [800, 800]],
+  }), 'lemon')
+
+  const paintContains = async (selector: string, color: readonly number[]) => page.locator(selector)
+    .evaluate((canvas, expected) => {
+      const pixels = (canvas as HTMLCanvasElement).getContext('2d')!
+        .getImageData(0, 0, (canvas as HTMLCanvasElement).width, (canvas as HTMLCanvasElement).height)
+        .data
+      return pixels.some((value, index) => index % 4 === 0 &&
+        value === expected[0] && pixels[index + 1] === expected[1] && pixels[index + 2] === expected[2])
+    }, color)
+
+  expect(await paintContains('#stroke-canvas', [255, 214, 90])).toBe(true)
+
+  const cards = page.locator('#choices button')
+  await cards.nth(1).click()
+  const wrongGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'incorrect',
+    guessId: wrongGuessId,
+    choiceIndex: 1,
+  }))
+  await expect(page.locator('#result')).toHaveText('TRY AGAIN')
+  expect(await paintContains('#stroke-canvas', [255, 120, 106])).toBe(true)
+
+  await cards.first().click()
+  const correctGuessId = await latestGuessId(page)
+  await emit(page, message('round.result', 'round-1', 5, {
+    outcome: 'correct',
+    guessId: correctGuessId,
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 2,
+  }))
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'CORRECT')
+  expect(await paintContains('#glyph-medallion canvas', [255, 214, 90])).toBe(true)
+})
+
 test('reduced motion locks the exact glyph immediately without rendering a moving overlay', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  expect(await page.locator('#connection').evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { duration: style.animationDuration, transform: style.transform }
+  })).toEqual({ duration: '0s', transform: 'none' })
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[200, 200], [400, 800], [600, 300]],
   }))
@@ -477,6 +750,9 @@ test('reduced motion locks the exact glyph immediately without rendering a movin
     const style = getComputedStyle(element)
     return { duration: style.animationDuration, transform: style.transform }
   })).toEqual({ duration: '0s', transform: 'none' })
+  await expect(cards.nth(1)).toContainText('×')
+  await expect(cards.nth(1)).toContainText('TRY AGAIN')
+  await expect(page.locator('#result')).toHaveText('TRY AGAIN')
 
   await cards.first().click()
   const correctGuessId = await latestGuessId(page)
@@ -492,12 +768,19 @@ test('reduced motion locks the exact glyph immediately without rendering a movin
   await expect(page.locator('#glyph-transition-canvas')).toHaveCount(0)
   await expect(page.locator('#glyph-medallion')).toBeVisible()
   await expect(page.locator('#glyph-medallion')).not.toHaveClass(/is-transitioning/)
+  await expect(cards.first()).toContainText('✓')
+  await expect(cards.first()).toContainText('CORRECT')
+  await expect(page.locator('#result')).toHaveText('CORRECT · SNAKE')
+  expect(await cards.first().evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { duration: style.animationDuration, transform: style.transform }
+  })).toEqual({ duration: '0s', transform: 'none' })
 })
 
 test('a motion preference change immediately settles an in-flight glyph', async ({ page }) => {
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[200, 200], [400, 800], [600, 300]],
   }))
@@ -537,7 +820,7 @@ test('uses the fixed one-shot connection, wrong, and correct visual timings', as
     targetConnectionId: BROWSER_CONNECTION_ID,
   }))
   await expect(page.locator('#connection')).toHaveClass(/is-changing/)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[200, 200], [400, 800], [600, 300]],
   }))
@@ -591,7 +874,7 @@ test('a render failure cannot prevent the semantic glyph lock', async ({ page })
   })
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[200, 200], [400, 800], [600, 300]],
   }))
@@ -612,7 +895,7 @@ test('a render failure cannot prevent the semantic glyph lock', async ({ page })
 test('reset before completion makes the stale glyph callback harmless', async ({ page }) => {
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[100, 200]],
   }))
@@ -644,7 +927,7 @@ test('reset before completion makes the stale glyph callback harmless', async ({
 test('one-point authoritative result paints the exact normalized violet glyph point', async ({ page }) => {
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[237, 811]],
   }))
@@ -673,7 +956,7 @@ test('phone glyph canvas and painted right-bottom edge stay inside the visible m
   await page.setViewportSize({ width: 390, height: 844 })
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[0, 0], [1_000, 1_000]],
   }))
@@ -732,7 +1015,7 @@ test('phone glyph canvas and painted right-bottom edge stay inside the visible m
 test('point-count mismatch sends the exact round-scoped resync request', async ({ page }) => {
   await join(page)
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[100, 200]],
   }))
@@ -762,7 +1045,7 @@ test('channel error creates one successor and stale glyph work cannot lock its r
   await join(page)
   await expect(page.getByRole('status')).toContainText('WAITING FOR PAINTER')
   await startRound(page)
-  await emit(page, message('stroke.points', 'round-1', 3, {
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[100, 200]],
   }))

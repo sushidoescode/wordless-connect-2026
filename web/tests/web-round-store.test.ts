@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from 'vitest'
 import type {
   ChoiceIndex,
   RelayMessage,
+  StrokeColorId,
 } from '@wordless/core/Protocol'
+import { parseRelayMessage } from '@wordless/core/Protocol'
 import { WebRoundStore } from '../src/web-round-store'
 
 const SESSION_ID = 'WAVE42'
@@ -63,6 +65,26 @@ function roundReset(
     nextRoundId,
     targetConnectionId: BROWSER_CONNECTION_ID,
   }, sequence)
+}
+
+function begin(
+  roundId = 'round-1',
+  colorId: StrokeColorId = 'violet',
+  sequence = 4,
+  strokeId = 'stroke-1',
+): MessageOf<'stroke.begin'> {
+  const message = parseRelayMessage({
+    v: 2,
+    type: 'stroke.begin',
+    sessionId: SESSION_ID,
+    roundId,
+    senderId: PAINTER_ID,
+    sequence,
+    sentAtMs: 1_000,
+    payload: { strokeId, colorId },
+  })
+  if (message?.type !== 'stroke.begin') throw new Error('valid begin fixture rejected')
+  return message
 }
 
 function points(
@@ -133,13 +155,73 @@ function createStore(ids: string[] = ['guess-1', 'guess-2']) {
   }
 }
 
-function activate(store: WebRoundStore): void {
+function colorSnapshot(store: WebRoundStore): WebRoundStore['getSnapshot'] extends () => infer Snapshot
+  ? Snapshot & { readonly strokeColorId: StrokeColorId | null }
+  : never {
+  return store.getSnapshot() as WebRoundStore['getSnapshot'] extends () => infer Snapshot
+    ? Snapshot & { readonly strokeColorId: StrokeColorId | null }
+    : never
+}
+
+function activate(store: WebRoundStore, bindStroke = true): void {
   store.setTransportState('waiting', 'SUBSCRIBED · WAITING FOR PAINTER')
   store.dispatch(targetedAck())
   store.dispatch(roundStart())
+  if (bindStroke) store.dispatch(begin())
 }
 
 describe('WebRoundStore', () => {
+  it('binds points to one current-round begin and never lets a later begin recolor it', () => {
+    const { store } = createStore()
+    activate(store, false)
+
+    store.dispatch(points([[100, 200]], 'round-1', 4))
+    expect(colorSnapshot(store).points).toEqual([])
+    expect(colorSnapshot(store).strokeColorId).toBeNull()
+
+    store.dispatch(begin('round-1', 'mint', 5))
+    expect(colorSnapshot(store).strokeColorId).toBe('mint')
+    store.dispatch(envelope('stroke.points', 'round-1', {
+      strokeId: 'other-stroke',
+      points: [[100, 200]],
+    }, 6))
+    expect(colorSnapshot(store).points).toEqual([])
+    store.dispatch(points([[100, 200]], 'round-1', 7))
+    expect(colorSnapshot(store).points).toEqual([[100, 200]])
+
+    store.dispatch(begin('round-1', 'lemon', 8))
+    expect(colorSnapshot(store).strokeColorId).toBe('mint')
+  })
+
+  it('clears the public color and private stroke binding for reconnect, reset, and successor start', () => {
+    const { store } = createStore()
+    activate(store, false)
+    store.dispatch(begin('round-1', 'mint', 4))
+    store.dispatch(roundReset('round-1', 'round-2', 5))
+    expect(colorSnapshot(store).strokeColorId).toBeNull()
+    store.dispatch(roundStart('round-2', 6))
+    expect(colorSnapshot(store).strokeColorId).toBeNull()
+    store.dispatch(points([[100, 200]], 'round-2', 7))
+    expect(colorSnapshot(store).points).toEqual([])
+    store.dispatch(begin('round-2', 'lemon', 8))
+    store.invalidateForReconnect()
+    expect(colorSnapshot(store).strokeColorId).toBeNull()
+  })
+
+  it('leaves the snapshot untouched for malformed begins at the unsafe dispatch boundary', () => {
+    const { store } = createStore()
+    activate(store, false)
+    const before = store.getSnapshot()
+    const malformed = {
+      ...begin('round-1', 'mint', 4),
+      payload: { strokeId: 'stroke-1', colorId: 'coral' },
+    }
+
+    store.dispatch(malformed as unknown as RelayMessage)
+
+    expect(store.getSnapshot()).toEqual(before)
+  })
+
   it('does not call the channel subscription CONNECTED by itself', () => {
     const { store } = createStore()
 

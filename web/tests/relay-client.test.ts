@@ -1265,6 +1265,10 @@ describe('BrowserRelayClient authoritative product routing', () => {
       'presence.ack', 'round.start', 'stroke.begin', 'stroke.points',
       'stroke.end', 'round.result',
     ])
+    expect(harness.delegate.dispatched.slice(2, 4)).toMatchObject([
+      { type: 'stroke.begin', payload: { strokeId: 'stroke-1', colorId: 'violet' } },
+      { type: 'stroke.points', payload: { strokeId: 'stroke-1' } },
+    ])
   })
 
   it('emits a sequence-gap control and invalidates once before dispatching no gameplay or resync request', async () => {

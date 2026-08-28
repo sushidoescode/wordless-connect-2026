@@ -226,7 +226,7 @@ test('rejects invalid glyph depths', () => {
   }
 })
 
-test('runtime view reuses authored ivory and violet resources without allocation churn', () => {
+test('runtime view reuses exact authored color resources without mutation or churn', () => {
   const builders = []
   const clock = { seconds: 10 }
   globalThis.getTime = () => clock.seconds
@@ -302,8 +302,27 @@ test('runtime view reuses authored ivory and violet resources without allocation
   }
   view.frameVisual = { mainMaterial: null, mesh: null, meshShadowMode: null }
   view.revealedWordLabel = { text: 'STALE' }
-  view.ivoryFrameMaterial = { name: 'ivory-frame' }
-  view.violetGlyphMaterial = { name: 'violet-glyph' }
+  view.ivoryFrameMaterial = {
+    name: 'ivory-frame',
+    mainPass: { baseColor: { r: 1, g: 246 / 255, b: 232 / 255, a: 1 } },
+  }
+  view.violetGlyphMaterial = {
+    name: 'violet-glyph',
+    mainPass: { baseColor: { r: 139 / 255, g: 92 / 255, b: 246 / 255, a: 1 } },
+  }
+  view.lemonGlyphMaterial = {
+    name: 'lemon-glyph',
+    mainPass: { baseColor: { r: 1, g: 214 / 255, b: 90 / 255, a: 1 } },
+  }
+  view.mintGlyphMaterial = {
+    name: 'mint-glyph',
+    mainPass: { baseColor: { r: 115 / 255, g: 230 / 255, b: 174 / 255, a: 1 } },
+  }
+  const originalSharedColors = [
+    structuredClone(view.violetGlyphMaterial.mainPass.baseColor),
+    structuredClone(view.lemonGlyphMaterial.mainPass.baseColor),
+    structuredClone(view.mintGlyphMaterial.mainPass.baseColor),
+  ]
   view.onAwake()
 
   assert.equal(builders.length, 2)
@@ -326,7 +345,8 @@ test('runtime view reuses authored ivory and violet resources without allocation
     { x: 72, y: -44, z: 0 },
   ]
   const destination = [[100, 100], [900, 900]]
-  view.render(source, destination, 'SNAKE')
+  view.render(source, destination, 'SNAKE', 'violet')
+  assert.strictEqual(view.glyphVisual.mainMaterial, view.violetGlyphMaterial)
   assert.equal(view.medallionRoot.enabled, true)
   assert.equal(view.glyphVisual.enabled, true)
   assert.equal(view.glyphVisual.mesh, originalMesh)
@@ -370,14 +390,26 @@ test('runtime view reuses authored ivory and violet resources without allocation
   assert.deepEqual(builders[0].vertices, destinationGeometry.vertices.flat())
 
   clock.seconds = 10.5
-  view.render([{ x: 0, y: 0, z: 0 }], [[500, 500]], 'DOT')
+  view.render(
+    [{ x: 0, y: 0, z: 0 }],
+    [[500, 500]],
+    'DOT',
+    'lemon',
+  )
+  assert.strictEqual(view.glyphVisual.mainMaterial, view.lemonGlyphMaterial)
   assert.equal(builders[0].vertices.length, 32)
   assert.deepEqual(
     builders[0].vertices.filter((_, index) => index % 8 === 2),
     Array(4).fill(-5.2),
   )
 
-  view.render(source, destination, 'SNAKE')
+  view.render(source, destination, 'SNAKE', 'mint')
+  assert.strictEqual(view.glyphVisual.mainMaterial, view.mintGlyphMaterial)
+  assert.deepEqual([
+    view.violetGlyphMaterial.mainPass.baseColor,
+    view.lemonGlyphMaterial.mainPass.baseColor,
+    view.mintGlyphMaterial.mainPass.baseColor,
+  ], originalSharedColors)
   const updateCountBeforeHide = builders[0].updateCount
   view.hide()
   clock.seconds = 20
@@ -388,11 +420,11 @@ test('runtime view reuses authored ivory and violet resources without allocation
     () => view.render([
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 1, z: 1 },
-    ], [[0, 0], [1000, 1000]], 'SNAKE'),
+    ], [[0, 0], [1000, 1000]], 'SNAKE', 'mint'),
     /one display plane/i,
   )
 
-  view.render([], [], 'SNAKE')
+  view.render([], [], 'SNAKE', 'violet')
   assert.equal(view.medallionRoot.enabled, true)
   assert.equal(view.glyphVisual.enabled, false)
   assert.equal(view.glyphVisual.mesh, originalMesh)
@@ -407,6 +439,6 @@ test('runtime view rejects an incomplete authored medallion binding set', () => 
   const view = new GlyphMedallionView()
   assert.throws(
     () => view.onAwake(),
-    /requires root, frame, glyph, word, and two material bindings/i,
+    /requires root, frame, glyph, word, and four material bindings/i,
   )
 })

@@ -4,7 +4,11 @@ import {
   type GlyphTransitionPoint,
 } from '../Core/GlyphTransition'
 import { MAX_STROKE_POINTS } from '../Core/Protocol'
-import type { QuantizedPoint, WorldPoint } from '../Core/Protocol'
+import type {
+  QuantizedPoint,
+  StrokeColorId,
+  WorldPoint,
+} from '../Core/Protocol'
 
 export interface OwnedGlyphResourceCounts {
   readonly sceneObjects: number
@@ -317,6 +321,8 @@ export class GlyphMedallionView extends BaseScriptComponent {
   @input revealedWordLabel: Text
   @input ivoryFrameMaterial: Material
   @input violetGlyphMaterial: Material
+  @input lemonGlyphMaterial: Material
+  @input mintGlyphMaterial: Material
 
   private glyphBuilder: MeshBuilder | null = null
   private frameBuilder: MeshBuilder | null = null
@@ -354,7 +360,9 @@ export class GlyphMedallionView extends BaseScriptComponent {
     sourcePoints: readonly WorldPoint[],
     glyphPoints: readonly QuantizedPoint[],
     revealedWord: string,
+    colorId: StrokeColorId,
   ): void {
+    this.glyphVisual.mainMaterial = this.glyphMaterial(colorId)
     const inverseGlyphWorld = this.glyphVisual
       .getSceneObject()
       .getTransform()
@@ -439,6 +447,14 @@ export class GlyphMedallionView extends BaseScriptComponent {
     return Number.isFinite(value) && value >= 0 ? value : 0
   }
 
+  private glyphMaterial(colorId: StrokeColorId): Material {
+    switch (colorId) {
+      case 'lemon': return this.lemonGlyphMaterial
+      case 'mint': return this.mintGlyphMaterial
+      case 'violet': return this.violetGlyphMaterial
+    }
+  }
+
   private createBuilder(): MeshBuilder {
     const builder = new MeshBuilder(GLYPH_VERTEX_LAYOUT)
     builder.topology = MeshTopology.Triangles
@@ -470,9 +486,11 @@ export class GlyphMedallionView extends BaseScriptComponent {
         !this.glyphVisual ||
         !this.revealedWordLabel ||
         !this.ivoryFrameMaterial ||
-        !this.violetGlyphMaterial) {
+        !this.violetGlyphMaterial ||
+        !this.lemonGlyphMaterial ||
+        !this.mintGlyphMaterial) {
       throw new Error(
-        'GlyphMedallionView requires root, frame, glyph, word, and two material bindings',
+        'GlyphMedallionView requires root, frame, glyph, word, and four material bindings',
       )
     }
   }

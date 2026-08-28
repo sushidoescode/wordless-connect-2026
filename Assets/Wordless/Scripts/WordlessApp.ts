@@ -6,6 +6,7 @@ import type {
   RelayMessage,
   RelayMessageDraft,
   RoundPhase,
+  StrokeColorId,
   WorldPoint,
   QuantizedPoint,
 } from './Core/Protocol'
@@ -31,6 +32,10 @@ import type {
   BrushController,
   BrushListener,
 } from './Input/BrushController'
+import type {
+  PainterPaletteController,
+  PaletteSelectionListener,
+} from './Input/PainterPaletteController'
 import type {
   ReplayController,
   ReplayRequestListener,
@@ -61,6 +66,8 @@ interface BrushPort {
 
 interface RibbonPort {
   render(points: readonly WorldPoint[]): void
+  setStrokeColor(colorId: StrokeColorId): void
+  setIncorrectFeedbackActive(active: boolean): void
   setPayoffActive(active: boolean): void
   getOwnedResourceCounts(): {
     readonly sceneObjects: number
@@ -82,6 +89,7 @@ interface GlyphPort {
     sourcePoints: readonly WorldPoint[],
     glyphPoints: readonly QuantizedPoint[],
     revealedWord: string,
+    colorId: StrokeColorId,
   ): void
   getOwnedResourceCounts(): {
     readonly sceneObjects: number
@@ -94,6 +102,11 @@ interface ReplayPort {
   setAvailable(roundId: string, available: boolean): void
 }
 
+interface PalettePort {
+  setListener(listener: PaletteSelectionListener | null): void
+  render(colorId: StrokeColorId, inputLocked: boolean): void
+}
+
 export interface WordlessAppDependencies {
   readonly relay: RelayPort
   readonly brush: BrushPort
@@ -101,6 +114,7 @@ export interface WordlessAppDependencies {
   readonly hud: HudPort
   readonly glyph: GlyphPort
   readonly replay: ReplayPort
+  readonly palette: PalettePort
   readonly nowMs: () => number
   readonly createNonce: () => string
   readonly log: (line: string) => void
@@ -258,13 +272,14 @@ export function mapEngineEffectToDraft(
 }
 
 export class WordlessAppController
-  implements BrushListener, ReplayRequestListener {
+  implements BrushListener, ReplayRequestListener, PaletteSelectionListener {
   private readonly relay: RelayPort
   private readonly brush: BrushPort
   private readonly ribbon: RibbonPort
   private readonly hud: HudPort
   private readonly glyph: GlyphPort
   private readonly replay: ReplayPort
+  private readonly palette: PalettePort
   private readonly nowSource: () => number
   private readonly nonceSource: () => string
   private readonly logLine: (line: string) => void
@@ -305,6 +320,7 @@ export class WordlessAppController
     this.hud = dependencies.hud
     this.glyph = dependencies.glyph
     this.replay = dependencies.replay
+    this.palette = dependencies.palette
     this.nowSource = dependencies.nowMs
     this.nonceSource = dependencies.createNonce
     this.logLine = dependencies.log
@@ -324,6 +340,7 @@ export class WordlessAppController
     )
     this.brush.setListener(this)
     this.replay.setListener(this)
+    this.palette.setListener(this)
 
     this.instanceNonce = this.nonceSource()
     this.roundCounter = 1
@@ -396,6 +413,7 @@ export class WordlessAppController
     this.brush.disarm()
     this.replay.setListener(null)
     this.replay.setAvailable(this.store.getSnapshot().roundId, false)
+    this.palette.setListener(null)
     this.invalidatedRecoveryTokens.clear()
     await (this.localClosePromise ?? Promise.resolve())
   }
@@ -422,6 +440,11 @@ export class WordlessAppController
   onStrokeStart(strokeId: string): void {
     if (this.destroyed) return
     this.publishEffects(this.engine.beginStroke(strokeId, this.nowMs()))
+  }
+
+  onPaletteColorSelected(colorId: StrokeColorId): void {
+    if (!this.engine.selectStrokeColor(colorId)) return
+    this.renderSnapshot(this.store.getSnapshot())
   }
 
   onStrokePoint(world: WorldPoint, normalized: QuantizedPoint): void {
@@ -470,7 +493,15 @@ export class WordlessAppController
     }
     this.lastPhase = snapshot.phase
 
+    this.palette.render(
+      snapshot.strokeColorId,
+      snapshot.paletteInputLocked || snapshot.phase !== 'ACTIVE',
+    )
     this.hud.render(snapshot)
+    this.ribbon.setStrokeColor(snapshot.strokeColorId)
+    this.ribbon.setIncorrectFeedbackActive(
+      snapshot.phase === 'ACTIVE' && snapshot.lastOutcome === 'incorrect',
+    )
     this.ribbon.setPayoffActive(
       snapshot.phase === 'CORRECT' || snapshot.phase === 'GLYPH_LOCKED',
     )
@@ -485,6 +516,7 @@ export class WordlessAppController
           snapshot.worldPoints,
           snapshot.glyph,
           snapshot.revealedWord,
+          snapshot.strokeColorId,
         )
       }
       if (snapshot.phase === 'GLYPH_LOCKED') {
@@ -1063,6 +1095,7 @@ export class WordlessApp extends BaseScriptComponent {
   @input hud: LensHudView
   @input glyph: GlyphMedallionView
   @input replay: ReplayController
+  @input palette: PainterPaletteController
 
   private controller: WordlessAppController | null = null
 
@@ -1076,6 +1109,7 @@ export class WordlessApp extends BaseScriptComponent {
       hud: this.hud,
       glyph: this.glyph,
       replay: this.replay,
+      palette: this.palette,
       nowMs: () => Date.now(),
       createNonce: () => createInstanceNonce(),
       log: (line) => print(line),
@@ -1097,9 +1131,9 @@ export class WordlessApp extends BaseScriptComponent {
 
   private assertBindings(): void {
     if (!this.relay || !this.brush || !this.ribbon || !this.hud ||
-        !this.glyph || !this.replay) {
+        !this.glyph || !this.replay || !this.palette) {
       throw new Error(
-        'WordlessApp requires relay, brush, ribbon, HUD, glyph, and replay bindings',
+        'WordlessApp requires relay, brush, ribbon, HUD, glyph, replay, and palette bindings',
       )
     }
   }

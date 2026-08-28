@@ -1,5 +1,5 @@
 import { MAX_STROKE_POINTS } from '../Core/Protocol'
-import type { WorldPoint } from '../Core/Protocol'
+import type { StrokeColorId, WorldPoint } from '../Core/Protocol'
 import { StrokeRibbonMesh } from './StrokeRibbonMesh'
 
 export interface OwnedResourceCounts {
@@ -9,6 +9,24 @@ export interface OwnedResourceCounts {
 
 const OUTER_WIDTH_CM = 7
 const CORE_WIDTH_CM = 3.6
+const OUTER_ALPHA = 0.28
+const CORE_ALPHA = 1
+const VIOLET_RGB = [139 / 255, 92 / 255, 246 / 255] as const
+const LEMON_RGB = [1, 214 / 255, 90 / 255] as const
+const MINT_RGB = [115 / 255, 230 / 255, 174 / 255] as const
+const CORAL_RGB = [1, 120 / 255, 106 / 255] as const
+
+function strokeColorRgb(colorId: StrokeColorId): readonly [
+  red: number,
+  green: number,
+  blue: number,
+] {
+  switch (colorId) {
+    case 'lemon': return LEMON_RGB
+    case 'mint': return MINT_RGB
+    case 'violet': return VIOLET_RGB
+  }
+}
 
 function snapshotPoints(points: readonly WorldPoint[]): WorldPoint[] {
   if (!Array.isArray(points)) return []
@@ -62,6 +80,8 @@ export class StrokeRibbonView extends BaseScriptComponent {
   private lastWorldPoints: readonly WorldPoint[] | null = null
   private hasGeometry = false
   private payoffActive = false
+  private incorrectFeedbackActive = false
+  private strokeColorId: StrokeColorId = 'violet'
 
   onAwake(): void {
     this.outerMesh = new StrokeRibbonMesh(OUTER_WIDTH_CM)
@@ -76,6 +96,7 @@ export class StrokeRibbonView extends BaseScriptComponent {
       this.coreMesh,
       this.coreMaterial,
     )
+    this.applyEffectiveColor()
     this.createEvent('OnDestroyEvent').bind(() => this.onDestroy())
   }
 
@@ -111,6 +132,36 @@ export class StrokeRibbonView extends BaseScriptComponent {
     if (this.payoffActive === active) return
     this.payoffActive = active
     this.applyVisibility()
+  }
+
+  setIncorrectFeedbackActive(active: boolean): void {
+    if (this.incorrectFeedbackActive === active) return
+    this.incorrectFeedbackActive = active
+    this.applyEffectiveColor()
+  }
+
+  setStrokeColor(colorId: StrokeColorId): void {
+    if (this.strokeColorId === colorId) {
+      this.applyEffectiveColor()
+      return
+    }
+    this.strokeColorId = colorId
+    this.applyEffectiveColor()
+  }
+
+  private applyEffectiveColor(): void {
+    const color = this.incorrectFeedbackActive
+      ? CORAL_RGB
+      : strokeColorRgb(this.strokeColorId)
+    for (let index = 0; index < this.ownedMaterials.length; index += 1) {
+      const alpha = index === 0 ? OUTER_ALPHA : CORE_ALPHA
+      this.ownedMaterials[index].mainPass.baseColor = new vec4(
+        color[0],
+        color[1],
+        color[2],
+        alpha,
+      )
+    }
   }
 
   getOwnedResourceCounts(): OwnedResourceCounts {
@@ -163,5 +214,7 @@ export class StrokeRibbonView extends BaseScriptComponent {
     this.lastWorldPoints = null
     this.hasGeometry = false
     this.payoffActive = false
+    this.incorrectFeedbackActive = false
+    this.strokeColorId = 'violet'
   }
 }

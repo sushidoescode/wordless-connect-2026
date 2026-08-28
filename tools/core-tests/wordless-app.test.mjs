@@ -107,6 +107,7 @@ class FakeRelay {
     this.confirmedPeerConnectionId = null
     this.closeDeferred = null
     this.sendDeferreds = []
+    this.beforeSend = null
     this.diagnostics = {
       activeChannels: 1,
       activeTimers: 2,
@@ -127,6 +128,7 @@ class FakeRelay {
   }
 
   send(draft) {
+    this.beforeSend?.(draft)
     this.sent.push(clone(draft))
     const nextDeferred = this.sendDeferreds.shift()
     return nextDeferred ? nextDeferred.promise : Promise.resolve()
@@ -269,6 +271,8 @@ class FakeRibbon {
   constructor() {
     this.renders = []
     this.payoffStates = []
+    this.incorrectFeedbackStates = []
+    this.strokeColors = []
   }
 
   render(points) {
@@ -277,6 +281,14 @@ class FakeRibbon {
 
   setPayoffActive(active) {
     this.payoffStates.push(active)
+  }
+
+  setIncorrectFeedbackActive(active) {
+    this.incorrectFeedbackStates.push(active)
+  }
+
+  setStrokeColor(colorId) {
+    this.strokeColors.push(colorId)
   }
 
   getOwnedResourceCounts() {
@@ -308,11 +320,12 @@ class FakeGlyph {
     this.hiddenCount += 1
   }
 
-  render(sourcePoints, glyphPoints, revealedWord) {
+  render(sourcePoints, glyphPoints, revealedWord, colorId) {
     this.renders.push({
       sourcePoints: clone(sourcePoints),
       glyphPoints: clone(glyphPoints),
       revealedWord,
+      colorId,
     })
   }
 
@@ -337,6 +350,25 @@ class FakeReplay {
 
   request(roundId) {
     this.listener?.onReplayRequested(roundId)
+  }
+}
+
+class FakePalette {
+  constructor() {
+    this.listener = null
+    this.renders = []
+  }
+
+  setListener(listener) {
+    this.listener = listener
+  }
+
+  render(colorId, inputLocked) {
+    this.renders.push({ colorId, inputLocked })
+  }
+
+  emit(colorId) {
+    this.listener?.onPaletteColorSelected(colorId)
   }
 }
 
@@ -382,6 +414,7 @@ function makeHarness(relay = new FakeRelay()) {
   const hud = new FakeHud()
   const glyph = new FakeGlyph()
   const replay = new FakeReplay()
+  const palette = new FakePalette()
   const logs = []
   const clock = { nowMs: 1_000 }
   const app = new WordlessAppController({
@@ -391,6 +424,7 @@ function makeHarness(relay = new FakeRelay()) {
     hud,
     glyph,
     replay,
+    palette,
     nowMs: () => clock.nowMs,
     createNonce: () => 'APP00001',
     log: (line) => logs.push(line),
@@ -403,6 +437,7 @@ function makeHarness(relay = new FakeRelay()) {
     hud,
     glyph,
     replay,
+    palette,
     logs,
     clock,
   }
@@ -663,6 +698,59 @@ test('initializes one local round and starts only on the confirmed ack tuple', a
   )
 })
 
+test('routes palette intent through engine snapshots and locks before stroke send', async () => {
+  const harness = makeHarness()
+  await harness.app.start()
+
+  assert.deepEqual(harness.palette.renders.at(-1), {
+    colorId: 'violet',
+    inputLocked: true,
+  })
+  harness.palette.emit('lemon')
+  assert.equal(harness.app.getSnapshot().strokeColorId, 'violet')
+  assert.deepEqual(harness.palette.renders.at(-1), {
+    colorId: 'violet',
+    inputLocked: true,
+  })
+
+  harness.relay.emitStatus('SUBSCRIBED', 'SUBSCRIBED · TRANSPORT ONLY')
+  harness.relay.confirmedPeerConnectionId = PEER_CONNECTION
+  harness.relay.emitMessage(presenceAck())
+  await settle()
+  assert.deepEqual(harness.palette.renders.at(-1), {
+    colorId: 'violet',
+    inputLocked: false,
+  })
+
+  harness.palette.emit('lemon')
+  assert.equal(harness.app.getSnapshot().strokeColorId, 'lemon')
+  assert.deepEqual(harness.palette.renders.at(-1), {
+    colorId: 'lemon',
+    inputLocked: false,
+  })
+  assert.equal(harness.ribbon.strokeColors.at(-1), 'lemon')
+
+  let beginObserved = false
+  harness.relay.beforeSend = (draft) => {
+    if (draft.type !== 'stroke.begin') return
+    beginObserved = true
+    assert.deepEqual(harness.palette.renders.at(-1), {
+      colorId: 'lemon',
+      inputLocked: true,
+    })
+  }
+  harness.brush.begin('stroke-palette')
+  await settle()
+
+  assert.equal(beginObserved, true)
+  assert.equal(harness.app.getSnapshot().paletteInputLocked, true)
+  harness.palette.emit('mint')
+  assert.equal(harness.app.getSnapshot().strokeColorId, 'lemon')
+
+  await harness.app.destroy()
+  assert.equal(harness.palette.listener, null)
+})
+
 test('routes brush and guesses through the engine and guards the 450ms glyph lock', async () => {
   const harness = makeHarness()
   await startAndBind(harness)
@@ -685,6 +773,7 @@ test('routes brush and guesses through the engine and guards the 450ms glyph loc
     sourcePoints: [{ x: 1, y: 2, z: -3 }],
     glyphPoints: [[500, 500]],
     revealedWord: 'SNAKE',
+    colorId: 'violet',
   }])
   assert.equal(harness.ribbon.payoffStates.at(-1), true)
   assert.deepEqual(harness.replay.availability.at(-1), {
@@ -720,6 +809,7 @@ test('routes brush and guesses through the engine and guards the 450ms glyph loc
     sourcePoints: [{ x: 1, y: 2, z: -3 }],
     glyphPoints: [[500, 500]],
     revealedWord: 'SNAKE',
+    colorId: 'violet',
   }])
   assert.deepEqual(harness.replay.availability.at(-1), {
     roundId: ROUND_ONE,
@@ -728,6 +818,24 @@ test('routes brush and guesses through the engine and guards the 450ms glyph loc
   assert.ok(harness.logs.includes(
     '[Wordless] GLYPH_LOCKED points=1 hash=c98cf275',
   ))
+})
+
+test('colors the ribbon only for the authoritative active incorrect state', async () => {
+  const harness = makeHarness()
+  await startAndBind(harness)
+
+  harness.relay.emitMessage(guess(ROUND_ONE, 'guess-wrong-color', 1, 3))
+  await settle()
+
+  assert.equal(harness.app.getSnapshot().phase, 'ACTIVE')
+  assert.equal(harness.app.getSnapshot().lastOutcome, 'incorrect')
+  assert.equal(harness.ribbon.incorrectFeedbackStates.at(-1), true)
+
+  harness.relay.emitMessage(guess(ROUND_ONE, 'guess-correct-color', 0, 4))
+  await settle()
+
+  assert.equal(harness.app.getSnapshot().phase, 'CORRECT')
+  assert.equal(harness.ribbon.incorrectFeedbackStates.at(-1), false)
 })
 
 test('awaits each engine-effect draft before starting the next one', async () => {
@@ -1554,6 +1662,7 @@ test('decorated runtime component binds authored dependencies and delegates life
   component.hud = harness.hud
   component.glyph = harness.glyph
   component.replay = harness.replay
+  component.palette = harness.palette
   harness.relay.connectOnStart = true
   component.onAwake()
 

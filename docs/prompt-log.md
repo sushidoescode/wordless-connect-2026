@@ -3079,3 +3079,74 @@ proof. Task 4 must wire `PainterPaletteController`, `WordlessApp.palette`, and
 the new glyph material inputs before clean runtime behavior can be claimed.
 All Task 3 Preview evidence is simulated Lens Studio Preview evidence, not a
 hardware test or real Spectacles capture.
+
+## 2026-08-28 — Task 4 authors and wires the additive-safe painter palette
+
+Task 4 scene authoring stayed inside Lens Studio MCP. A fresh Virtual Scene
+read immediately before mutation reported 137 objects / 52 assets and
+reconfirmed the approved authored anchors relative to `DrawingAnchor`: prompt
+`(-20,49,3)`, phase `(-72,34,3)`, timer `(69,49,3)`, glyph medallion
+`(55,4,4)`, and brush `(-60,0,0)`. MCP bounding boxes put the palette's
+maximum-halo envelope at X `14..52`, Y `43..55`; vertical clearance to the
+prompt and timer was respectively 7.4 cm and 7.6 cm. The approved root
+`(33,34,4)` therefore retained more than the required 5 cm and the Y `31`
+fallback was not used.
+
+One declarative Virtual Scene apply created `Painter Palette` under
+`DrawingAnchor`, ordered violet/lemon/mint roots at X `-13/0/13`, six reused
+sphere visuals, three radius-6 sphere colliders, three package Interactables,
+and the compiled `PainterPaletteController`. Fills use scale `[4,4,1]` at Z
+`0.4`; ivory halos use `[5.2,5.2,0.8]` at Z `0`; targeting mode is indirect
+`2`, instant drag is false, and interaction-plane ignore is true. Violet uses
+`Wordless Ribbon Core`, lemon `Wordless Brush Lemon`, mint `Wordless HUD Mint`,
+and all halos `Wordless HUD Ivory`; no mesh or material asset was added. All 12
+root/ring/collider/interactable controller inputs were explicitly bound.
+
+The first apply retained every created object and binding but rejected six
+`meshShadowMode: "None"` writes because the Editor property requires an enum
+ordinal. A narrow recovery set the copied property path to `0` on all six
+visuals. The first composition-wiring apply made no mutation because class-name
+component property selectors were not valid modify paths. A fresh snapshot
+showed the actual native paths; the recovery used
+`WordlessAppRoot.components.ScriptComponent#1.palette` and
+`DrawingAnchor.components.ScriptComponent#2.lemonGlyphMaterial` /
+`mintGlyphMaterial`. That second apply succeeded with three mutations and no
+errors. The final snapshot asserts the three swatches in order, all 12
+controller references non-null, `WordlessApp.palette` non-null, and the lemon
+and mint glyph materials bound.
+
+Fresh Preview runtime inspection proved the authored initial state: one
+enabled palette root at local `(33,34,4)`, three enabled swatch roots, exactly
+three palette Interactables, violet scale `1.15`, lemon/mint scale `1`, and
+only the violet ivory halo enabled. With an ordinary local browser participant
+connected through the configured relay, the Lens reached `ACTIVE`. The
+interaction automation did not establish the stronger lemon-and-lock proof:
+unique-ID hover/pinch could not acquire either a palette swatch or the already
+established `BrushHead`, and render-coordinate gesture variants emitted no
+stroke. Free-space coordinate pinch completed but did not target the
+indirect-only swatch. Therefore this task does not claim live lemon selection,
+post-begin input lock, or a Preview-observed `colorId=lemon` payload. The
+304-test deterministic core suite covers those state/lock/payload contracts,
+but is not represented as a replacement for the missing interaction proof.
+
+Runtime helper cleanup also stayed inside Lens Studio MCP. Virtual Scene
+removed the exact `AiPreviewAgent Handler`; Editor API
+`AssetManager.remove(SourcePath)` removed `AiPreviewAgentInspect.lspkg`,
+`AiPreviewAgentInteract.lspkg`, `Leaf.lspkg`, and `Bitmoji 3D.lsc` with their
+metadata, then `model.project.save()` serialized the scene. The clean read is
+146 objects / 52 assets with no helper root or helper asset. That editor save
+materialized the script input lines/default slots and component identity in
+the adjacent metadata for `PainterPaletteController`, `WordlessApp`, and
+`GlyphMedallionView`; these editor-generated changes are required so a clone
+retains the authored input identities.
+
+Final Lens TypeScript compilation returned `status: succeeded`. The required
+fresh Preview refresh observed first activity at 28 ms, applied a round,
+configured the client, and subscribed with no product-script error. Console
+contained one editor/network warning, `Host requires authentication`; it did
+not prevent subscription. The final MCP Preview screenshot was saved outside
+the repository at `/tmp/wordless-palette-final.jpg`. Repository verification
+passed `npm run check` (304/304 core, 106/106 web, 55-module build), Lens
+typecheck with no diagnostics, the repeated core and web suites, the repeated
+production build, and `git diff --check`. All visual evidence is simulated
+Lens Studio Preview evidence, not hardware footage or a device test.

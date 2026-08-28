@@ -24,11 +24,22 @@
   VersionPatch: 0
   VersionPrerelease: ""
   UpdateOrder: 0
-  ComponentUid: 00000000-0000-0000-0000-000000000000
+  ComponentUid: f42ea246-4979-4cdc-b151-2eb618625f17
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    {}
+    lemonCollider: false
+    lemonInteractable: false
+    lemonRing: false
+    lemonRoot: false
+    mintCollider: false
+    mintInteractable: false
+    mintRing: false
+    mintRoot: false
+    violetCollider: false
+    violetInteractable: false
+    violetRing: false
+    violetRoot: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -38,10 +49,31 @@
   Attachments:
     []
   DefaultScriptInputs:
-    -
-      {}
+    - violetRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      lemonRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      mintRoot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      violetRing: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      lemonRing: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      mintRing: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      violetCollider: !<reference.ColliderComponent> 00000000-0000-0000-0000-000000000000
+      lemonCollider: !<reference.ColliderComponent> 00000000-0000-0000-0000-000000000000
+      mintCollider: !<reference.ColliderComponent> 00000000-0000-0000-0000-000000000000
+      violetInteractable: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      lemonInteractable: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      mintInteractable: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
   InputLines:
-    []
+    - // @input SceneObject violetRoot
+    - // @input SceneObject lemonRoot
+    - // @input SceneObject mintRoot
+    - // @input SceneObject violetRing
+    - // @input SceneObject lemonRing
+    - // @input SceneObject mintRing
+    - // @input Component.ColliderComponent violetCollider
+    - // @input Component.ColliderComponent lemonCollider
+    - // @input Component.ColliderComponent mintCollider
+    - // @input AssignableType_1 violetInteractable
+    - // @input AssignableType_2 lemonInteractable
+    - // @input AssignableType_3 mintInteractable

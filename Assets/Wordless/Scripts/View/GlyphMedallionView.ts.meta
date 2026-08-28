@@ -31,7 +31,9 @@
     frameVisual: false
     glyphVisual: false
     ivoryFrameMaterial: false
+    lemonGlyphMaterial: false
     medallionRoot: false
+    mintGlyphMaterial: false
     revealedWordLabel: false
     violetGlyphMaterial: false
   ScriptTypesHidden:
@@ -49,6 +51,8 @@
       revealedWordLabel: !<reference.Text> 00000000-0000-0000-0000-000000000000
       ivoryFrameMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
       violetGlyphMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      lemonGlyphMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      mintGlyphMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
@@ -59,3 +63,5 @@
     - // @input Component.Text revealedWordLabel
     - // @input Asset.Material ivoryFrameMaterial
     - // @input Asset.Material violetGlyphMaterial
+    - // @input Asset.Material lemonGlyphMaterial
+    - // @input Asset.Material mintGlyphMaterial

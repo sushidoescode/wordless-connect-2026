@@ -31,6 +31,7 @@
     brush: false
     glyph: false
     hud: false
+    palette: false
     relay: false
     replay: false
     ribbon: false
@@ -49,6 +50,7 @@
       hud: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
       glyph: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
       replay: !<MappingBased.AssignableType_6> 00000000-0000-0000-0000-000000000000
+      palette: !<MappingBased.AssignableType_7> 00000000-0000-0000-0000-000000000000
   ScriptTypes:
     -
       {}
@@ -59,3 +61,4 @@
     - // @input AssignableType_4 hud
     - // @input AssignableType_5 glyph
     - // @input AssignableType_6 replay
+    - // @input AssignableType_7 palette

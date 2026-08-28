@@ -35,13 +35,13 @@
         </div>
         <p id="connection" role="status"><span aria-hidden="true"></span> CONNECTING</p>
       </header>
-      <p id="timer" aria-label="Time remaining"></p>
+      <p id="timer" role="timer" aria-label="Time remaining"></p>
+      <section id="choices" class="choice-grid" aria-label="Answer choices"></section>
       <section class="play-field" aria-labelledby="play-title">
         <h2 id="play-title" class="visually-hidden">Live clue from the painter</h2>
-        <canvas id="stroke-canvas" width="1000" height="620" aria-label="Live clue drawing"></canvas>
+        <canvas id="stroke-canvas" width="1000" height="620" role="img" aria-label="Live clue drawing"></canvas>
         <div id="glyph-medallion" hidden aria-label="Solved clue glyph"></div>
       </section>
-      <section id="choices" class="choice-grid" aria-label="Answer choices"></section>
       <p id="result" aria-live="assertive"></p>
     </main>
     <script type="module" src="/src/main.ts"></script>

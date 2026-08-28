@@ -3207,3 +3207,114 @@ the repeated production build, and `git diff --check`. The HUD Role scale was
 not changed; its approved pre-existing Task 14 state was preserved. All
 captures and interactions are simulated Lens Studio Preview evidence, not
 hardware footage or a device test.
+
+## 2026-08-28 — Task 5 authoritative painter-color relay and v8 evidence
+
+Task 5 began from independently accepted Task 4 fix commit `d451853`. It made
+no new product or E2E implementation change, so no new production behavior was
+introduced without TDD. The already approved but uncommitted Task 14 browser
+accessibility/presentation work in `web/index.html` and `web/src/styles.css`
+was preserved and is included only after the full matrix passed. The final
+source binding is baseline `d451853` plus the lexicographically sorted 36-file
+inventory in `docs/evidence/layperson-read.md`, whose `SHA-256  path` manifest
+digest is
+`8c56227ea87f6e9a0390cca04806fb93c6650b11fd385f533902f2b95e418f21`.
+
+Two distinct connected rounds supply non-overlapping evidence. The accepted
+capture source is round `r-Y2G1Q8BC-1`: Lens diagnostics and browser public
+projection each reached 44 points; both live paths were lemon; physical
+`ROPE` produced coral on both surfaces; physical `SNAKE` cleared the coral and
+produced the exact lemon glyph on both surfaces; and a late mint attempt did
+not change the completed lemon glyph. Only the capture's later replay-helper
+tail was rejected and excluded. The v2-begin observer for this capture was
+validated during the run but was prematurely purged when the attempt was
+temporarily classified as rejected, so an exact capture-round begin object is
+not claimed as retained direct evidence.
+
+A separate no-recorder lifecycle closes the begin/replay evidence gap without
+being cross-attributed to the capture. Its receive-only observer retained only
+this exact six-field projection:
+
+```json
+{"v":2,"type":"stroke.begin","roundId":"r-51OUBRI2-1","sequence":7,"payload":{"strokeId":"stroke-1","colorId":"lemon"}}
+```
+
+The one-line result was below 512 bytes, matched exact top-level keys
+`v/type/roundId/sequence/payload` and exact payload keys `strokeId/colorId`,
+and passed the prohibited-field scan. Round `r-51OUBRI2-1` reached 42 equal
+Lens world/browser public points. Direct value-safe observations proved lemon
+live on both sides, `ROPE` wrong with coral on both, `SNAKE` correct with the
+coral cleared and the same exact path lemon in both glyphs, and a late mint
+no-op. Lens diagnostics recorded `GUESS index=2 outcome=incorrect`,
+`ACTIVE -> CORRECT`, `GUESS index=0 outcome=correct`,
+`CORRECT -> GLYPH_LOCKED`, and
+`GLYPH_LOCKED points=42 hash=bb1d1762`. One atomic Preview
+held-Pinch/wait/Release replay interaction created a successor. After the first
+successor timed out during inspection, the same bounded replay interaction
+advanced to `r-51OUBRI2-3`, observed `ACTIVE` at 18 seconds with four enabled
+browser choices and an unlocked palette. Lemon remained selected at 1.15
+scale with its halo; violet was 1.0; mint's 1.08 scale was transient hover
+only, not a selected-state change.
+
+The browser answers used current screen bounds and genuine atomic macOS
+`cliclick c:` input, never DOM `.click()`. A disposable event counter proved
+exactly one `pointerdown`, `mousedown`, `pointerup`, `mouseup`, and `click` in
+calibration. Manual `dd`/120 ms/`du` was rejected because the simultaneous
+screenshot recorder consumed the release path and omitted terminal events;
+atomic OS click was the smallest evidence-harness correction. Earlier takes
+with wrong palette state, empty observation, missed browser focus, ineffective
+manual down/up, or an invalid replay-helper tail were quarantined rather than
+promoted as product evidence.
+
+The accepted raw hashes are Lens Preview
+`0ca279c0255f0448064c6edaeb3fe39b2482d29a05036c819f72130f561bd4fa`
+and ordinary Chrome browser
+`149ca459538c7aa631dd5cf9f831757c1f9daf28dd5202c35c8e3a6092d46db9`.
+The final encoder used input-level `-ss 3.200` on both raws, Lens crop
+`1172:1274:2064:440` -> `960:1044` -> plum pad at Y 18, browser crop
+`1696:1856:48:172` -> `960:1050` -> plum pad at Y 14, browser/Lens horizontal
+stack, and the disclosure overlay at `(990,1002)`. It emitted 300 frames with
+`libx264`, `yuv420p`, BT.709 declarations, and no audio. A separate
+reconstruction verified that filter-level
+`trim=start=3.200:end=8.200,setpts=PTS-STARTPTS` on both raws is byte-identical
+to the recorded input-level trim. The final v8 SHA-256 is
+`dc8792be4526ef3f7116a1b2e61c397f0dd60a82f619e15c2e331a68bbeca908`.
+Fresh probes confirm 5.000000 seconds, 1920x1080, H.264/yuv420p, 60/1 fps, 300
+declared and independently decoded frames, zero audio streams, and a clean
+full decode. Direct inspection found incomplete lemon-tail growth at frame 0,
+completed lemon/`WAIT FOR GUESS` at frame 60, browser `ROPE · SUBMITTED` at
+frames 172–173, Lens coral onset at frame 174, bilateral coral/`TRY AGAIN` at
+frame 178, and the bilateral coral hold at frame 299. The simulated-Preview
+disclosure remains visible throughout.
+
+Two entirely fresh context-isolated multimodal LLM screens received only a
+neutrally named byte-identical copy of final v8 and the question, “What do you
+think is happening, and what do you think each side is doing?” Both passed the
+strict shared-causality criterion. Their exact answers were:
+
+```text
+The right side is the painter’s simulated Lens view: it knows the clue is “snake,” displays the drawn wavy path, and waits for a guess. The left side is the browser guesser: it sees the relayed path with four choices, selects “rope,” and gets an incorrect “try again” result. Both sides then turn the path coral/red to show the failed guess.
+```
+
+```text
+It looks like a two-player drawing-and-guessing game. The right side is the painter’s view: they have been told to draw a snake, have made a wavy line, and are waiting for a guess. The left side is the guesser’s browser: it receives the same drawing, offers four choices, and the guesser selects “rope.” That answer is rejected, so both sides turn the drawing red and show “try again” feedback while the round continues.
+```
+
+No genuinely unfamiliar human reviewed v8, so Task 14 remains
+**PENDING — HUMAN-INCLUSIVE PANEL** and is not claimed PASS.
+
+Final repository verification passed 304/304 core tests, 106/106 browser unit
+tests, the 55-module production build, 38/38 Chromium Playwright tests,
+aggregate `npm run check`, Lens typecheck, and `git diff --check`. Lens Studio
+MCP TypeScript compilation succeeded. A fresh Preview reset observed activity
+at 24 ms, no product-script error, and the enabled `WordlessAppRoot`; the only
+diagnostic was the known editor/network `Host requires authentication`
+warning. After the final runtime query, MCP removed the exact
+`AiPreviewAgent Handler` and the exact inspect/interact/Leaf/Bitmoji helper
+package roots through Editor `AssetManager.remove(SourcePath)`, then saved the
+project. The final snapshot/filesystem check is 146 objects / 52 assets with no
+helper reference or package remaining. The allowlist observer, its result, and
+the temporary browser probe were also purged. No capture, helper, environment
+file, secret, raw transport frame, URL, header, join payload, local handoff, or
+external research is staged. All Lens footage remains explicitly simulated
+Preview evidence, not Spectacles hardware or a device test.

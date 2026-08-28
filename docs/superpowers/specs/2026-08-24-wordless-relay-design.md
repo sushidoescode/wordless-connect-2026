@@ -1,7 +1,7 @@
 # WORDLESS Relay — approved design
 
 **Status:** Approved by the project owner on 2026-08-24
-**Phase:** Pre-implementation
+**Phase:** Active implementation; final Task 14 source freeze pending
 **Theme:** Connect
 **Decision:** Build a Spectacles-to-browser relay, gated by a realtime spike
 
@@ -18,6 +18,13 @@ preserving the one-Preview/one-browser product and every authority/evidence
 boundary. The binding amendment is
 `2026-08-25-wordless-relay-standard-supabase-amendment.md`; it supersedes
 conflicting Snap Cloud service, setup, adapter-name, and claim language below.
+
+**Painter-palette amendment — 2026-08-28:** The owner approved a bounded,
+painter-only violet/lemon/mint selector. The Lens freezes the selection at
+stroke begin, protocol v2 sends the color token once with `stroke.begin`, the
+browser renders that public projection, coral temporarily overrides the live
+path after an authoritative incorrect result, and the selected color returns
+for the correct exact-path glyph. Section 15 is the binding amendment.
 
 ## 1. Product sentence
 
@@ -69,6 +76,8 @@ session glyph, not from claiming invention of air drawing or charades.
 - Accounts, profiles, matchmaking, or social graphs.
 - Free-text guesses, speech, camera input, or semantic recognition.
 - AI-generated glyphs or illustrated answer reveals.
+- Arbitrary RGB/hex colors, gradients, per-point colors, or mid-stroke color
+  changes.
 - Physics, room occlusion, particles, complex spline smoothing, or hand
   rendering in judged footage.
 - Production authentication, anti-cheat guarantees, or global scale.
@@ -83,6 +92,8 @@ session glyph, not from claiming invention of air drawing or charades.
   sample points while a stroke is active.
 - **StrokeSampler** throttles, quantizes, simplifies, caps, and numbers samples.
 - **RibbonRenderer** draws the local bounded segment pool immediately.
+- **PainterPaletteView** emits one of three bounded color intents to the
+  composition root; it never mutates `RoundStore` or transport state.
 - **LensRelayAdapter** converts local samples into normalized screen
   coordinates and exchanges typed protocol messages with the realtime service.
 - **WordlessEngine** owns the round state machine, word choice, decoys, timer,
@@ -171,15 +182,21 @@ ordinary strict gap handling resumes.
 
 ### Drawing
 
-1. Lens renders every accepted world-space sample locally.
-2. StrokeSampler emits bounded batches of normalized integer `[x, y]` tuples with a
+1. During `ACTIVE` before stroke begin, the painter may select violet, lemon,
+   or mint. `WordlessEngine` validates the intent and updates authoritative
+   round state; the browser receives nothing yet.
+2. The accepted `stroke.begin` freezes the round color and publishes its
+   bounded color token once. Lens renders every accepted world-space sample in
+   that selected color.
+3. StrokeSampler emits bounded batches of normalized integer `[x, y]` tuples with a
    monotonically increasing sequence number.
-3. Browser ignores stale duplicates, detects gaps, and renders accepted points.
+4. Browser binds the color only from the accepted `stroke.begin`, ignores
+   stale duplicates, detects gaps, and renders accepted points.
    A browser-observed painter gap performs one local re-subscribe with no
    pre-close request; the connection-ID transition makes Lens apply a new
    round. A Lens-observed guesser gap applies/sends the reset in place. Neither
    invents missing geometry.
-4. A stroke-end message freezes drawing input; exactly one stroke is allowed
+5. A stroke-end message freezes drawing input; exactly one stroke is allowed
    per round, while guessing remains active until terminal state.
 
 ### Guess and result
@@ -197,11 +214,19 @@ ordinary strict gap handling resumes.
    result/timeout message plus final point count, never glyph geometry.
 6. Incorrect feedback uses coral, keeps that card disabled, and leaves the
    remaining choices active while time remains.
-7. Correct feedback uses mint, reveals the word on both surfaces, freezes the
-   exact path, and independently normalizes each surface's identical public
-   points into the shared session glyph medallion.
+7. Correct feedback uses mint frame/check/text, restores the selected path
+   color, reveals the word on both surfaces, freezes the exact path, and
+   independently normalizes each surface's identical public points into the
+   shared session glyph medallion.
 
 ## 7. Protocol contract
+
+The painter-palette amendment advances the complete proof to protocol version
+`2`. Lens and browser switch atomically and reject every other version; this
+one-Lens/one-browser proof does not carry a dual-version compatibility stack.
+The only new public value is the bounded wire enum
+`StrokeColorId = 'violet' | 'lemon' | 'mint'`. RGB, hex, CSS strings, coral,
+ivory, plum, and unknown tokens are invalid payloads.
 
 Every message carries:
 
@@ -295,6 +320,15 @@ Minimum message types:
 - `transport.ping`
 - `transport.ack`
 
+In protocol v2, `stroke.begin` carries exactly
+`{ strokeId, colorId: StrokeColorId }`. The color is not repeated in
+`stroke.points`, `stroke.end`, result, timeout, reset, or start messages. An
+accepted browser `WebRoundStore` must bind `strokeColorId` before accepting any
+points. A missing begin is therefore never replaced with a guessed/default
+browser color: a lost begin followed by points exercises the existing sequence
+gap recovery, while a contiguous but unauthorized points command is rejected
+without mutating the public projection.
+
 Payload limits are configured from measured spike evidence. Until those
 measurements exist, the conservative probe uses one stroke, no more than 128
 accepted points, batches no faster than 10 Hz, quantized normalized values, and
@@ -321,6 +355,15 @@ generation, so a stale completion callback is a no-op. Task 13 may refine the
 tween or complete immediately for reduced motion, but it cannot introduce or
 redefine this pre-Gate-1 state behavior.
 
+Color selection is authoritative round data, not a new phase. A round starts
+with the engine's in-memory preferred color, initially violet. Only an `ACTIVE`
+round whose stroke state is `NOT_STARTED` accepts `selectStrokeColor`; the same
+call after accepted `beginStroke`, during terminal state, or without a bound
+round is rejected without mutation. An accepted selection updates both the
+current round color and the in-memory preference. `applyRound` copies that
+preference into its newly authoritative snapshot. A full Lens restart resets
+the preference to violet; no persistent storage is used.
+
 Actual local connection loss moves that participant to `DISCONNECTED`. A peer
 rejoin observed on a healthy local channel invalidates partial gameplay but
 keeps that channel and local connection ID; recovery runs once through the
@@ -346,6 +389,9 @@ and invalidates every pending old-round close or terminal callback.
   recovery; a Lens-observed browser gap applies/sends one reset in place and
   completes receive-policy resync. `round.resync.request` is reserved for a
   healthy-channel point-count mismatch. No path invents missing geometry.
+- Unknown, malformed, or late stroke color: reject the command/message without
+  mutating either store. Never substitute violet for an invalid public token,
+  and never partially recolor an already-started stroke.
 - Rate or payload warning: stop the probe, record the evidence, and reduce the
   cap before continuing.
 - Unsupported configured Supabase access: the spike fails. Do not hide the
@@ -357,17 +403,23 @@ and invalidates every pending old-round close or terminal callback.
 
 ### Palette roles
 
-- Ultraviolet violet: live path and primary identity.
-- Warm lemon: active draw head and countdown accent.
-- Mint: connected and correct.
-- Coral: incorrect and recoverable error.
+- Ultraviolet violet (`#8B5CF6`): default selectable path and primary identity.
+- Warm lemon (`#FFD65A`): selectable path, active draw head, and countdown
+  accent.
+- Mint (`#73E6AE`): selectable path, connected, and correct.
+- Coral (`#FF786A`): reserved for incorrect and recoverable error; never a
+  selectable path color.
 - Warm ivory: readable labels and neutral answer cards.
 - Deep plum: browser background only; never relied upon to darken Lens Preview.
 
 ### Lens view
 
-The room carries a short violet path, one lemon draw head, one prompt label,
-one countdown, and a small connection indicator. Hands are not required to be
+The room carries a short selected-color path, one lemon draw head, one prompt
+label, one countdown, a small connection indicator, and three emissive palette
+swatches adjacent to—not overlapping—the draw prompt. An ivory ring plus a
+1.15× swatch scale marks the selection so it is not color-only. The palette
+accepts input only before stroke begin; afterward its ring persists, input and
+hover growth stop, and the swatches remain fixed. Hands are not required to be
 visible. Saturated geometry and literal color/state changes carry every beat.
 
 ### Browser view
@@ -380,8 +432,10 @@ border/icon, and text so meaning is not color-only.
 
 The north-star image suggests an illustrated snake transformation. Production
 does not copy that behavior. The exact sampled stroke is scaled and translated
-into a medallion, accompanied by the revealed word. The deterministic before
-and after must be visibly causal.
+into a medallion in its selected painter color, accompanied by the revealed
+word. The deterministic before and after must be visibly causal. On an
+incorrect result, coral is only an effective display override: the underlying
+selected color remains unchanged and returns before the correct transition.
 
 ## 11. Visual-reference interpretation
 
@@ -435,8 +489,15 @@ that choice.
   expiry, and `applyRound` reset behavior.
 - Pure tests for quantization, simplification, point/byte caps, ordering,
   duplicate rejection, and malformed messages.
+- Pure tests for the three-color enum, protocol-v2 begin payload, selection
+  timing, preferred-color replay, malformed/late color rejection, and no-point-
+  before-begin browser policy.
 - Browser component tests for join, waiting, answer disabled, incorrect,
-  correct, disconnected, and narrow-viewport states.
+  correct, disconnected, selected-color live/glyph paths, coral override and
+  restoration, and narrow-viewport states.
+- Lens view/integration tests for the non-color selection marker, locked input,
+  selected-color ribbon/glyph, coral override, replay preference, and full-
+  restart violet default.
 - Lens Preview runtime logs for every state transition and message boundary.
 - A recorded end-to-end proof for Lens→browser points and browser→Lens guess.
 - Visual capture review at additive-washed and bright-room conditions.
@@ -450,14 +511,67 @@ The eventual video remains under sixty seconds and opens in medias res:
 1. Split view already shows the wearer drawing and the browser receiving it.
 2. Role labels establish `PAINTER` and `GUESSER` immediately.
 3. Browser taps a wrong answer; both surfaces react in coral.
-4. Browser taps the correct answer; both surfaces turn mint and reveal the word.
+4. Browser taps the correct answer; both surfaces show mint correct feedback,
+   restore the selected path color, and reveal the word.
 5. The exact scribble locks into a glyph medallion.
-6. A short proof beat shows Lens Studio, the browser, and the realtime exchange.
-7. End card states the Preview simulation and the measured, supported claims.
+6. A later replay beat—not the opening five seconds—may show the painter
+   selecting another bounded color and that color reaching the browser/glyph.
+7. A short proof beat shows Lens Studio, the browser, and the realtime exchange.
+8. End card states the Preview simulation and the measured, supported claims.
 
 This is a story target, not evidence that the behavior currently exists.
 
-## 15. Design authority and amendment rule
+## 15. Approved painter palette amendment
+
+### Authority and stores
+
+- `StrokeColorId` is the single shared domain/wire type and contains exactly
+  `violet`, `lemon`, and `mint`.
+- `WordlessEngine` owns `selectStrokeColor(colorId)` and the in-memory preferred
+  color. It accepts a selection only for the current `ACTIVE` round before
+  `beginStroke` succeeds.
+- Lens `RoundStore` snapshots expose authoritative `strokeColorId` and whether
+  palette input is locked. The palette view emits an intent to the composition
+  root; neither the view nor transport adapter writes the store.
+- Browser `WebRoundStore` exposes `strokeColorId: StrokeColorId | null`. A new
+  start/reset clears it to `null`; only an accepted Lens-authored
+  `stroke.begin` binds it. Browser UI never selects or invents a value.
+
+### Rendering and interaction
+
+- Before the stroke, the Lens palette displays three fixed emissive swatches in
+  violet/lemon/mint order. The selected swatch uses a bright ivory ring and
+  1.15× scale; the affordance must remain legible in the
+  additive Sunlit Room Preview.
+- The existing indirect interaction path targets the swatches. Selection does
+  not start a stroke or round, reset the timer, publish a message, or create a
+  second gesture mode.
+- Accepted `beginStroke` locks further palette input. The selector may retain
+  its chosen state visually but cannot handle another selection until the next
+  `applyRound`.
+- Ribbon, browser live path, transition path, and exact glyph resolve their base
+  color from `strokeColorId`. The lemon draw head remains lemon for all
+  selections.
+- Effective live color is
+  `authoritative active incorrect ? coral : selected stroke color`. Incorrect
+  feedback never overwrites the stored selection. Correct handling restores the
+  selection before the 450 ms exact-glyph transition; mint frame/check/text
+  still signal correctness independently.
+
+### Recovery, replay, and compatibility
+
+- `stroke.begin` is the sole wire binding for public color. Point batches never
+  carry color and cannot render before an accepted begin.
+- Reset, browser reconnect, or painter-epoch replacement clears the browser
+  projection and its color. The next authorized round and begin establish a
+  new projection; no recovery path reuses a partial old stroke/color.
+- Lens-local replay keeps the last accepted selection in memory and applies it
+  to the successor round. A full Lens restart returns to violet. No account,
+  preference file, `.env` value, or backend row stores color.
+- Protocol v2 is an atomic upgrade of both proof clients. V1/v2 interoperation,
+  migration messages, and feature negotiation are outside scope.
+
+## 16. Design authority and amendment rule
 
 This document supersedes the remote two-Spectacles architecture in the Fable
 research memo. Research may inform implementation but cannot override this

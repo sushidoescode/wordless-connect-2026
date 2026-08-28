@@ -2,9 +2,9 @@
 
 - Status: **PENDING — HUMAN-INCLUSIVE PANEL**
 - Observed date: 2026-08-28 PT
-- Latest screened source: committed baseline `d451853` plus 36-file v8
+- Latest screened source: committed HEAD `289d3dd` plus current 36-file v8
   source-manifest SHA-256
-  `8c56227ea87f6e9a0390cca04806fb93c6650b11fd385f533902f2b95e418f21`
+  `877df568014dd0c4046177609db1f423b628fbb67efcf9e2fcda619d71012f71`
 - Latest screened clip: `captures/task14/five-second-comprehension-v8.mp4`
 - Latest screened clip SHA-256:
   `dc8792be4526ef3f7116a1b2e61c397f0dd60a82f619e15c2e331a68bbeca908`
@@ -585,8 +585,8 @@ deferred, followed by the unfamiliar-human result.
 ## V8 authoritative palette-source refresh
 
 V7 and its panel are superseded because the approved painter palette changed
-protocol, state, Lens scene identity, and rendering. V8 binds the final source
-to baseline `d451853` plus this lexicographically sorted 36-file inventory:
+protocol, state, Lens scene identity, and rendering. V8 binds the current
+source at `289d3dd` to this lexicographically sorted 36-file inventory:
 
 ```text
 Assets/Scene.scene
@@ -628,9 +628,16 @@ web/tests/web-round-store.test.ts
 ```
 
 The SHA-256 over the 36 corresponding `SHA-256  path` lines is
-`8c56227ea87f6e9a0390cca04806fb93c6650b11fd385f533902f2b95e418f21`.
+`877df568014dd0c4046177609db1f423b628fbb67efcf9e2fcda619d71012f71`.
 Documentation and ignored evidence artifacts are intentionally outside that
 source-only digest.
+
+The accepted v8 capture was first frozen at `f9062a8`, when the same inventory
+hashed to `8c56227ea87f6e9a0390cca04806fb93c6650b11fd385f533902f2b95e418f21`.
+Independent review then changed only the Playwright Axe assertion inside that
+inventory. Commit `289d3dd` does not change Lens or browser runtime source,
+the raw takes, final v8 bytes, or either blind review; the current digest above
+records that test-only hardening rather than silently retaining the stale hash.
 
 ### Connected color evidence
 

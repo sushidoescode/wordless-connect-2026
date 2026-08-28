@@ -3214,11 +3214,15 @@ Task 5 began from independently accepted Task 4 fix commit `d451853`. It made
 no new product or E2E implementation change, so no new production behavior was
 introduced without TDD. The already approved but uncommitted Task 14 browser
 accessibility/presentation work in `web/index.html` and `web/src/styles.css`
-was preserved and is included only after the full matrix passed. The final
-source binding is baseline `d451853` plus the lexicographically sorted 36-file
-inventory in `docs/evidence/layperson-read.md`, whose `SHA-256  path` manifest
-digest is
+was preserved and is included only after the full matrix passed. The
+capture-freeze source binding is baseline `d451853` plus the lexicographically
+sorted 36-file inventory in `docs/evidence/layperson-read.md`; at Task 5
+commit `f9062a8`, its `SHA-256  path` manifest digest was
 `8c56227ea87f6e9a0390cca04806fb93c6650b11fd385f533902f2b95e418f21`.
+The independent-review follow-up later changed only the inventory's
+`web/e2e/wordless.spec.ts` assertion. At `289d3dd`, the current 36-file digest
+is `877df568014dd0c4046177609db1f423b628fbb67efcf9e2fcda619d71012f71`;
+runtime source and v8 bytes are unchanged.
 
 Two distinct connected rounds supply non-overlapping evidence. The accepted
 capture source is round `r-Y2G1Q8BC-1`: Lens diagnostics and browser public
@@ -3348,3 +3352,12 @@ with BT.709 primaries, transfer, and colorspace flags; the final file reports
 `color_space=bt709`, while `color_primaries` and `color_transfer` remain
 `unknown`. No video was regenerated, so the reviewed v8 hash and its two blind
 passes remain unchanged. Task 14 is still **PENDING — HUMAN-INCLUSIVE PANEL**.
+
+The closure review then caught one Important evidence-binding regression:
+because `web/e2e/wordless.spec.ts` is one of the 36 inventoried files, the
+all-severity assertion changed the manifest even though it changed no runtime
+source or capture. Recomputing all 36 sorted `SHA-256  path` lines produced
+`877df568014dd0c4046177609db1f423b628fbb67efcf9e2fcda619d71012f71`.
+Every current-manifest reference now uses that digest and explicitly preserves
+`8c56227e...e418f21` as the historical `f9062a8` capture-freeze digest. This
+documentation-only reconciliation does not alter the source inventory or v8.

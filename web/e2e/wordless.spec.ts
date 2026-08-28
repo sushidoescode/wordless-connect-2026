@@ -283,8 +283,6 @@ async function auditAxeState(
     total[impact] = (total[impact] ?? 0) + 1
     return total
   }, {})
-  const blocking = results.violations.filter((violation) =>
-    violation.impact === 'serious' || violation.impact === 'critical')
   console.log(`[AXE] ${state} ${JSON.stringify({ counts, rules: results.violations.map((violation) => ({
     id: violation.id,
     impact: violation.impact,
@@ -294,7 +292,7 @@ async function auditAxeState(
     body: JSON.stringify(results, null, 2),
     contentType: 'application/json',
   })
-  expect(blocking, `${state} has serious or critical Axe violations`).toEqual([])
+  expect(results.violations, `${state} has Axe violations`).toEqual([])
 }
 
 async function expectRoundElementsInsideViewport(page: Page): Promise<void> {
@@ -355,7 +353,7 @@ test('validates join input without bypassing the six-character code', async ({ p
   })
 })
 
-test('has no serious or critical Axe violations across every public round state', async ({ page }, testInfo) => {
+test('has no Axe violations across every public round state', async ({ page }, testInfo) => {
   await page.goto('/')
   await auditAxeState(page, 'join', testInfo)
 

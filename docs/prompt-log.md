@@ -3274,8 +3274,10 @@ The final encoder used input-level `-ss 3.200` on both raws, Lens crop
 `1172:1274:2064:440` -> `960:1044` -> plum pad at Y 18, browser crop
 `1696:1856:48:172` -> `960:1050` -> plum pad at Y 14, browser/Lens horizontal
 stack, and the disclosure overlay at `(990,1002)`. It emitted 300 frames with
-`libx264`, `yuv420p`, BT.709 declarations, and no audio. A separate
-reconstruction verified that filter-level
+`libx264`, `yuv420p`, no audio, and encoder flags requesting BT.709 primaries,
+transfer, and colorspace. `ffprobe` verifies `color_space=bt709`; the emitted
+`color_primaries` and `color_transfer` tags remain `unknown` and are not
+claimed as verified. A separate reconstruction verified that filter-level
 `trim=start=3.200:end=8.200,setpts=PTS-STARTPTS` on both raws is byte-identical
 to the recorded input-level trim. The final v8 SHA-256 is
 `dc8792be4526ef3f7116a1b2e61c397f0dd60a82f619e15c2e331a68bbeca908`.
@@ -3318,3 +3320,31 @@ the temporary browser probe were also purged. No capture, helper, environment
 file, secret, raw transport frame, URL, header, join payload, local handoff, or
 external research is staged. All Lens footage remains explicitly simulated
 Preview evidence, not Spectacles hardware or a device test.
+
+### 2026-08-28 — Task 5 independent review follow-up
+
+An independent read-only review of `d451853..f9062a8` recomputed the exact
+36-file source manifest and v8 media/raw hashes, confirmed the five-file commit
+scope and evidence separation, and found no Critical or Important issue. It
+reported two Minor precision/guard findings: the Axe run was genuinely empty
+at every severity while the committed assertion blocked only serious/critical
+findings, and the video record did not distinguish requested BT.709 flags from
+the tags actually reported by `ffprobe`.
+
+The Axe guard was strengthened test-first. A disposable headless page with an
+empty heading produced one `empty-heading` violation at `minor` impact; the
+old serious/critical filter returned an empty blocking set, so the mutation
+probe failed with `RED: current serious/critical guard misses an Axe
+violation`. The production audit now asserts that the complete
+`results.violations` array is empty and names that contract directly. The
+focused desktop/phone audit passed 2/2 with empty sets in join, waiting,
+active, wrong, correct, locked, and timeout. The full Chromium suite then
+passed 38/38. Fresh aggregate verification also passed 304/304 core tests,
+106/106 browser unit tests, the 55-module build, Lens typecheck, and
+`git diff --check`.
+
+The media prose now states the exact evidence boundary: ffmpeg was invoked
+with BT.709 primaries, transfer, and colorspace flags; the final file reports
+`color_space=bt709`, while `color_primaries` and `color_transfer` remain
+`unknown`. No video was regenerated, so the reviewed v8 hash and its two blind
+passes remain unchanged. Task 14 is still **PENDING — HUMAN-INCLUSIVE PANEL**.

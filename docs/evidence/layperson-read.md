@@ -711,6 +711,10 @@ Independent probes require and confirm one 1920x1080 H.264 video stream,
 stream, and a clean full decode. V8 SHA-256 is
 `dc8792be4526ef3f7116a1b2e61c397f0dd60a82f619e15c2e331a68bbeca908`.
 
+The encoder invocation supplied all three BT.709 flags. The resulting file's
+probe reports `color_space=bt709`; `color_primaries` and `color_transfer`
+remain `unknown`, so those two output tags are not claimed as verified.
+
 Direct inspection shows frame 0 with an incomplete lemon path and the changing
 tail visible on both sides; frame 60 with the completed lemon path and
 `WAIT FOR GUESS`; frames 172–173 with browser `ROPE · SUBMITTED`; frame 174

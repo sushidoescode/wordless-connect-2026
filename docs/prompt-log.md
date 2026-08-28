@@ -3150,3 +3150,60 @@ passed `npm run check` (304/304 core, 106/106 web, 55-module build), Lens
 typecheck with no diagnostics, the repeated core and web suites, the repeated
 production build, and `git diff --check`. All visual evidence is simulated
 Lens Studio Preview evidence, not hardware footage or a device test.
+
+## 2026-08-28 — Task 4 live Preview acceptance closes the evidence gap
+
+The missing Task 4 interaction acceptance was reproduced and closed without a
+source or scene mutation. The earlier normalized render coordinate
+`(0.642,0.572)` had its screen-Y sign reversed. At corrected Y `0.315`, X
+`0.642` selected mint, which established that the palette controller and the
+hover-acquisition cadence were working but that the target was one swatch too
+far right. A bounded refinement located lemon at `(0.602,0.315)`. Separate MCP
+calls could still consume the 20-second Lens round while awaiting evaluation,
+so the accepted proof kept Preview refresh, state queries, interactions,
+screenshots, Console collection, and relay monitoring inside one uninterrupted
+orchestration. Earlier attempts that captured only keepalives or expired the
+round were rejected rather than promoted as product evidence.
+
+The accepted run began in `DRAW` at `0:19` with violet scale approximately
+`1.15` and its halo enabled, lemon/mint scale `1` with halos disabled. MCP
+`InjectPreviewGesture` tapped `(0.602,0.315)`, waited 650 ms for indirect hover
+acquisition, then sent a distinct touch start/end at the same coordinate. At
+`0:18`, only lemon was scale approximately `1.15` with its halo enabled;
+violet and mint were scale `1` with halos disabled. The reviewable selected
+state was captured outside git at `/tmp/task4-wire-lemon-selected.jpg`.
+
+The brush then used the proven acquisition point `(0.30,0.45)`: tap, 650 ms
+wait, touch start, the requested 30-move path at 60 ms cadence, and touch end
+at `(0.67,0.45)`. Runtime advanced to `WAIT FOR GUESS` at `0:15`; the browser
+was simultaneously `ACTIVE` with 21,739 painted pixels. A deliberate post-begin
+mint attempt at `(0.642,0.315)` used the same tap/wait/touch cadence. At `0:14`
+it was a no-op: phase remained `WAIT FOR GUESS`, lemon remained approximately
+`1.15` with its halo enabled, and mint remained scale `1` with its halo
+disabled. This live no-op plus persistent selected state is the Preview lock
+proof; no editor property mutation was used as a substitute. The locked state
+was captured outside git at `/tmp/task4-wire-palette-locked.jpg`.
+
+The concurrent ordinary-browser relay monitor captured the accepted v2
+`stroke.begin`: round `r-SUC7DFLW-1`, sender `161D4I01`, sequence `7`, payload
+keys `[colorId,strokeId]`, and `colorId=lemon` (187 bytes). It observed one
+begin, 17 point batches carrying 35 public points, and one end at sequence 27;
+batch sizes were `[2,2,3,1,2,3,2,3,2,3,2,2,1,2,2,1,2]`, maximum message size
+was 212 bytes, public-point hash `15db29fd`, and glyph-coordinate hash
+`a9335b20`. Lens Console accumulated 16 stroke diagnostics, ending
+`[Wordless] STROKE worldPoints=35 publicPoints=35 bytes=114`. No product-script
+error appeared; the existing editor/network `Host requires authentication`
+warning remained non-blocking.
+
+After proof, MCP Virtual Scene deleted the exact inspect-helper root and typed
+Editor API `AssetManager.remove(SourcePath("AiPreviewAgentInspect.lspkg",
+Packages))` removed the reinstalled helper package before `model.project.save()`.
+The final fresh read returned 146 objects / 52 assets, one palette, and zero
+helper roots/assets. A final Lens TypeScript compile succeeded, and the final
+Preview refresh returned success with no product-script error. Repository
+revalidation passed `npm run check` (304/304 core, 106/106 web, 55-module
+build), Lens typecheck with no diagnostics, the repeated core and web suites,
+the repeated production build, and `git diff --check`. The HUD Role scale was
+not changed; its approved pre-existing Task 14 state was preserved. All
+captures and interactions are simulated Lens Studio Preview evidence, not
+hardware footage or a device test.

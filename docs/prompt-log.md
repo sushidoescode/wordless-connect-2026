@@ -3361,3 +3361,29 @@ source or capture. Recomputing all 36 sorted `SHA-256  path` lines produced
 Every current-manifest reference now uses that digest and explicitly preserves
 `8c56227e...e418f21` as the historical `f9062a8` capture-freeze digest. This
 documentation-only reconciliation does not alter the source inventory or v8.
+
+## 2026-08-28 — Owner closes the five-second gate and redirects to Fable review
+
+After the two strict LLM passes on exact v8, the owner supplied this response
+from a genuinely unfamiliar human shown the same five-second candidate:
+
+```text
+It looks like one side is trying to draw something, and the other side sees the same thing, and is given choices on what that could be? Looking at it closely the left side says Guess the Clue, so that means the right side is drawing based on the word in the middle and then the left side is guessing.
+```
+
+The response correctly identifies the drawing/guessing game, both roles, the
+shared drawing, and the multiple-choice interaction. It does not explicitly
+narrate the submitted wrong answer or bilateral coral reaction required by the
+original strict Task 14 rubric. The owner rejected treating that omission as a
+product failure in a five-second silent excerpt, judged the test duration too
+short and the continued recut/review loop disproportionate, and directed the
+team to stop this testing and work on the private Fable review handoff. No v9
+or mirrored-guess-receipt amendment was authorized or implemented.
+
+This is an explicit execution deviation from the Task 14 → Task 15 gate in the
+implementation plan. Task 14 is closed by owner waiver, not relabeled as a
+formal human-inclusive pass. The existing v8 media, hashes, two strict LLM
+passes, and human response remain honest evidence. Task 15 may proceed without
+another five-second panel when the owner returns to implementation, while the
+planned 59-second submission must be reviewed as a complete story. This entry
+contains no competitive/judge research from the ignored Fable handoff.

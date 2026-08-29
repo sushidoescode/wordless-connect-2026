@@ -1,6 +1,6 @@
 # Task 14 five-second comprehension read
 
-- Status: **PENDING — HUMAN-INCLUSIVE PANEL**
+- Status: **CLOSED BY OWNER WAIVER — FORMAL STRICT PASS NOT CLAIMED**
 - Observed date: 2026-08-28 PT
 - Latest screened source: committed HEAD `289d3dd` plus current 36-file v8
   source-manifest SHA-256
@@ -8,9 +8,12 @@
 - Latest screened clip: `captures/task14/five-second-comprehension-v8.mp4`
 - Latest screened clip SHA-256:
   `dc8792be4526ef3f7116a1b2e61c397f0dd60a82f619e15c2e331a68bbeca908`
-- Latest panel composition: two fresh context-isolated multimodal LLM screens,
-  both strict passes. A genuinely unfamiliar human response is still required;
-  no human result exists for v8 and none is fabricated here.
+- Latest review composition: two fresh context-isolated multimodal LLM screens,
+  both strict passes, plus one owner-supplied unfamiliar-human response that
+  correctly identifies the drawing/guessing game, the two roles, the shared
+  drawing, and the browser's multiple-choice interaction. The human response
+  is recorded verbatim below. The owner ended the five-second gate before that
+  response was scored against the abandoned strict shared-causality criterion.
 
 This evidence uses one ordinary local Chrome guesser and one simulated Lens
 Studio Preview painter connected through ordinary hosted Supabase Realtime. It
@@ -738,8 +741,7 @@ named byte-identical copy of silent v8 and this exact question:
 What do you think is happening, and what do you think each side is doing?
 ```
 
-Both answers meet the strict shared-causality criterion. Neither substitutes
-for the required unfamiliar human.
+Both answers meet the original strict shared-causality criterion.
 
 #### V8 reviewer A — fresh multimodal LLM — PASS
 
@@ -753,9 +755,21 @@ The right side is the painter’s simulated Lens view: it knows the clue is “s
 It looks like a two-player drawing-and-guessing game. The right side is the painter’s view: they have been told to draw a snake, have made a wavy line, and are waiting for a guess. The left side is the guesser’s browser: it receives the same drawing, offers four choices, and the guesser selects “rope.” That answer is rejected, so both sides turn the drawing red and show “try again” feedback while the round continues.
 ```
 
-V8 therefore has two strict LLM passes, but the overall gate remains
-**PENDING — HUMAN-INCLUSIVE PANEL** until a genuinely unfamiliar human also
-passes. No human answer was available during this task.
+#### V8 reviewer H1 — unfamiliar human — informative, not strictly scored
+
+```text
+It looks like one side is trying to draw something, and the other side sees the same thing, and is given choices on what that could be? Looking at it closely the left side says Guess the Clue, so that means the right side is drawing based on the word in the middle and then the left side is guessing.
+```
+
+This response spontaneously identifies the drawing/guessing game, the shared
+drawing, the painter and guesser roles, and the browser's multiple-choice
+interaction. It does not narrate the submitted wrong answer or bilateral coral
+reaction. The owner rejected treating that omission as a product failure in a
+five-second silent excerpt, concluded that the experiment was too short to be
+a useful release gate, and directed the team to stop recutting/retesting and
+judge comprehension in the full submission story instead. The response is
+therefore preserved as positive qualitative evidence and is not labeled a
+failure. V8 is not promoted as a formal pass under the superseded strict rule.
 
 ## Accessibility evidence
 
@@ -789,8 +803,11 @@ and 52 assets with no Preview-agent helper root or package remaining.
 
 ## Conclusion
 
-**PENDING — HUMAN-INCLUSIVE PANEL.** The owner-approved palette and bilateral
-coral-path response are implemented, source-bound, and visible in fresh v8.
-Both new isolated LLM screens pass, but no genuinely unfamiliar human has
-reviewed v8. Task 14 therefore does not claim PASS, and Task 15 remains gated
-behind the missing human-inclusive evidence.
+**CLOSED BY OWNER WAIVER — FORMAL STRICT PASS NOT CLAIMED.** The
+owner-approved palette and bilateral coral-path response are implemented,
+source-bound, and visible in fresh v8. Both isolated LLM screens pass the
+original strict rubric, and the unfamiliar human correctly describes the core
+game and roles. On 2026-08-28 the owner ended further five-second testing as
+unrepresentative of the planned 59-second submission. Task 15 may proceed by
+that explicit owner decision, but this record does not relabel Task 14 as a
+formal human-inclusive pass or claim that resilience work is complete.

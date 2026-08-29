@@ -3387,3 +3387,40 @@ passes, and human response remain honest evidence. Task 15 may proceed without
 another five-second panel when the owner returns to implementation, while the
 planned 59-second submission must be reviewed as a complete story. This entry
 contains no competitive/judge research from the ignored Fable handoff.
+
+## 2026-08-29 — Owner approves submission-first two-day finalization
+
+After receiving the private adversarial review, the owner approved a bounded
+submission-first execution design for the remaining two days. This approval
+does not import the private competitive or judge analysis into tracked files.
+It establishes these execution decisions:
+
+- Freeze feature scope. Before final capture, make only two approved product
+  corrections: enforce the browser projection's aggregate 128-point limit
+  through the existing recovery intent, and give browser wrong-result text the
+  existing coral wrong-feedback tone. Runtime copy stays concise; any caption
+  explaining the bilateral reaction must say both **strokes**, not both screens.
+- Reconcile Task 16 to a complete-story timeline: roles/shared line at 00–04,
+  wrong result at 04–09, correct result at 09–14, exact glyph at 14–20, replay
+  at 20–26, CLAD proof at 26–42, validation/limits at 42–51, and end card at
+  51–59 seconds.
+- The Task 14 five-second gate remains owner-waived, not passed. Task 16 must
+  replace its stale five-second human re-gate with an independent review of the
+  complete 59-second candidate, plus the existing frame, disclosure, claim, and
+  technical media checks. No five-second comprehension claim may be published.
+- Task 15 may be called complete only if its full planned adversarial matrix,
+  five-round soak, reconnect/reload/Preview-restart proof, production-config
+  audit, and evidence report pass. Any reduced run must be labeled partial and
+  must not satisfy the completion definition by implication.
+- The target is a local, private release candidate: updated README, original
+  hero/end card, submission documents, Sunlit Room split-screen video, and
+  locally generated Chris narration using ignored credentials without printing
+  or tracking them. Narration must support a mute-readable edit.
+- No history rewrite, clean-lineage creation, video upload, visibility change,
+  or form submission is authorized by this approval. Those remain separate
+  owner gates after the local candidate and release audit are complete.
+
+Any source change after the product-freeze validation invalidates the candidate
+capture and requires a new capture, full-cut review, technical probe, and
+evidence binding. A fresh tracked specification/plan amendment may formalize
+the approved Task 16 timing and review replacement before implementation.

@@ -3694,3 +3694,69 @@ scripted staging). `docs/evidence/resilience.md` §3a, §7, §8 record this.
 Capture remains blocked pending an owner-arranged clean-desktop session; the
 overall outcome is unchanged: CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS. No
 competitive or judge research entered this entry.
+
+## 2026-08-30 — Capture, assemble, narrate, and bind the 59-second candidate
+
+With the owner's confirmation that the desktop was cleaned and the Chris
+sample approved, and following the owner's sequencing correction (lock the raw
+picture, then generate and mix the complete narration, then final technical
+verification and Stage B), the release candidate was captured and assembled.
+
+Desktop hygiene: the WORDLESS windows were isolated for capture. Screen 0
+initially showed an unrelated private project, so all non-WORDLESS apps were
+**hidden** (never closed) and Lens Studio + Chrome positioned as a split
+screen; a diagnostic frame confirmed a clean desktop before recording.
+
+Capture: a full-display macOS screen recording (avfoundation, 60 fps) captured
+one live connected round on session `EOU4LZ` — a continuous drawn stroke, three
+wrong guesses turning both strokes coral, the correct STAR guess turning mint
+with the word revealed, and matching exact-path glyph medallions on both
+surfaces. The Lens was driven with `InjectPreviewGesture` and the visible
+browser with the on-page auto-resolve loop; a closed-loop stroke kept the brush
+position stable. Two earlier takes were discarded (a mid-take window drift left
+the desktop wallpaper in one, verified and rejected). The accepted master take
+is the clean full round.
+
+Assembly: the full-screen split capture was recomposed into a clean
+1920×1080 split screen (Lens pane left, browser pane right, plum ground),
+trimmed to the amendment §3 beats, with a held glyph split-screen under
+original CLAD/validation lower-third cards for 26.0–51.0, the original end card
+for 51.0–59.0, a persistent "Lens Studio Preview — simulated" disclosure on
+every Preview segment, and burned beat captions. Because this ffmpeg build
+lacks libass/drawtext, cards and captions were rendered as PNG overlays via the
+Chromium renderer. The recipe and hashes are in the ignored
+`captures/task16/edit-manifest.json`.
+
+Narration: the eight Chris beat lines were generated through the owner's
+ElevenLabs account (voice `iP95p4xoKVk53GoZ742B`, `eleven_multilingual_v2`,
+0.45/0.8/0.15/speaker-boost/1.0), placed at the beat offsets, and mixed with
+two-pass loudness normalisation. The key was read in-process from the ignored
+`.env`, never printed, logged, serialised, or passed on a command line, and
+verified absent from every sidecar, doc, tool, and source file.
+
+Verification: `tools/media/verify-wordless-video.mjs` passes all checks —
+59.000 s, H.264 High 1920×1080 yuv420p square-pixel 60/1 fps, AAC 48 kHz,
+3540/3540 frames, clean decode, faststart, −16.89 LUFS integrated, −1.67 dBTP
+true peak, no black interval and no trailing silence.
+
+Complete-cut panel (amendment §5): Stage A (three fresh, context-isolated
+reviewers, blind and muted) 3/3 independently identified the two roles, the
+browser's causal effect (wrong→coral on both, correct→mint medallion on both),
+and the exact shared mark becoming the glyph; two blockers it raised (an
+unexplained wallpaper frame in the replay beat and a clipped CLAD card) were
+fixed. Stage B (same three, narrated candidate + project description + README
+first screen + claim ledger) initially found one credible blocker — an
+unscoped on-screen 10 Hz cadence figure — which was corrected to "a live
+two-way stroke relay" (the scoped Gate 0 10 Hz remains only in the project
+description); on re-review all three returned STAGE B: PASS with no blockers.
+Verbatim answers are stored under the ignored `local-handoff/reviews/task16/`.
+
+Binding: accepted candidate SHA-256
+`18f7ce9a9b0b72c761ecc36e844cde4487ff4b88f6f7de4222d3bb814a73b5b5`, bound to
+product-freeze `31123d3` and runtime/UI manifest `bcb3859a…a46705`
+(re-verified byte-identical after the Lens helper-package cleanup). The README
+hero was extracted from this exact candidate at 17.0 s. The candidate video,
+narration audio, and raw takes remain ignored under `captures/`. The
+video-EDL, release checklist, and polish ledger record the observed values;
+no runtime/UI file changed. No competitive or judge research entered this
+entry. Nothing was pushed, uploaded, published, or submitted.

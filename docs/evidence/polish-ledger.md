@@ -39,3 +39,30 @@ change or retain rationale, and fresh proof. Captures remain local and ignored.
   not to score that answer as a failure and waived the five-second gate in
   favor of reviewing the complete 59-second story. No formal Task 14 strict
   pass is claimed.
+
+## 2026-08-30 / Task 16 capture-to-binding — capture/evidence loop
+
+- **Input capture/hash:** accepted candidate
+  `captures/task16/wordless-relay-final-59s.mp4` (ignored), SHA-256
+  `18f7ce9a9b0b72c761ecc36e844cde4487ff4b88f6f7de4222d3bb814a73b5b5`,
+  59.000 s, H.264 High 1920×1080 yuv420p 60/1 fps, AAC 48 kHz, faststart,
+  integrated −16.89 LUFS / true peak −1.67 dBTP, 3540 frames.
+- **Reviewed source revision:** product-freeze `31123d3`; runtime/UI manifest
+  `bcb3859a…a46705` re-verified byte-identical after the Lens helper-package
+  cleanup.
+- **Reviewer composition:** three fresh, context-isolated multimodal reviewers
+  per stage (Stage A blind/muted; Stage B narrated + description + README +
+  claim ledger).
+- **Observed defect / decision:** Stage A round 1 flagged an unexplained
+  desktop-wallpaper frame in the replay beat and a clipped CLAD card — both
+  fixed (replay beat rebuilt from the clean master take; card shortened).
+  Stage B round 1 flagged one credible blocker: an unscoped on-screen 10 Hz
+  cadence claim — fixed to "a live two-way stroke relay" (scoped 10 Hz remains
+  only in the project description, per the claim ledger). Caption doubling at
+  the 9 s boundary and an unshown "new colour" promise were also corrected.
+- **Evidence:** `local-handoff/reviews/task16/stageA-results.md` and
+  `stageB-results.md` (verbatim answers ignored); `verify-wordless-video.mjs`
+  all-pass; `captures/task16/edit-manifest.json` records the recipe/hashes.
+- **Outcome:** capture/evidence loop PASS. Complete-cut panel PASS (Stage A
+  3/3, Stage B 3/3 after the smallest demonstrated repairs). README hero
+  extracted from the accepted candidate at 17.0 s.

@@ -48,18 +48,43 @@ must match its ledger row and scope exactly at review time.
 
 | Gate | Requirement | Observed |
 | --- | --- | --- |
-| Correct + word | Correct feedback and the revealed word visible by 14.0 s | PENDING CAPTURE |
-| Glyphs holding | Matching glyph medallions visible and holding before 20.0 s | PENDING CAPTURE |
-| Split screen | Lens/browser split continuously visible 00.0–51.0; end card 51.0–59.0 is the only full-frame exception | PENDING CAPTURE |
-| Disclosure | `LENS STUDIO PREVIEW — SIMULATED` readable on every Preview-bearing segment, from frame zero onward | PENDING CAPTURE |
-| Wrong-beat caption | Exactly `WRONG · BOTH STROKES GO CORAL`; never "both screens"; runtime copy stays `TRY AGAIN` | PENDING CAPTURE |
+| Correct + word | Correct feedback and the revealed word visible by 14.0 s | PASS — `STAR · CORRECT` and `CORRECT · the word is revealed` visible by ~9 s |
+| Glyphs holding | Matching glyph medallions visible and holding before 20.0 s | PASS — matching glyph medallions on both surfaces from ~9 s, holding through 20.0 s |
+| Split screen | Lens/browser split continuously visible 00.0–51.0; end card 51.0–59.0 is the only full-frame exception | PASS — split screen 00.0–51.0; end card 51.0–59.0 only |
+| Disclosure | `LENS STUDIO PREVIEW — SIMULATED` readable on every Preview-bearing segment, from frame zero onward | PASS — lower-left disclosure pill on every Preview segment 00.0–51.0; end card carries `Lens Studio Preview prototype — simulated` |
+| Wrong-beat caption | Exactly `WRONG · BOTH STROKES GO CORAL`; never "both screens"; runtime copy stays `TRY AGAIN` | PASS — caption `WRONG · BOTH STROKES GO CORAL`; runtime cards read `× WORD · TRY AGAIN` |
 
-## Observed record (to be completed after export)
+## Observed record (accepted candidate)
 
-To be recorded here after the cut exists, per segment and per gate:
+Accepted candidate: `captures/task16/wordless-relay-final-59s.mp4` (ignored).
 
-- Final candidate SHA-256, duration, and frame count: PENDING CAPTURE
-- Observed cut points and per-segment start/end frames: PENDING CAPTURE
-- Observed disclosure ranges (start/end timestamps): PENDING CAPTURE
-- Observed caption on-screen ranges and measured contrast: PENDING CAPTURE
-- Hero-extraction timestamp used for the README hero: PENDING CAPTURE
+- SHA-256: `18f7ce9a9b0b72c761ecc36e844cde4487ff4b88f6f7de4222d3bb814a73b5b5`
+- Duration 59.000 s; 3540 decoded frames (60/1 fps); H.264 High 1920×1080 yuv420p
+  square-pixel; AAC 48 kHz; faststart (moov before mdat); integrated
+  −16.89 LUFS; true peak −1.67 dBTP; no black interval ≥ 0.25 s; no trailing
+  silence ≥ 0.50 s. `tools/media/verify-wordless-video.mjs` → all checks pass.
+- Disclosure present on every Preview segment (00.0–51.0); absent only on the
+  end card (which carries its own prototype-simulated line).
+- Hero extracted from the accepted candidate at 17.0 s (glyph payoff
+  split-screen): `docs/media/wordless-relay-hero.png`.
+- Complete-cut panel: Stage A 3/3 (blind, muted) identified the roles, browser
+  causality, and the exact-mark glyph; Stage B 3/3 PASS on the narrated
+  candidate with no blockers (one Stage B round found and fixed an unscoped
+  10 Hz card; the accepted cut carries no on-screen cadence figure). Verbatim
+  answers under the ignored `local-handoff/reviews/task16/`.
+
+### Shipped-caption reconciliation
+
+Two planned draft captions above were adjusted to match what the footage
+actually shows (recorded for honesty):
+
+- Segment 5 (20.0–26.0): shipped caption is `Play again — a fresh round
+  begins.` The planned "new stroke color" line was dropped because the captured
+  replay round used the same violet colour; the palette feature is described in
+  the docs, not claimed on-screen.
+- Segment 7 (42.0–51.0): the shipped CLAD/validation cards carry no on-screen
+  cadence figure. The scoped Gate 0 10 Hz statement lives only in
+  `docs/submission/project-description.md`, per the claim ledger. The shipped
+  cards state the relay, the Lens-only referee, 11/11 malformed rejected,
+  453 tests, RTT 86 ms median (observed, 50 pings, one machine), 0 Axe
+  violations, and the honesty/limits line.

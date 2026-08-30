@@ -1,8 +1,8 @@
 # WORDLESS Relay — narration script
 
-Status: **DRAFT — timing to be conformed to the final audio.** One narration
-line per beat, matching the target time ranges in
-`docs/submission/video-edl.md`. Written for a warm, down-to-earth male read
+Status: **CONFORMED — generated and mixed into the accepted candidate**
+(`18f7ce9a…`, 2026-08-30). One narration line per beat, matching the time
+ranges in `docs/submission/video-edl.md`. Written for a warm, down-to-earth male read
 (Chris), with deliberate room for product sound and pauses. Narration never
 carries information the captions or visuals fail to show, cites no exact test
 count (exact numbers live in captions and cards, where they can be updated),
@@ -22,7 +22,7 @@ captions must match the final spoken words exactly.
 | 2 | 04.0–09.0 | A wrong guess — and both strokes go coral. | Small beat of amusement; pause before "coral" so the color change lands on screen. |
 | 3 | 09.0–14.0 | The Lens is the referee. The right answer lands — mint, and the word is revealed. | Lift slightly on "the right answer lands". |
 | 4 | 14.0–20.0 | The exact path they made locks into a shared glyph. No recognition. No redraw. | Slow, plain, deliberate on the last two sentences. |
-| 5 | 20.0–26.0 | Then they play again — and the painter picks a new stroke color. | Light and quick; leave air for the palette beat. |
+| 5 | 20.0–26.0 | Then they play again — a fresh round begins. | Light and quick. (Reworded from an earlier "new colour" line, which the captured replay round did not show.) |
 | 6 | 26.0–42.0 | WORDLESS was built as a verified loop — prompt, change, simulated Lens Studio Preview, real browser, test, fix. Hundreds of automated tests behind one small game. | Steady list rhythm; long pauses between phrases while the proof cards carry the exact numbers. |
 | 7 | 42.0–51.0 | We measured the relay end to end, rejected malformed messages without changing the game, and tested the defined round and recovery transitions. | Matter-of-fact; the measured-limits cards carry the figures. |
 | 8 | 51.0–59.0 | WORDLESS Relay. Draw in space. Guess from a browser. Keep the mark you made together. | Slow sign-off over the end card; full stop between each phrase; no rush to the out. Matches the end-card wording exactly. |

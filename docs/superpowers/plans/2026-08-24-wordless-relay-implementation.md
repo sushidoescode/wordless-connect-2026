@@ -161,9 +161,11 @@ This plan is optimized for LLM workers, not human sprint pacing:
    time. During parallel red/green work, each lane runs only its own test file;
    repository-wide globs run only at serial integration gates.
 4. Use the agent speed dividend for judge-facing iteration. After Gate 1, no
-   new capability is allowed. At least three documented polish loops are
-   mandatory: one visual-craft loop in Task 13, one silent-comprehension loop
-   in Task 14, and one capture/evidence loop in Task 16. Each records an
+   new capability is allowed. Three documented polish loops are recorded: one
+   visual-craft loop in Task 13, the Task 14 silent-comprehension loop now
+   recorded as OWNER-WAIVED — NOT PASSING per
+   `docs/superpowers/specs/2026-08-29-wordless-submission-review-amendment.md`,
+   and one capture/evidence loop in Task 16. Each records an
    observe → smallest-change-or-retain decision → fresh-verification cycle in
    `docs/evidence/polish-ledger.md`, including date, input capture/hash,
    reviewed source revision, reviewer composition, observed defect, exact change
@@ -171,10 +173,12 @@ This plan is optimized for LLM workers, not human sprint pacing:
    after independent review and fresh verification. A later edit to any
    runtime/artifact within that row's reviewed scope invalidates it and forces
    a fresh review/verification; unrelated docs-only commits do not. The
-   release-candidate commit and optional hosting are blocked until all three
-   current rows pass, except that if Task 1 proves the live submission form
-   requires a companion URL, the smallest hosting setup may happen earlier and
-   must be re-verified after all rows pass; the majority of post-Gate-1 cycles go to these
+   release-candidate commit and optional hosting are blocked until the
+   visual-craft and capture/evidence rows are current and passing and the
+   complete-cut review of the final candidate has passed per that amendment,
+   except that if Task 1 proves the live submission form requires a companion
+   URL, the smallest hosting setup may happen earlier and must be re-verified
+   after those gates; the majority of post-Gate-1 cycles go to these
    judge-facing loops. To avoid a circular self-referencing commit hash, each
    source revision is the current base commit plus a SHA-256 manifest of every
    reviewed in-scope file; later gates recompute that manifest.
@@ -298,7 +302,7 @@ docs/
 | Browser choices with Lens-authoritative wrong/correct results | Tasks 6, 8–9, and 12 |
 | Exact shared path becomes the result glyph on both surfaces | Tasks 6–7 and 11–13 |
 | Additive-safe spatial UI and polished companion web surface | Tasks 9–11 and 13 |
-| Layperson understands roles and loop within five silent seconds | Task 14, then Task 16 judge gate |
+| Comprehension: Task 14 closed by owner waiver; the complete 59-second candidate is independently reviewed | 2026-08-29 amendment, Task 16 complete-cut review |
 | Reconnect, malformed-message, and soak evidence; optional deployment | Task 15 and Optional Task 17 |
 | Honest sub-60-second CLAD submission package | Task 16 |
 | Public repo/video access and organizer confirmation | Owner-authorized Task 18 |
@@ -3953,6 +3957,10 @@ git commit -m "polish: refine WORDLESS visual payoff"
 
 ### Task 14: Prove five-second comprehension and accessibility
 
+> **Status (2026-08-29):** Closed by owner waiver — recorded as
+> OWNER-WAIVED — NOT PASSING. The five-second panel is not rerun; see
+> `docs/superpowers/specs/2026-08-29-wordless-submission-review-amendment.md`.
+
 **Files:**
 
 - Create: `docs/evidence/layperson-read.md`
@@ -4197,8 +4205,13 @@ files and require:
 ```bash
 test ! -e web/tests/adversarial/BrowserFaultChannel.ts
 test ! -e web/tests/real-supabase-fault-matrix.test.ts
-! rg -n 'BrowserFaultChannel|sendRawForTest|fault injection' web/src web/dist Assets/Wordless
+require_no_rg_match 'BrowserFaultChannel|sendRawForTest|fault injection' \
+  web/src web/dist Assets/Wordless
 ```
+
+`require_no_rg_match` is the checked helper defined in Step 4: `rg` status 1
+is the only clean result, status 0 is a finding, and status 2 or greater is
+an audit failure (2026-08-29 amendment §7).
 
 - [ ] **Step 2: Run five consecutive rounds**
 
@@ -4240,12 +4253,36 @@ a new `applyRound`.
 
 ```bash
 npm --prefix web run build
-! rg -l '(SUPABASE_(SERVICE_ROLE_KEY|ACCESS_TOKEN|MANAGEMENT_TOKEN)|DATABASE_(URL|PASSWORD)|POSTGRES_PASSWORD|service_role|sb_secret_[A-Za-z0-9_-]{20,})' web/src Assets/Wordless tools --glob '!**/*.md' --glob '!tools/security/audit-public-build-config.mjs'
-! rg -l '(gho_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|sbp_[A-Za-z0-9_-]{20,}|sb_secret_[A-Za-z0-9_-]{20,}|c2VydmljZV9yb2xl)' web/dist
+require_no_rg_match() {
+  if rg -l "$@"; then
+    echo "forbidden filename match" >&2
+    return 1
+  else
+    scan_rc=$?
+    if test "$scan_rc" -eq 1; then return 0; fi
+    return "$scan_rc"
+  fi
+}
+require_no_rg_match '(SUPABASE_(SERVICE_ROLE_KEY|ACCESS_TOKEN|MANAGEMENT_TOKEN)|DATABASE_(URL|PASSWORD)|POSTGRES_PASSWORD|service_role|sb_secret_[A-Za-z0-9_-]{20,})' web/src Assets/Wordless tools --glob '!**/*.md' --glob '!tools/security/audit-public-build-config.mjs'
+require_no_rg_match '(gho_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|sbp_[A-Za-z0-9_-]{20,}|sb_secret_[A-Za-z0-9_-]{20,}|c2VydmljZV9yb2xl)' web/dist
 node tools/security/audit-public-build-config.mjs web/.env.local web/dist
-! git ls-files | rg '(^|/)\.env($|\.(local|production|development|test)$)|(^|/)Assets/LocalOnly/'
+tracked_paths="$(mktemp)"
+git ls-files > "$tracked_paths" || exit 2
+if rg '(^|/)\.env($|\.(local|production|development|test)$)|(^|/)Assets/LocalOnly/' "$tracked_paths"; then
+  echo "forbidden tracked path" >&2
+  rm -f "$tracked_paths"
+  exit 1
+else
+  scan_rc=$?
+  rm -f "$tracked_paths"
+  test "$scan_rc" -eq 1 || exit 2
+fi
 du -sh web/dist
 ```
+
+An `rg` exit status of 1 is the only clean result; status 0 is a finding and
+status 2 or greater is an audit failure, never a false clean result
+(2026-08-29 amendment §7).
 
 Expected: build succeeds; user-authored source has no forbidden secret-key
 identifier/value, the vendor-containing bundle has no value-shaped private key
@@ -4270,8 +4307,10 @@ Write actual matrix results, point-batch timestamps, all five raw
 `[WordlessDiag]` snapshots, both reconnect observations, and the production
 build scan in `docs/evidence/resilience.md`. If a reproduced failure required a
 runtime or UI edit within the scope of an earlier polish row, mark that row
-invalid and rerun its Task 13/14 review before Task 16; a docs-only evidence
-commit does not invalidate it.
+invalid and rerun its Task 13 visual review and/or the complete-cut review per
+the 2026-08-29 amendment before Task 16; the Task 14 five-second panel is
+closed by owner waiver and is never rerun. A docs-only evidence commit does
+not invalidate it.
 
 ```bash
 git add Assets/Wordless web tools/security/audit-public-build-config.mjs docs/evidence/resilience.md docs/prompt-log.md
@@ -4340,21 +4379,26 @@ protocol, spatial anchor, or state machine.
 
 - [ ] **Step 3: Create the 59-second target EDL**
 
+Per the 2026-08-29 submission review amendment §3:
+
 ```text
-00.0–03.0  in medias res: PAINTER / GUESSER / matching live line / four cards
-03.0–05.0  browser taps ROPE; coral × / TRY AGAIN is visible on both by 05.0
-05.0–13.0  line finishes; browser taps SNAKE; mint + word reveal on both
-13.0–19.0  exact line locks in 450 ms; matching medallions hold visibly
-19.0–25.0  replay through clean round reset
-25.0–42.0  CLAD proof: Lens Studio scene, prompt/log, live browser exchange
-42.0–51.0  measured validation: tests, RTT, payload, and limitations
-51.0–59.0  original WORDLESS RELAY end card and one-sentence promise
+00.0–04.0  immediate split-screen roles, shared live line, four choices
+04.0–09.0  browser chooses wrong; authoritative bilateral coral stroke response
+09.0–14.0  browser chooses correctly; mint response and word reveal
+14.0–20.0  exact sampled path locks as matching glyph medallions
+20.0–26.0  replay/reset and a concise palette beat
+26.0–42.0  CLAD process and implementation proof
+42.0–51.0  validation, measured limits, and honest constraints
+51.0–59.0  original end card and one-sentence promise
 ```
 
 Do not spend the opening on joining, setup, title animation, or narration-only
 explanation. A small readable lower-third, `Lens Studio Preview — simulated`,
 appears on the Lens pane from `00.0` and remains on every segment containing
-Preview footage.
+Preview footage. The Lens/browser split screen stays continuously visible from
+00.0 through 51.0; the 51.0–59.0 original end card is the sole full-frame
+exception. The wrong-beat caption is `WRONG · BOTH STROKES GO CORAL`; never
+say both screens.
 
 - [ ] **Step 4: Build original submission graphics**
 
@@ -4382,9 +4426,12 @@ record a retain rationale, export again, and rerun the frame inspection plus
 video probe. Record both hashes, review composition, defect/decision, and final
 outcome in `docs/evidence/polish-ledger.md`.
 
-Extract the final candidate's exact `00.0–05.0` segment. If its hash or framing
-differs from the Task 14 passing clip, rerun the same neutral three-reviewer
-gate, including an unfamiliar human who must pass, before accepting the cut.
+The candidate is accepted only through the complete-cut two-stage protocol in
+the 2026-08-29 amendment §5: Stage A blind and muted on the complete final MP4
+with frozen timestamped answers, then Stage B with audio, project description,
+README first screen, and claim ledger. No five-second segment extraction or
+re-adjudication occurs; an observed credible blocker controls even if a panel
+majority passes.
 
 - [ ] **Step 6: Verify the video technically**
 
@@ -4397,12 +4444,13 @@ H.264 video + AAC audio if audio is present
 faststart enabled
 no clipped ending or silent accidental tail
 all copy readable at normal laptop playback size
-dual mint + revealed word visible by 13.5 seconds
+dual mint + revealed word visible by 14.0 seconds
 completed matching glyphs visible before 20.0 seconds
+split screen continuous 00.0 through 51.0; end card is the sole exception
 Preview disclosure visible from frame zero and every later Preview shot
 ```
 
-Measure those three visual assertions from the exported file frame by frame,
+Measure those visual assertions from the exported file frame by frame,
 not from EDL intent. Record the observed mint/word and glyph-completion
 timestamps plus every disclosure shot range in `video-edl.md` and
 `release-checklist.md`; any miss requires a recut.
@@ -4411,16 +4459,20 @@ If narration is used, verify measured loudness/true peak and disclose its
 source. A silent/caption-led cut is acceptable only if blind viewers understand
 it.
 
-- [ ] **Step 7: Run the final adversarial judge gate**
+- [ ] **Step 7: Run the complete-cut adversarial panel**
 
-Give one fresh multimodal reviewer only the unedited candidate cut, project
-description, README first screen, and claim ledger. Ask it to score theme fit,
-five-second comprehension, magic moment timing, spatial necessity, browser
-causality, visual finish, CLAD proof, and unsupported claims. Fix only observed
-clarity/evidence defects; do not add features. Any fix requires a new export,
-the Step 5 frame inspection and five-second gate, the complete Step 6 video
-probe/timing assertions, and an updated capture/evidence ledger row. The row
-records the reviewed source revision and final video hash.
+Run the two-stage complete-cut protocol from the 2026-08-29 amendment §5 with
+three fresh, context-isolated multimodal reviewers. Stage A gives each
+reviewer only the complete final MP4, muted, and freezes its timestamped
+neutral answers; Stage B then supplies the intended audio version, project
+description, README first screen, and claim ledger and assesses theme fit,
+role clarity, browser causality, magic-moment timing, spatial necessity,
+visual finish, CLAD proof, cross-document consistency, and unsupported
+claims. Fix only observed clarity/evidence defects; do not add features. An
+observed credible blocker controls even if a panel majority passes. Any fix
+requires a new export, the Step 5 frame inspection, the complete Step 6 video
+probe/timing assertions, both panel stages, and an updated capture/evidence
+ledger row. The row records the reviewed source revision and final video hash.
 
 - [ ] **Step 8: Run the full release verification**
 
@@ -4461,24 +4513,33 @@ reachable blobs non-shipping. Rewriting/filtering history or creating a clean
 public lineage requires separate explicit authorization; never do either
 silently.
 
-- [ ] **Step 9: Commit the private release candidate**
+- [ ] **Step 9: Commit the private release candidate locally**
 
-First require all three `polish-ledger.md` rows—visual craft, silent
-comprehension, and capture/evidence—to be present, passing, and current for the
-reviewed runtime/source revision and final candidate hash.
+First require the visual-craft and capture/evidence `polish-ledger.md` rows to
+be present, passing, and current for the reviewed runtime/source revision and
+final candidate hash, the Task 14 row recorded as OWNER-WAIVED — NOT PASSING,
+and the complete-cut review passed per the 2026-08-29 amendment.
+
+Stage only an explicit reviewed-path allowlist — never a broad directory
+add — then inspect the staged names and status before the local commit:
 
 ```bash
-git add README.md docs Assets Packages web tools package.json package-lock.json
+git add -- README.md docs/evidence/claim-ledger.md \
+  docs/evidence/polish-ledger.md docs/evidence/resilience.md \
+  docs/media docs/references/README.md docs/submission \
+  docs/prompt-log.md tools/media tools/docs \
+  tools/security tools/core-tests
+git diff --cached --name-status
 git diff --cached --check
 git commit -m "docs: prepare WORDLESS submission candidate"
-git push origin main
 ```
 
-Keep the repository private. Public visibility, final video upload, and contest
-submission are separate owner-authorized external actions. The actual form
-recorded in Task 1 decides whether Optional Task 17 runs; the official public
-repository requirement remains mandatory at the final owner-authorized
-submission gate.
+Stop here. Nothing is pushed. Keep the repository private. History/lineage
+remediation, any push, public visibility, final video upload, and contest
+submission are separate owner-authorized external actions under Task 18. The
+actual form recorded in Task 1 decides whether Optional Task 17 runs; the
+official public repository requirement remains mandatory at the final
+owner-authorized submission gate.
 
 ### Optional Task 17: Deploy and re-verify the companion browser
 
@@ -4626,7 +4687,7 @@ Task 1
   -> Task 11 waits for Tasks 9–10 and is the sole composition/scene writer
   -> Task 12 Gate 1 (serial integration and feature freeze)
   -> Task 13 visual craft
-  -> Task 14 five-second comprehension/accessibility
+  -> Task 14 five-second comprehension/accessibility (closed by owner waiver)
   -> Task 15 resilience/production build
   -> Task 16 evidence/submission release candidate
   -> Optional Task 17 hosting only after the release candidate, unless required
@@ -4646,8 +4707,11 @@ Implementation is complete only when:
 2. One real browser choice visibly and causally changes Lens Preview.
 3. The exact sampled path independently becomes the same counted/hashed session
    medallion on both surfaces without geometry in the result message.
-4. The unfamiliar human and at least two of three blind viewers understand the
-   two roles, browser causality, and guessing loop in five silent seconds.
+4. Task 14 is recorded as closed by owner waiver (OWNER-WAIVED — NOT PASSING)
+   and the complete 59-second candidate passes the two-stage complete-cut
+   review in the 2026-08-29 amendment: a blind, muted Stage A majority
+   independently identifies the roles, the browser's causal effect, and the
+   exact-mark glyph, and no observed credible blocker stands.
 5. All pure tests, browser tests/build, Lens typecheck, Lens compile, Preview
    runtime, malformed-message matrix, five-round soak, and release checks pass
    fresh.
@@ -4655,11 +4719,12 @@ Implementation is complete only when:
    and states the Preview limitation.
 7. Every public claim has an exact evidence row and no secret/reference-only
    material enters the release.
-8. The private release-candidate commit is pushed; every later upload,
+8. The private release-candidate commit exists locally; every push, upload,
    visibility change, and submission remains blocked pending Task 18's granular
    approvals.
-9. Visual-craft, silent-comprehension, and capture/evidence polish-ledger rows
-   each show independent observation, decision, and fresh passing verification.
+9. The visual-craft and capture/evidence polish-ledger rows each show
+   independent observation, decision, and fresh passing verification; the
+   silent-comprehension row stands as the recorded owner waiver.
 
 The entry is **submission-complete** only after Task 18 also verifies anonymous
 repo/video access and records the organizer confirmation. Until then, it is an

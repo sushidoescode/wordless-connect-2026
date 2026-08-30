@@ -3424,3 +3424,39 @@ Any source change after the product-freeze validation invalidates the candidate
 capture and requires a new capture, full-cut review, technical probe, and
 evidence binding. A fresh tracked specification/plan amendment may formalize
 the approved Task 16 timing and review replacement before implementation.
+
+## 2026-08-29 — Task 0 reconciles the tracked submission authority
+
+Finalization execution began at 18:58 PT, after the internal 18:00 PT target
+for Task 0/Task 1 completion had passed; the overrun is recorded here and the
+next internal checkpoint (2026-08-30 08:00 PT Task 15 full-versus-partial
+decision) is protected. Baseline verified: main at e4de22e with a clean
+worktree.
+
+Created `docs/superpowers/specs/2026-08-29-wordless-submission-review-amendment.md`
+recording the owner's approved submission-review decisions: Task 14 stays
+closed by owner waiver (OWNER-WAIVED — NOT PASSING, never re-adjudicated
+because the five-second clip was an invalidly short evaluation artifact for
+this submission), the approved complete-story 59-second timeline replaces
+Task 16's earlier front-loaded EDL and its stale five-second human re-gate,
+release acceptance moves to a three-reviewer two-stage blind-first
+complete-cut protocol that requires independent review but no human
+participant, an observed credible blocker controls over any panel majority,
+any post-capture runtime/UI-manifest change invalidates the cut and requires
+recapture and review, the executable push leaves Task 16 in favor of an
+explicit reviewed-path staging allowlist plus a local commit and a hard stop
+before all external actions, and negated `rg` audit commands move to checked
+exit-status semantics in which status 2 or greater is an audit failure.
+
+Reconciled the implementation plan to that amendment: the agent-native
+polish-loop release rule, the requirement coverage map, a Task 14 status
+note, Task 15 Steps 1/4/5 audit semantics and review routing, Task 16
+Steps 3/5/6/7/9, the execution graph annotation, and completion-definition
+items 4, 8, and 9. Added the tracked `/local-handoff/` rule to `.gitignore`
+(previously the rule existed only in local `.git/info/exclude`, where a
+redundant copy remains) and verified that `git ls-files` reports nothing
+under `local-handoff/`. No competitive or judge research enters tracked
+files. An independent review of this Task 0 diff found one important defect
+— the plan's tracked-path audit did not verify the `git ls-files` exit
+status — which was fixed along with its temp-file and error-propagation
+minors before commit.

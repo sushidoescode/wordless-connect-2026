@@ -8,15 +8,23 @@ carries information the captions or visuals fail to show, cites no exact test
 count (exact numbers live in captions and cards, where they can be updated),
 and is bound by `docs/evidence/claim-ledger.md`.
 
-**Audio-verification blocker.** The narration was generated and mixed, and the
-mixed track was measured (integrated −16.89 LUFS, true peak −1.67 dBTP; a
-beat-structured envelope). But **no available reviewer tool can perceive the
-spoken audio.** Three independent complete-cut reviewers each confirmed this and
-recorded the spoken-narration evaluation (words, delivery, voice identity,
+**Audio-verification blocker.** For the recut candidate (`254945f2`) the
+narration was **re-mixed from the eight frozen MP3 inputs without any new
+generation** (mono; gentle compression + dynamic loudnorm), and the mixed track
+was measured (integrated **−16.12 LUFS**, true peak **−1.75 dBTP**; no trailing
+silence; a beat-structured envelope). But **no available reviewer tool can
+perceive the spoken audio.** Independent complete-cut reviewers confirmed this
+and recorded the spoken-narration evaluation (words, delivery, voice identity,
 caption-vs-spoken agreement) as BLOCKED rather than substituting this text. So
 whether the actual spoken audio matches this script is UNVERIFIED, and — per the
 finalization rule at the foot of this file — narration is an isolated blocker;
 it needs a human listen-through (or a listening tool) to clear.
+
+Beat 5 note: the shipped `line-05.mp3` (SHA `71d3c5cc…`) is the regenerated
+reworded line matching both the beat-5 caption and the script row below ("a
+fresh round begins"); a stale `lines.json` record that still held the earlier
+"new stroke color" text/hash was corrected. The spoken words of every line —
+beat 5 included — still require the owner listen-through.
 
 `docs/submission/wordless-relay-en.srt` is the **spoken-narration transcript**:
 its cue text is this eight-beat script (SRT files cannot carry a header

@@ -1,26 +1,28 @@
 # WORDLESS Relay — final video EDL
 
-Status: **RECONCILED TO THE ACCEPTED CANDIDATE — SPOKEN-AUDIO REVIEW BLOCKED.**
+Status: **RECONCILED TO THE RECUT CANDIDATE — SPOKEN-AUDIO REVIEW BLOCKED.**
 This is the approved 59-second timeline from
 `docs/superpowers/specs/2026-08-29-wordless-submission-review-amendment.md`
-§3, with the observed columns below now filled from the exported file. The
-planned column records the approved plan; the observed columns record what the
-footage actually shows, including honest deviations. The claim ledger is never
-weakened to fit the cut. The accepted candidate's **spoken narration audio
-could not be perceived by any available reviewer tool** (three independent
-reviewers recorded this as a blocker rather than substituting the transcript);
-that gap is reflected in the Observed record below and gates the outcome to
-**CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS**.
+§3. The candidate was **re-cut from the frozen raw capture** (no recapture) to
+fix caption legibility, obscuring, contrast, and the sub-contrast card header;
+the observed columns record what the recut actually shows, including honest
+deviations. The claim ledger is never weakened to fit the cut. The candidate's
+**spoken narration audio could not be perceived by any available reviewer tool**
+(recorded as a blocker rather than substituting the transcript); that gap gates
+the outcome to **CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS** (the earlier
+caption-legibility blocker is now cleared by the recut).
 
-Candidate: `captures/task16/wordless-relay-final-59s.mp4` (ignored; hosted
-link owner-gated). Source revision: product-freeze commit
-`31123d34006bb740f397a1bfc467925483e66955`. Narration and caption copy:
-`docs/submission/narration.md` and `docs/submission/wordless-relay-en.srt`.
-The SRT transcribes the **intended spoken narration** (it matches
-`narration.md`); it is a distinct artifact from the shorter burned lower-third
-captions listed in this EDL. Whether the actual spoken audio matches the SRT
-word-for-word is **UNVERIFIED** — audio perception is blocked; see the Observed
-record.
+Candidate: `captures/task16/wordless-relay-final-59s-v2.mp4` (ignored; hosted
+link owner-gated), SHA-256
+`254945f2977a69221c30b13e0f6cde7cd9af95d8097b6bc61529688c496050c1`, reproducible
+via `captures/task16/recut.mjs`; supersedes `18f7ce9a…`. Source revision:
+product-freeze commit `31123d34006bb740f397a1bfc467925483e66955` (runtime/UI
+unchanged by the recut). Narration and caption copy: `docs/submission/narration.md`
+and `docs/submission/wordless-relay-en.srt`. The SRT transcribes the **intended
+spoken narration** (it matches `narration.md`); it is a distinct artifact from
+the shorter burned lower-third captions listed here. Whether the actual spoken
+audio matches the SRT word-for-word is **UNVERIFIED** — audio perception is
+blocked; see the Observed record.
 
 ## Global presentation rules
 
@@ -57,54 +59,50 @@ must match its ledger row and scope exactly at review time.
 
 | Gate | Requirement | Observed |
 | --- | --- | --- |
-| Correct + word | Correct feedback and the revealed word visible by 14.0 s | PASS — `STAR · CORRECT` and `CORRECT · the word is revealed` visible by ~9 s |
-| Glyphs holding | Matching glyph medallions visible and holding before 20.0 s | PASS — matching glyph medallions on both surfaces from ~9 s, holding through 20.0 s |
+| Correct + word | Correct feedback and the revealed word visible by 14.0 s | PASS — `STAR · CORRECT` and `CORRECT · the word is revealed` visible by ~10.3 s (recut; caption onset == visual onset, 0.0 s delta) |
+| Glyphs holding | Matching glyph medallions visible and holding before 20.0 s | PASS — matching glyph medallions on both surfaces from ~10.3 s, holding through 20.0 s |
 | Split screen | Lens/browser split continuously visible 00.0–51.0; end card 51.0–59.0 is the only full-frame exception | PASS — split screen 00.0–51.0; end card 51.0–59.0 only |
 | Disclosure | `LENS STUDIO PREVIEW — SIMULATED` readable on every Preview-bearing segment, from frame zero onward | PASS — lower-left disclosure pill on every Preview segment 00.0–51.0; end card carries `Lens Studio Preview prototype — simulated` |
 | Wrong-beat caption | Exactly `WRONG · BOTH STROKES GO CORAL`; never "both screens"; runtime copy stays `TRY AGAIN` | PASS — caption `WRONG · BOTH STROKES GO CORAL`; runtime cards read `× WORD · TRY AGAIN` |
 
-## Observed record (accepted candidate)
+## Observed record (recut candidate)
 
-Accepted candidate: `captures/task16/wordless-relay-final-59s.mp4` (ignored).
+Recut candidate: `captures/task16/wordless-relay-final-59s-v2.mp4` (ignored),
+reproducible via `captures/task16/recut.mjs`. It supersedes `18f7ce9a…`, rebuilt
+from the frozen raw `split-screen-master.mov` (no recapture; runtime/UI
+unchanged) with a re-composited layout (840-wide panes, y=60) that reserves a
+bottom overlay band so no caption/card covers a pane, stroke, or glyph.
 
-- SHA-256: `18f7ce9a9b0b72c761ecc36e844cde4487ff4b88f6f7de4222d3bb814a73b5b5`
+- SHA-256: `254945f2977a69221c30b13e0f6cde7cd9af95d8097b6bc61529688c496050c1`
 - Duration 59.000 s; 3540 decoded frames (60/1 fps); H.264 High 1920×1080 yuv420p
-  square-pixel; AAC 48 kHz; faststart (moov before mdat); integrated
-  −16.89 LUFS; true peak −1.67 dBTP; no black interval ≥ 0.25 s; no trailing
-  silence ≥ 0.50 s. `tools/media/verify-wordless-video.mjs` → all checks pass.
-- Disclosure present on every Preview segment (00.0–51.0); absent only on the
-  end card (which carries its own prototype-simulated line).
-- **Caption geometry — misses the global rule (KNOWN BLOCKER).** Measured on the
-  locked file: lower-third cap height ~32 px (build-note body ~29 px, headers
-  ~21 px) — below the 42 px minimum. Contrast is strong for ivory/mint/coral
-  (14.8 / 11 / 6.5:1) but the violet `THE LENS IS THE ONLY REFEREE` header is
-  ~2.7–4.4:1 (sub-4.5:1). Lower-thirds are title-safe; the intro/wrong lower-
-  thirds overlap the browser projection and partially dim the live stroke; the
-  disclosure chip crosses the L/B title-safe margins. Legible at full and
-  1440×810 laptop resolution; at 390 px the core story survives but proof detail
-  and HUD text drop out. Clearing this requires a recut under the §4
-  invalidation rule.
-- Hero extracted from the accepted candidate at 17.0 s (glyph payoff
-  split-screen): `docs/media/wordless-relay-hero.png`.
-- Complete-cut panel (rerun on the exact accepted MP4; verbatim answers under
-  the ignored `local-handoff/reviews/task16/`):
-  - **Stage A — 3/3 PASS (comprehension).** Three independent reviewers each
-    self-decoded the actual muted MP4 with ffmpeg (no orchestrator-supplied
-    frames) and, blind, identified the painter/guesser roles, the live shared
-    stroke, bilateral coral on a wrong guess (caption read as `WRONG · BOTH
-    STROKES GO CORAL`, never "both screens"), the mint correct + word reveal,
-    and the exact-mark glyph medallion.
+  square-pixel; AAC 48 kHz mono; faststart (moov before mdat); integrated
+  **−16.12 LUFS**; true peak **−1.75 dBTP**; no black interval ≥ 0.25 s; no
+  trailing silence ≥ 0.50 s. `tools/media/verify-wordless-video.mjs` → all pass.
+- Disclosure `Lens Studio Preview — simulated` present top-left on every Preview
+  segment (00.0–51.0); absent only on the end card (its own prototype line).
+- **Caption geometry — PASS (recut).** Measured: caption/card main cap height
+  **46–48 px** (≥42); all overlays sit in a plum band below the panes —
+  **~79 px** gap to the browser glyph ring, **~119 px** to the pane bottoms
+  (nothing obscured); contrast ivory 16.9:1 / coral 7.1:1 / mint 11.9:1 /
+  **lemon eyebrows 12.8–12.9:1** (the failing violet header replaced with lemon);
+  title-safe margins met on every caption and card. Legible at 1440×810 and
+  390 px. (The left in-world Lens HUD stays small/low-contrast — inherent to the
+  frozen raw capture, not fixable without a recapture.)
+- Hero extracted from the recut at 17.0 s (glyph payoff split-screen):
+  `docs/media/wordless-relay-hero.png` (SHA-256 `72664be3…`).
+- Complete-cut panel on the recut (summary/verbatim under the ignored
+  `local-handoff/reviews/task16/recut-review-verbatim.md`):
+  - **Stage A — 3/3 PASS (comprehension).** Three fresh reviewers each
+    self-decoded the actual muted recut and, blind, identified the painter/guesser
+    roles, the live shared stroke, bilateral coral on a wrong guess (caption read
+    as `WRONG · BOTH STROKES GO CORAL`), the mint correct + word reveal, and the
+    exact-mark glyph medallion; all three confirmed the captions no longer obscure
+    the panels/stroke/glyph.
   - **Stage B — verified parts PASS, spoken audio BLOCKED; NOT a full PASS.**
-    The same three reviewers evaluated the narrated candidate + the six required
-    documents. Video↔EDL beat structure/timing, narration-script-as-document vs
-    video, claim discipline, and cross-document consistency all passed 3/3. But
-    **no available reviewer tool can perceive the spoken narration audio.** All
-    three measured the track (present, ≈−16.8 LUFS, beat-structured, matching
-    targets) yet each refused to read the transcript and declare the audio good;
-    they recorded the spoken-narration evaluation as **BLOCKED**. This is the
-    primary KNOWN BLOCKER: the spoken narration must be signed off by a human
-    (or a listening tool). The prior "Stage B 3/3 PASS … no blockers" claim is
-    withdrawn as inaccurate.
+    Video↔EDL, narration-script-as-document, claim discipline, and cross-document
+    consistency hold. But **no available reviewer tool can perceive the spoken
+    narration audio.** It is recorded as **BLOCKED**, not substituted — the
+    remaining KNOWN BLOCKER, requiring the owner listen-through (Task 7).
 
 ### Shipped-caption reconciliation
 
@@ -147,3 +145,39 @@ still matches its ledger row and scope.
   this is not a change to the documented 20-second round length.
 - **Card label variance.** One on-screen card labels the 109 web-unit tests as
   "109 browser"; the docs say "109 web unit" — the same number, different label.
+
+### Recut reconciliation (candidate `254945f2`, supersedes the notes above)
+
+The candidate was re-cut from the frozen raw (no recapture) to clear the
+caption-legibility blocker. What changed vs the `18f7ce9a` notes above:
+
+- **Layout.** Panes re-composited to 840 px wide at y=60 on the plum ground,
+  reserving a bottom band. Every caption/card now sits in that band, so
+  **nothing overlaps a pane, the stroke, or the glyph** (measured ~79 px gap to
+  the browser glyph ring). The intro/wrong caption no longer covers the browser
+  projection.
+- **Caption size/contrast.** Caption/card main text is 64 px (measured cap
+  height 46–48 px ≥ 42); the sub-4.5:1 violet `THE LENS IS THE ONLY REFEREE`
+  header is replaced with lemon (~12.9:1). Cards are two rows (eyebrow + one
+  main line) so they clear the held glyph.
+- **Beat/caption alignment.** beat1 (0–4) now shows the neutral drawn stroke;
+  beat2 (4–9) the wrong/coral; beat3 the correct at ~10.3 s with the `CORRECT`
+  caption timed to the same frame (0.0 s delta). Shipped beat captions:
+  seg 1 `One draws in space — a friend guesses in a browser.`; seg 2
+  `WRONG · BOTH STROKES GO CORAL`; seg 3 `CORRECT · the word is revealed`;
+  seg 4 `The exact shared path becomes their glyph.`; seg 5 `Play again — a
+  fresh round begins.`
+- **Cards (beats 6–7), shipped copy:** `HOW IT WAS BUILT — CLAD / One draws in
+  space; a browser sees it and guesses.`; `THE LENS IS THE ONLY REFEREE / The
+  browser guesses; 11 of 11 malformed rejected.`; `VERIFIED, END TO END / 453
+  tests · RTT 86 ms median, one machine · 0 Axe.`; `MEASURED AND HONEST / No
+  recognition, no AI, no redraw.` The `10 HZ` card remains absent.
+- **Audio.** Rebuilt from the eight frozen MP3s (no regeneration): mono, gentle
+  compression + dynamic loudnorm → −16.12 LUFS / −1.75 dBTP, no trailing
+  silence. beat-5 uses the regenerated `line-05.mp3` (71d3c5cc, matching the
+  caption); the stale `lines.json` entry was corrected. Spoken words still
+  require the owner listen-through (audio perception is blocked).
+- **Held explainer / dim Lens HUD.** The 26–51 s explainer holds a frozen glyph
+  under the cards (approved beat-6/7 structure), and the left in-world Lens HUD
+  stays small/low-contrast — both inherent to the frozen raw; not addressed by
+  an overlay-only recut.

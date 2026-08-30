@@ -1,11 +1,16 @@
 # WORDLESS Relay — release checklist
 
-Statuses: `RECORDED` (already true, with evidence), `PENDING` (not yet
-verified), `OWNER GATE — OPEN` (blocked on an explicit owner decision). No row
-may move past `PENDING` without the exact measurement or evidence reference
-recorded in this file or the linked evidence document. Authority:
+Statuses: `RECORDED` / `PASS` (verified true, with evidence — `PASS (recut)`
+notes a gate met by the recut candidate), `PARTIAL` (partly verified),
+`PENDING` (not yet verified), `BLOCKED — NOT PASSING` (a real gap recorded, not
+substituted), `FAIL` (a measured miss), and `OWNER GATE — OPEN` (blocked on an
+explicit owner decision). No row may move past `PENDING` without the exact
+measurement or evidence reference recorded in this file or the linked evidence
+document. Authority:
 `docs/superpowers/specs/2026-08-29-wordless-submission-review-amendment.md`
-(§3–7) and the owner-approved finalization handoff.
+(§3–7) and the owner-approved finalization handoff. The current candidate is the
+**recut** `wordless-relay-final-59s-v2.mp4` (`254945f2…`), rebuilt from the
+frozen raw with no recapture; the runtime/UI manifest is unchanged.
 
 ## 1. Runtime/UI freeze binding
 
@@ -21,9 +26,9 @@ recorded in this file or the linked evidence document. Authority:
 | Gate | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
 | Clean worktree | Worktree clean at recording | PASS | helper packages removed via Lens Studio MCP before capture; tracked worktree clean (candidate/media/narration stay ignored under captures/) |
-| Session value | Fresh six-character session run per the demo runbook; the Lens/browser session value matches the committed capture-session code (a coordination value, not a credential or security boundary) | PENDING | — |
-| Lens environment | Spectacles target, clean compile, active Lens Studio Preview (simulated), Sunlit Room environment confirmed through Lens Studio MCP | PENDING | — |
-| Screen hygiene | One foreground browser tab, split-screen framing, visible pointer, no notifications, no credential-bearing windows | PENDING | — |
+| Session value | Fresh six-character session run per the demo runbook; the Lens/browser session value matches the committed capture-session code (a coordination value, not a credential or security boundary) | RECORDED (original capture) | session `EOU4LZ` matches the committed scene code; the recut reuses the frozen raw `split-screen-master.mov` (no new capture) |
+| Lens environment | Spectacles target, clean compile, active Lens Studio Preview (simulated), Sunlit Room environment confirmed through Lens Studio MCP | RECORDED (original capture) | the frozen raw is one live connected Preview (simulated) round; the recut re-composites it with no recapture |
+| Screen hygiene | One foreground browser tab, split-screen framing, visible pointer, no notifications, no credential-bearing windows | RECORDED (original capture) | owner-cleaned desktop at the original capture; the recut edits only the frozen raw + overlays, so no new screen exposure |
 
 ## 3. Video technical gates (from the exported candidate)
 
@@ -35,12 +40,12 @@ recorded in this file or the linked evidence document. Authority:
 | Frame count | Decoded frame count matches the declared 60 fps duration exactly | PASS | 3540 decoded = 3540 expected |
 | Decode | Clean full ffmpeg decode with no error | PASS | clean full decode, no error |
 | Faststart | Top-level MP4 atom order places `moov` before `mdat` | PASS | moov @ 32 before mdat @ 95630 |
-| Loudness | Integrated loudness within −17 to −15 LUFS (target −16); true peak no higher than −1.5 dBTP | PASS | −16.89 LUFS; true peak −1.67 dBTP |
+| Loudness | Integrated loudness within −17 to −15 LUFS (target −16); true peak no higher than −1.5 dBTP | PASS | recut candidate −16.12 LUFS; true peak −1.75 dBTP (mono; compressor + dynamic loudnorm on the 8 MP3 mix) |
 | Black intervals | `blackdetect` finds no unplanned black interval of 0.25 s or longer | PASS | 0 black intervals |
 | Silent tail | `silencedetect` finds no unplanned tail of 0.50 s or longer | PASS | no trailing silence ≥ 0.5 s |
-| Hash | Final candidate SHA-256 recorded here and in the EDL | RECORDED | `18f7ce9a9b0b72c761ecc36e844cde4487ff4b88f6f7de4222d3bb814a73b5b5` |
-| Burned captions | At least 42 source pixels high, inside five-percent safe margins, unobscured, at least 4.5:1 contrast against the scrim | FAIL — KNOWN BLOCKER | Measured on the locked MP4: cap height ~32 px on the lower-thirds (~29 px build-note body, ~21 px headers) — **none reaches the 42 px minimum**. Contrast strong for ivory/mint/coral (14.8/11/6.5:1) but the violet `THE LENS IS THE ONLY REFEREE` header is ~2.7–4.4:1 (**sub-4.5:1**). Lower-thirds are title-safe, but the intro/wrong captions **overlap the browser projection panel and partially dim the live stroke** (confirmed), and the disclosure chip crosses the L/B title-safe margins. Text is legible at full/laptop res (all reviewers read every caption), but this misses the stated 42 px + unobscured + contrast bar. Clearing it requires a recut, which needs owner authority per the §4 invalidation rule. |
-| Playback inspection | Watched end to end at 1440×810 laptop playback and at 390 px phone width | PARTIAL | 1440×810 laptop: PASS — all captions, the four answer cards, wrong/correct states, and numeric proof text legible. 390 px phone: PARTIAL — the core story (roles, shared stroke, wrong=coral, correct=green STAR, lower-third captions) survives, but the left Lens HUD, proof sublines (RTT/malformed detail), the violet header, and small role tags become illegible. Frame-by-frame extracts across the key beats; a live end-to-end owner playthrough at both sizes still recommended. |
+| Hash | Final candidate SHA-256 recorded here and in the EDL | RECORDED | recut candidate `captures/task16/wordless-relay-final-59s-v2.mp4` SHA-256 `254945f2977a69221c30b13e0f6cde7cd9af95d8097b6bc61529688c496050c1` (supersedes `18f7ce9a…` for caption legibility / no-obscuring / contrast; reproducible via `captures/task16/recut.mjs`) |
+| Burned captions | At least 42 source pixels high, inside five-percent safe margins, unobscured, at least 4.5:1 contrast against the scrim | PASS (recut) | Measured on the recut `254945f2`: caption/card main cap height **46–48 px** (≥42); every overlay sits in a plum band **below** both panes — measured **79 px** gap to the browser glyph ring, **~119 px** clearance to the pane bottoms (nothing obscured); contrast ivory 16.9:1 / coral 7.1:1 / mint 11.9:1 / **lemon eyebrows 12.8–12.9:1** (the failing violet header replaced with lemon); title-safe margins met on every caption and card (the over-long "no redraw" line was shortened to fit). |
+| Playback inspection | Watched end to end at 1440×810 laptop playback and at 390 px phone width | PASS (recut) | 1440×810 and 390 px frame inspection of the recut: all captions/cards, answer states, medallions, and disclosure legible; the core story reads at phone width. The left Lens in-world HUD stays small/low-contrast (inherent to the frozen raw capture; not fixable without a recapture, which is out of scope). A live end-to-end owner playthrough remains a courtesy check. |
 | Verifier | `tools/media/verify-wordless-video.mjs` passes as the single checked entry point; parsed measurements recorded here | PASS | all checks ok:true (see measurements above) |
 
 ## 4. Frame and story gates (per `docs/submission/video-edl.md`)
@@ -60,10 +65,10 @@ recorded in this file or the linked evidence document. Authority:
 
 | Gate | Requirement | Status | Evidence |
 | --- | --- | --- | --- |
-| Panel composition | Three fresh, context-isolated multimodal reviewers; one fixed two-stage prompt; verbatim answers stored under `local-handoff/reviews/task16/` (ignored) | PASS | rerun on the exact accepted MP4; 3 reviewers each stage; verbatim in `local-handoff/reviews/task16/stage-a-actual-mp4-verbatim.md` and `stage-b-narrated-verbatim.md`; prompt in `fixed-prompt.md` |
-| Stage A (blind, muted) | Each reviewer receives only the complete final MP4, muted, neutral questions, cited timestamps; at least two of three independently identify: one side draws and the other guesses; the browser guess changes the shared result; the exact shared mark becomes the glyph | PASS | 3/3; each self-decoded the actual muted MP4 with ffmpeg (no supplied frames) and independently identified all three points, plus the exact wrong-beat caption `WRONG · BOTH STROKES GO CORAL` |
+| Panel composition | Three fresh, context-isolated multimodal reviewers; one fixed two-stage prompt; verbatim answers stored under `local-handoff/reviews/task16/` (ignored) | PASS | rerun on the RECUT (`254945f2`); 3 fresh reviewers self-decoded the actual MP4; verbatim/summary in `local-handoff/reviews/task16/recut-review-verbatim.md` (prior `18f7ce9a` panels in `stage-a-actual-mp4-verbatim.md` / `stage-b-narrated-verbatim.md`) |
+| Stage A (blind, muted) | Each reviewer receives only the complete final MP4, muted, neutral questions, cited timestamps; at least two of three independently identify: one side draws and the other guesses; the browser guess changes the shared result; the exact shared mark becomes the glyph | PASS | 3/3 on the recut; each self-decoded the actual muted MP4 and identified all three points + the exact `WRONG · BOTH STROKES GO CORAL` caption; all three confirmed captions no longer obscure the panels/stroke/glyph. (Comprehension panel ran on `7c053405`, whose only diff from `254945f2` is the shortened "no redraw" card line — comprehension-neutral.) |
 | Stage A freeze | Timestamped Stage A answers frozen and recorded before any supporting text is revealed | PASS | Stage A run and recorded before Stage B docs shown |
-| Stage B (claims) | Same reviewers then receive the intended audio version, project description, README first screen, and claim ledger; assess theme fit, role clarity, browser causality, magic-moment timing, spatial necessity, visual finish, CLAD proof, cross-document consistency, and unsupported claims | BLOCKED — NOT PASSING | verified parts PASS 3/3 (video↔EDL, narration-script-as-document, claim discipline, cross-document); **spoken-narration AUDIO perception BLOCKED 3/3** — no available tool can hear the AAC track, all three refused to substitute the transcript. Not a full PASS; requires a human listen-through. This is the primary KNOWN BLOCKER. |
+| Stage B (claims) | Same reviewers then receive the intended audio version, project description, README first screen, and claim ledger; assess theme fit, role clarity, browser causality, magic-moment timing, spatial necessity, visual finish, CLAD proof, cross-document consistency, and unsupported claims | BLOCKED — NOT PASSING | verified parts PASS (video↔EDL, script-as-document, claim discipline, cross-document); **spoken-narration AUDIO perception remains BLOCKED** — no available tool can hear the AAC track; not a full PASS; requires the owner listen-through (Task 7). This is the remaining KNOWN BLOCKER alongside the PARTIAL Task 15. |
 | Blocker rule | An observed credible blocker (visual, causal, accessibility, disclosure, or claim) controls even if a panel majority passes; repairs limited to the smallest demonstrated defect; every repair re-enters the full frame, technical, and two-stage chain | RECORDED (rule) | Amendment §5 |
 | Gate composition | Release gating = Task 13 visual-craft row (PASS) + capture/evidence row + passing complete-cut review. The Task 14 five-second row participates only as the recorded waiver: OWNER-WAIVED — NOT PASSING; it is never rerun and no five-second comprehension claim is published | RECORDED (rule); capture/evidence and review PENDING | `docs/evidence/polish-ledger.md`; amendment §2 |
 

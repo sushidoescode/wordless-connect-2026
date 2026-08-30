@@ -233,11 +233,12 @@ unproven):
    tools cannot stage within one controller turn.
 
 Neither reflects an unproven product behaviour. The overall finalization is
-reported as CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS for reasons outside Task 15
-(the spoken-narration audio is unverifiable by available tooling, and the burned
-captions miss the 42 px / unobscured / contrast bar — see the release checklist
-and video EDL); Task 15 itself is substantially complete, with only these two
-narrow soak sub-cases carried as unit/policy-proven rather than single-run live.
+reported as CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS for a reason outside Task 15
+— the spoken-narration audio is unverifiable by available tooling and awaits the
+owner listen-through (the earlier caption-legibility blocker was cleared by the
+recut; see the release checklist and video EDL). Task 15 itself is substantially
+complete, with only these two narrow soak sub-cases carried as unit/policy-proven
+rather than single-run live.
 
 ## 8. Freeze preserved through helper-package cleanup
 

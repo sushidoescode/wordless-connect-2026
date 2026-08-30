@@ -3833,3 +3833,52 @@ audio, sub-42 px / obscured captions, and the PARTIAL Task 15 soak sub-cases.
 All Lens inspection stayed on Lens Studio MCP; no raw HTTP was used. No
 competitive or judge research entered this entry. Nothing was pushed, uploaded,
 published, made public, or submitted.
+
+## 2026-08-30 — Recut from the frozen raw + fail-closed audit hardening
+
+With owner authorization for a local-only media recut and audit-tooling change
+(no runtime/UI change, no recapture, no external action), two things were done.
+
+**Fail-closed audit partition.** `partitionAuditReport` no longer exempts any
+finding on a path-based allowlist. It now exempts ONLY findings whose exact
+(rule, path, label) tuple is one of an enumerated `SYNTHETIC_SELF_REFERENCES`
+list (the auditors' own regex/marker source, their synthetic fixtures, and the
+plan's documented commands). Every other finding fails closed and blocks —
+env-value-leak, absolute-home-path, database-credential, forbidden-filename,
+jwt-shape, or an unexpected label, INCLUDING inside a machinery file. Added
+negative unit tests (home-path, database-credential, forbidden-filename,
+unexpected-label, wrong-path all block in machinery files) and two CLI/
+integration tests that spawn the wrapper against a throwaway git repo. Core
+suite 372 → (with the expanded suite) still green.
+
+**Media recut.** The `18f7ce9a` candidate missed the 42 px caption bar, its
+intro captions overlapped the browser stroke, and one card header was sub-4.5:1
+(violet). A deterministic builder `captures/task16/recut.mjs` rebuilds the
+candidate from the FROZEN raw `split-screen-master.mov` (no recapture): panes
+re-composited to 840 px with a bottom overlay band so no caption/card covers a
+pane, stroke, or glyph; caption/card main text 64 px (cap height 46–48 px);
+two-row cards clearing the held glyph by ~79 px; the violet referee eyebrow
+replaced with lemon (~12.9:1); captions retimed to the on-screen events
+(CORRECT caption onset == visual onset). The narration was re-mixed from the
+eight frozen MP3s with NO regeneration (mono, compressor + dynamic loudnorm →
+−16.12 LUFS / −1.75 dBTP, no trailing silence); a stale `lines.json` beat-5
+record (old "new stroke color" / 7220d31d) was corrected to the regenerated
+`line-05.mp3` (71d3c5cc) that matches the caption. The ElevenLabs key was never
+touched by the recut. Final candidate `wordless-relay-final-59s-v2.mp4`, SHA-256
+`254945f2977a69221c30b13e0f6cde7cd9af95d8097b6bc61529688c496050c1`, verifier
+all-pass; `recut.mjs` reproduces the exact sha deterministically.
+
+Verification: a measurement pass (cap height, ≥42 px; ≥79 px glyph clearance;
+contrast ≥7:1; lemon eyebrow; title-safe; transition gates; 1440×810 + 390 px)
+and a fresh 3-reviewer Stage A comprehension panel both PASS on the recut; the
+one issue they surfaced (an over-long "no redraw" card line overrunning
+title-safe) was fixed and re-measured. Stage B spoken-audio perception remains
+BLOCKED — recorded, not substituted — so the outcome stays CANDIDATE ASSEMBLED
+WITH KNOWN BLOCKERS (spoken audio + PARTIAL Task 15); the caption-legibility
+blocker is cleared. The hero was re-extracted from the recut @ 17.0 s. The
+review bundle and the two-pass prospective-tree audit were rebuilt around the new
+hash. Task 15 stays honestly PARTIAL — its two narrow live sub-cases were not
+force-chased. Per the owner instruction, the exact final MP4 path/hash is handed
+back for the human listen-through and spoken narration is NOT cleared. All Lens
+inspection stayed on Lens Studio MCP. No competitive or judge research entered
+this entry. Nothing was pushed, uploaded, published, made public, or submitted.

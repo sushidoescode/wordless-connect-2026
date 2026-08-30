@@ -3533,3 +3533,64 @@ drawing must target the brush's current position (its world position mapped
 to render space), and injected gesture sequences must run inside a single
 uninterrupted injection to fit the twenty-second round. All Preview evidence
 is simulated Lens Studio Preview behavior, never a hardware or device claim.
+
+## 2026-08-30 — Task 15 resilience hardening (substantial, two cadence partials)
+
+Built the production-config auditor test-first: nine
+`tools/core-tests/public-build-config-audit.test.mjs` cases first failed
+(module absent), then `tools/security/audit-public-build-config.mjs` made them
+green. One real-bundle finding was investigated during bring-up — supabase-js
+ships a literal `startsWith('sb_secret_')` key-type check — and the auditor was
+tightened test-first to match value-shaped secrets, not library prefix checks,
+so the real bundle audits clean (exit 0, publishable key, 0 findings). The
+auditor reads the ignored environment in memory and reports only counts, key
+type, and finding labels — never a value, URL, or hash.
+
+Live adversarial matrix: a temporary `web/tests/adversarial/BrowserFaultChannel`
+wrapper around the real Supabase Broadcast channel plus
+`web/tests/real-supabase-fault-matrix.test.ts` (gated by
+`WORDLESS_REAL_SUPABASE_MATRIX=1`) drove five cases against the live Lens
+Preview painter: clean round establishment, eight malformed/foreign/oversize
+inbound variants each dropped without state change, byte-for-byte duplicate
+replay rejected, invalid terminal counts dropped with one valid unequal count
+recovering in place via a single `POINT_COUNT_MISMATCH` resync on the same
+healthy channel, and a swallowed painter message forcing a genuine
+unsubscribe/re-subscribe over the real service with a fresh authoritative round
+and no old-state merge. All five passed. The exhaustive policy permutations
+remain proven by the committed pure/linked-fake suites. Both temporary files
+were deleted; no harness reference remains in `web/src`, `web/dist`, or
+`Assets/Wordless`.
+
+Five-round soak: 318 `APPLY_ROUND` cycles this session with zero resource
+growth — `r-B9T2VX2V` ran generations `-2`..`-7` (six consecutive resets) and
+`r-D6DIVAFX-2..5`/`r-NCJ07VRZ-2..5` add more, every `[WordlessDiag]` line
+identical (listeners=1 timers=2 channels=1 sceneObjects=14 materials=7). Both
+guess outcomes and real glyph locks (`points=42 hash=bb1d1762`,
+`points=21 hash=b5435170`) observed live; largest wire message 263 bytes; no
+message over 1 KB; no point count over 128; no product Logger error (every
+frozen-build Preview refresh returned `errors: []` beyond the known
+non-product `Host requires authentication` editor warning).
+
+Recovery observations (all live): full Lens Preview restart produced a new
+painter epoch and `r-<new-nonce>-1` each time; a full browser reload with a new
+sender bound a fresh Lens round (`COUNTERPART_READY` → `READY -> ACTIVE` in
+~450 ms) with four unrevealed cards, empty result, hidden glyph, and zero
+painted pixels; a real sequence-gap re-subscribe and a healthy-channel resync
+each produced a fresh round with no old merge; and the single-flight terminal
+reconnect after peer silence was observed settling fail-closed at `TIMED_OUT`
+(the documented B3 behaviour), which the demo runbook mitigates with a
+restart-both-ends step.
+
+Production build clean (55 modules, `web/dist` 260 KB) with the checked-status
+source/bundle/config/tracked-path audits all clean. Created
+`docs/evidence/resilience.md` and `docs/submission/demo-runbook.md`.
+
+Honest partials (automation cadence, not product gaps): the specific
+five-contiguous-scripted-rounds-with-wrong+correct cadence, the exact
+128-point-cap round, and the mid-stroke-correct round were proven in aggregate
+and by the unit/policy suites rather than as single contiguous live captures,
+because scripted turn latency is comparable to the 20 s round and 6 s
+peer-liveness windows. Every underlying product behaviour is live-proven. Task
+15 is therefore recorded partial; the overall outcome is CANDIDATE ASSEMBLED
+WITH KNOWN RESILIENCE GAPS. No competitive or judge research entered this
+entry.

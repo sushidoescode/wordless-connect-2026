@@ -4263,7 +4263,7 @@ require_no_rg_match() {
     return "$scan_rc"
   fi
 }
-require_no_rg_match '(SUPABASE_(SERVICE_ROLE_KEY|ACCESS_TOKEN|MANAGEMENT_TOKEN)|DATABASE_(URL|PASSWORD)|POSTGRES_PASSWORD|service_role|sb_secret_[A-Za-z0-9_-]{20,})' web/src Assets/Wordless tools --glob '!**/*.md' --glob '!tools/security/audit-public-build-config.mjs'
+require_no_rg_match '(SUPABASE_(SERVICE_ROLE_KEY|ACCESS_TOKEN|MANAGEMENT_TOKEN)|DATABASE_(URL|PASSWORD)|POSTGRES_PASSWORD|service_role|sb_secret_[A-Za-z0-9_-]{20,})' web/src Assets/Wordless tools --glob '!**/*.md' --glob '!tools/security/audit-public-build-config.mjs' --glob '!tools/core-tests/public-build-config-audit.test.mjs'
 require_no_rg_match '(gho_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9_-]{20,}|sbp_[A-Za-z0-9_-]{20,}|sb_secret_[A-Za-z0-9_-]{20,}|c2VydmljZV9yb2xl)' web/dist
 node tools/security/audit-public-build-config.mjs web/.env.local web/dist
 tracked_paths="$(mktemp)"

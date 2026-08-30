@@ -205,6 +205,29 @@ describe('render', () => {
     expect(glyphTransitionFrame(layout, 0.5)).toHaveLength(3)
   })
 
+  it('exposes the semantic wrong-result state the coral style rule targets', () => {
+    render(activeSnapshot({ points: [[100, 200]] }))
+    const shell = document.querySelector<HTMLElement>('.app-shell')
+    expect(shell?.dataset.phase).toBe('ACTIVE')
+    expect(document.querySelector('#result')?.textContent).toBe('')
+
+    render(activeSnapshot({ points: [[100, 200]], wrongChoices: [2] }))
+    expect(shell?.dataset.phase).toBe('ACTIVE')
+    expect(document.querySelector('#result')?.textContent).toBe('TRY AGAIN')
+
+    render(activeSnapshot({
+      phase: 'CORRECT',
+      correctChoice: 0,
+      revealedWord: 'SNAKE',
+      finalPointCount: 1,
+      points: [[100, 200]],
+      glyph: [[100, 200]],
+      remainingMs: 0,
+    }), { reducedMotion: true })
+    expect(shell?.dataset.phase).toBe('CORRECT')
+    expect(document.querySelector('#result')?.textContent).toBe('CORRECT · SNAKE')
+  })
+
   it('renders CORRECT at the exact source path then yields to the final locked medallion', () => {
     const rect = (left: number, top: number, width: number, height: number): DOMRect => ({
       left,

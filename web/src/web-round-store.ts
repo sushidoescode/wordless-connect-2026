@@ -1,5 +1,5 @@
 import { normalizeGlyph } from '@wordless/core/StrokeGeometry'
-import { isStrokeColorId } from '@wordless/core/Protocol'
+import { MAX_STROKE_POINTS, isStrokeColorId } from '@wordless/core/Protocol'
 import type {
   ChoiceIndex,
   ChoiceTuple,
@@ -166,8 +166,7 @@ export class WebRoundStore {
         this.acceptStrokeBegin(message)
         return []
       case 'stroke.points':
-        this.acceptPoints(message)
-        return []
+        return this.acceptPoints(message)
       case 'round.result':
         return this.acceptResult(message)
       case 'guess.rejected':
@@ -349,15 +348,21 @@ export class WebRoundStore {
     this.replace({ ...this.snapshot, strokeColorId: message.payload.colorId })
   }
 
-  private acceptPoints(message: Extract<RelayMessage, { type: 'stroke.points' }>): void {
+  private acceptPoints(
+    message: Extract<RelayMessage, { type: 'stroke.points' }>,
+  ): readonly WebRoundIntent[] {
     if (this.snapshot.phase !== 'ACTIVE' ||
         message.roundId !== this.snapshot.roundId ||
         this.activeStrokeId !== message.payload.strokeId ||
-        this.snapshot.strokeColorId === null) return
+        this.snapshot.strokeColorId === null) return []
+    if (this.snapshot.points.length + message.payload.points.length > MAX_STROKE_POINTS) {
+      return this.requestPointCountResync(message.roundId)
+    }
     this.replace({
       ...this.snapshot,
       points: [...this.snapshot.points, ...message.payload.points],
     })
+    return []
   }
 
   private acceptResult(

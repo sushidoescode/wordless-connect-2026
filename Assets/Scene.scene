@@ -2234,14 +2234,13 @@
   Enabled: true
   ScriptAsset: !<reference> e52060e1-72f5-4c5b-8ff0-f5e1fc65e948
   ScriptInputsDefault:
-    sessionId: true
     connectOnStart: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
     "":
       supabaseProject: !<reference.SupabaseProject> 6ba48142-cc1e-49ef-8d22-84f2e2859a8e
-      sessionId: WAVE42
+      sessionId: EOU4LZ
       connectOnStart: false
   ScriptTypes:
     "":

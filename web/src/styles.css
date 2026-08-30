@@ -299,6 +299,11 @@ input:focus-visible {
   text-align: center;
 }
 
+/* During ACTIVE the only non-empty result copy is the wrong-state TRY AGAIN. */
+.app-shell[data-phase='ACTIVE'] #result:not(:empty) {
+  color: var(--coral);
+}
+
 @keyframes connection-fade {
   from { opacity: 0.38; }
   to { opacity: 1; }

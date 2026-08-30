@@ -1039,6 +1039,41 @@ test('point-count mismatch sends the exact round-scoped resync request', async (
     })
 })
 
+test('wrong result renders coral TRY AGAIN inside the viewport while correct stays mint', async ({ page }) => {
+  await join(page)
+  await startRound(page)
+  await emitStroke(page, message('stroke.points', 'round-1', 3, {
+    strokeId: 'stroke-1',
+    points: [[100, 200], [300, 400]],
+  }), 'mint')
+  await emit(page, message('round.result', 'round-1', 4, {
+    outcome: 'incorrect',
+    guessId: 'guess-authoritative',
+    choiceIndex: 2,
+  }))
+
+  const result = page.locator('#result')
+  await expect(result).toHaveText('TRY AGAIN')
+  await expect(result).toBeInViewport()
+  expect(await result.evaluate((element) => getComputedStyle(element).color))
+    .toBe('rgb(255, 120, 106)')
+  await expect(page.locator('#choices button[data-choice-index="2"]'))
+    .toHaveText('× ROPE · TRY AGAIN')
+  await expect(page.locator('#choices button[data-choice-index="2"]')).toBeDisabled()
+
+  await emit(page, message('round.result', 'round-1', 5, {
+    outcome: 'correct',
+    guessId: 'guess-correct',
+    choiceIndex: 0,
+    revealedWord: 'SNAKE',
+    finalPointCount: 2,
+  }))
+  await expect(result).toHaveText('CORRECT · SNAKE')
+  await expect(result).toBeInViewport()
+  expect(await result.evaluate((element) => getComputedStyle(element).color))
+    .toBe('rgb(115, 230, 174)')
+})
+
 test('channel error creates one successor and stale glyph work cannot lock its round', async ({ page }) => {
   await join(page)
   await expect(page.getByRole('status')).toContainText('WAITING FOR PAINTER')
@@ -1055,11 +1090,17 @@ test('channel error creates one successor and stale glyph work cannot lock its r
     finalPointCount: 1,
   }))
   await expect(page.locator('#glyph-medallion')).toBeVisible()
+  await expect(page.locator('#result')).toHaveText('CORRECT · SNAKE')
+  await expect(page.locator('#choices button[data-choice-index="0"]'))
+    .toHaveText('✓ SNAKE · CORRECT')
 
   await emitStatus(page, 'CHANNEL_ERROR', new Error('provider raw detail'))
   await expect(page.getByRole('status')).toContainText('RECONNECTING')
   await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'DISCONNECTED')
   await expect(page.locator('#glyph-medallion')).toBeHidden()
+  await expect(page.locator('#result')).not.toContainText('CORRECT')
+  await expect(page.locator('#result')).toHaveText('')
+  await expect(page.locator('#choices button')).toHaveCount(0)
   expect(await page.locator('#stroke-canvas').evaluate((canvas) => {
     const target = canvas as HTMLCanvasElement
     const pixels = target.getContext('2d')!.getImageData(0, 0, target.width, target.height).data
@@ -1091,6 +1132,11 @@ test('channel error creates one successor and stale glyph work cannot lock its r
   expect(await channelCount(page)).toBe(2)
   await expect(page.locator('.app-shell')).toHaveAttribute('data-phase', 'ACTIVE')
   await expect(page.locator('#glyph-medallion')).toBeHidden()
+  await expect(page.locator('#choices button')).toHaveCount(4)
+  await expect(page.locator('#choices button')).toHaveText([...CHOICES])
+  await expect(page.locator('#choices .is-correct')).toHaveCount(0)
+  await expect(page.locator('#choices button:disabled')).toHaveCount(0)
+  await expect(page.locator('#result')).toHaveText('')
 })
 
 test('rejected application send fails safely without leaking provider detail', async ({ page }) => {

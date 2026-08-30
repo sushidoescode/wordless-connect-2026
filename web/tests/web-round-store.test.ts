@@ -218,6 +218,62 @@ describe('WebRoundStore', () => {
     expect(colorSnapshot(store).points).toEqual([[300, 400]])
   })
 
+  it('enforces the aggregate point cap by rejecting the whole overflow batch with one resync request', () => {
+    const { store } = createStore()
+    activate(store)
+
+    const batch = Array.from(
+      { length: 8 },
+      (_, index) => [index * 10, index * 10] as readonly [number, number],
+    )
+    for (let batchIndex = 0; batchIndex < 16; batchIndex += 1) {
+      expect(store.dispatch(points(batch, 'round-1', 5 + batchIndex))).toEqual([])
+    }
+    expect(colorSnapshot(store).points).toHaveLength(128)
+    expect(colorSnapshot(store).phase).toBe('ACTIVE')
+
+    const intents = store.dispatch(points(batch, 'round-1', 21))
+    expect(intents).toEqual([{
+      type: 'round.resync.request',
+      roundId: 'round-1',
+      reason: 'POINT_COUNT_MISMATCH',
+    }])
+
+    const recovered = colorSnapshot(store)
+    expect(recovered.connection).toBe('reconnecting')
+    expect(recovered.phase).toBe('DISCONNECTED')
+    expect(recovered.points).toEqual([])
+    expect(recovered.strokeColorId).toBeNull()
+
+    expect(store.dispatch(points(batch, 'round-1', 22))).toEqual([])
+    expect(store.dispatch(points(batch, 'round-1', 23))).toEqual([])
+    expect(colorSnapshot(store).points).toEqual([])
+  })
+
+  it('rejects a cap-crossing batch entirely without truncation below the point cap', () => {
+    const { store } = createStore()
+    activate(store)
+
+    const batch = Array.from(
+      { length: 8 },
+      (_, index) => [index * 10, index * 10] as readonly [number, number],
+    )
+    for (let batchIndex = 0; batchIndex < 15; batchIndex += 1) {
+      store.dispatch(points(batch, 'round-1', 5 + batchIndex))
+    }
+    store.dispatch(points(batch.slice(0, 4), 'round-1', 20))
+    expect(colorSnapshot(store).points).toHaveLength(124)
+
+    const intents = store.dispatch(points(batch, 'round-1', 21))
+    expect(intents).toEqual([{
+      type: 'round.resync.request',
+      roundId: 'round-1',
+      reason: 'POINT_COUNT_MISMATCH',
+    }])
+    expect(colorSnapshot(store).points).toEqual([])
+    expect(colorSnapshot(store).connection).toBe('reconnecting')
+  })
+
   it('leaves the snapshot untouched for malformed begins at the unsafe dispatch boundary', () => {
     const { store } = createStore()
     activate(store, false)

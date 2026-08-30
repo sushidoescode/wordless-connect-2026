@@ -3460,3 +3460,76 @@ files. An independent review of this Task 0 diff found one important defect
 — the plan's tracked-path audit did not verify the `git ls-files` exit
 status — which was fixed along with its temp-file and error-propagation
 minors before commit.
+
+## 2026-08-29 — Task 1 lands the two approved fixes and freezes the product
+
+Both owner-approved product corrections were implemented test-first against
+the browser surface, with the red state observed before any implementation.
+
+Aggregate point cap (1A): two new `web/tests/web-round-store.test.ts` cases
+with literal `point cap` titles first failed exactly as predicted (dispatch
+returned no intent and points appended past 128). `WebRoundStore.acceptPoints`
+now imports the runtime `MAX_STROKE_POINTS` from `@wordless/core/Protocol`,
+returns `readonly WebRoundIntent[]` through `dispatch`, and rejects an
+overflowing batch whole — sixteen eight-point batches reach exactly 128
+accepted points, the seventeenth appends nothing and produces exactly one
+`round.resync.request` with reason `POINT_COUNT_MISMATCH` through the existing
+recovery path (projection invalidated/hidden, `reconnecting`,
+`DISCONNECTED`), and repeated overflow traffic emits no duplicate intent. A
+cap-crossing batch delivered at 124 accepted points is likewise rejected
+without truncation. No append, truncation, invented round, or bypass of the
+authoritative recovery exists.
+
+Wrong-result coral tone (1B): a new Playwright case titled `wrong result
+renders coral TRY AGAIN inside the viewport while correct stays mint` first
+failed on the computed color (mint `rgb(115, 230, 174)` received). The fix is
+one narrow CSS rule — `.app-shell[data-phase='ACTIVE'] #result:not(:empty)`
+sets `color: var(--coral)` — with no component logic. During `ACTIVE` the only
+non-empty result copy is `TRY AGAIN`, so the rule cannot recolor the
+`CORRECT · <WORD>` (mint, `CORRECT`/`GLYPH_LOCKED` phases) or `TIME'S UP`
+lines. The E2E proves computed coral `rgb(255, 120, 106)`, viewport
+visibility, unchanged card behavior, and the mint correct line in both
+Playwright projects (chromium-phone 390×844 and chromium-desktop 1440×900). A
+render unit test pins the semantic hooks the rule targets.
+
+Revealed-card recovery evidence (1C): the existing channel-error E2E case now
+also proves that the revealed `CORRECT · SNAKE` line and `✓ SNAKE · CORRECT`
+card are present before the transport error, that reconnection empties the
+result line and removes every choice button while the glyph stays hidden, and
+that the authoritative successor round returns exactly four enabled,
+unrevealed plain-word cards with no `.is-correct` residue and an empty result.
+No recovery policy changed.
+
+Capture-session configuration: the tracked scene input
+`SupabaseRelayTransport.sessionId` moved from the well-known `WAVE42` default
+to the freshly generated six-character code `EOU4LZ` through Lens Studio MCP
+(`scene-graphql setProperty` plus an Editor API `model.project.save()`), and
+the scene diff contains exactly that value change. The code is coordination,
+not a credential.
+
+Fresh full verification on this state: core 304/304, web unit 109/109, web
+build 55 modules, Playwright E2E 40/40 across both projects (up from 38 with
+the new case), and a clean Lens typecheck. Lens Studio MCP recompile
+succeeded and a Preview refresh connected the Lens to the live Supabase
+project (`SUBSCRIBED`, `CLIENT_CONFIGURED`, no product-script error; the
+known non-product editor `Host requires authentication` warning persists).
+
+Live connected verification against session `EOU4LZ` with one Lens Studio
+Preview painter and one ordinary local browser: multiple full authoritative
+rounds were exercised end to end. A drawn Preview stroke crossed as protocol
+v2 begin/points and rendered as the violet live path in the browser
+(13,192–15,687 painted pixels across rounds); one round completed correct —
+Lens `SOLVED` with mint `✓ FISH!`, revealed word on both surfaces, and the
+browser's exact-path violet glyph medallion — and separate rounds completed
+wrong: browser guesses reached the Lens (`[Wordless] GUESS … outcome=incorrect`
+in Preview logs), the correlated incorrect result returned, the guessed card
+rendered `× <WORD> · TRY AGAIN` disabled, the result line rendered `TRY
+AGAIN` in computed coral `rgb(255, 120, 106)` (the 1B change observed live),
+and the entire live browser path recolored coral while the round remained
+active. Timeout and `PLAY AGAIN` replay recovery ran repeatedly between
+rounds. One interaction-harness finding is recorded for the capture runbook:
+the Preview brush head rests where the previous stroke ended, so scripted
+drawing must target the brush's current position (its world position mapped
+to render space), and injected gesture sequences must run inside a single
+uninterrupted injection to fit the twenty-second round. All Preview evidence
+is simulated Lens Studio Preview behavior, never a hardware or device claim.

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">WORDLESS Relay end card</title>
+  <desc id="desc">Deep plum end card with a violet zigzag stroke inside a thin ivory ring, the WORDLESS RELAY word mark, the product promise, and the simulated Lens Studio Preview qualifier.</desc>
+
+  <!-- Ground: deep plum -->
+  <rect x="0" y="0" width="1920" height="1080" fill="#200B2B"/>
+
+  <!-- Glyph medallion: thin ivory ring, original violet zigzag stroke, lemon draw head -->
+  <g>
+    <circle cx="960" cy="330" r="140" fill="none" stroke="#FFF6E8" stroke-width="5" opacity="0.92"/>
+    <polyline points="866,388 908,272 960,390 1012,272 1054,386"
+              fill="none" stroke="#8B5CF6" stroke-width="14"
+              stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="1054" cy="386" r="14" fill="#FFD65A"/>
+  </g>
+
+  <!-- Word mark -->
+  <text x="960" y="622" text-anchor="middle"
+        font-family="ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif"
+        font-size="108" font-weight="700" letter-spacing="6"
+        fill="#FFF6E8">WORDLESS RELAY</text>
+
+  <!-- One-sentence promise -->
+  <text x="960" y="700" text-anchor="middle"
+        font-family="ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif"
+        font-size="42" font-weight="500" letter-spacing="0.5"
+        fill="#FFF6E8" opacity="0.95">Draw in space. Guess from a browser. Keep the mark you made together.</text>
+
+  <!-- Small mint / coral accents flanking a thin ivory rule -->
+  <g>
+    <circle cx="886" cy="768" r="7" fill="#73E6AE"/>
+    <line x1="912" y1="768" x2="1008" y2="768" stroke="#FFF6E8" stroke-width="2" opacity="0.4"/>
+    <circle cx="1034" cy="768" r="7" fill="#FF786A"/>
+  </g>
+
+  <!-- Honest qualifier -->
+  <text x="960" y="1006" text-anchor="middle"
+        font-family="ui-rounded, 'SF Pro Rounded', 'Segoe UI', system-ui, sans-serif"
+        font-size="34" font-weight="500" letter-spacing="1"
+        fill="#FFF6E8" opacity="0.8">Lens Studio Preview prototype — simulated</text>
+</svg>

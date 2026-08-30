@@ -3591,6 +3591,72 @@ five-contiguous-scripted-rounds-with-wrong+correct cadence, the exact
 and by the unit/policy suites rather than as single contiguous live captures,
 because scripted turn latency is comparable to the 20 s round and 6 s
 peer-liveness windows. Every underlying product behaviour is live-proven. Task
-15 is therefore recorded partial; the overall outcome is CANDIDATE ASSEMBLED
-WITH KNOWN RESILIENCE GAPS. No competitive or judge research entered this
+15 is therefore recorded partial. No competitive or judge research entered this
+entry.
+
+## 2026-08-30 — Judged package draft, media/release tooling, narration path
+
+Drafted the judged package with disjoint parallel ownership and one combined
+independent review. `docs/evidence/claim-ledger.md` (17 exact-claim rows plus a
+complete prohibited-wording section), `docs/submission/project-description.md`,
+`docs/submission/video-edl.md` (amendment §3 timeline, `WRONG · BOTH STROKES
+GO CORAL` caption, the five numeric gates, observed columns PENDING CAPTURE),
+`docs/submission/release-checklist.md` (technical gates, the two-stage
+blocker-controls panel, the freeze binding to commit `31123d34…` and manifest
+`bcb3859a…`, checked-`rg` audit semantics, eight OWNER GATE — OPEN rows), and
+`docs/submission/narration.md` + `docs/submission/wordless-relay-en.srt`
+(DRAFT). README.md was rewritten to lead with the human loop, carry the
+truthful Gate 0 GO / Gate 1 PASS / Task 14 OWNER-WAIVED — NOT PASSING status,
+a linked evidence table, setup/demo steps, and honest limitations, with the
+hero as a not-yet-extracted path. The three external reference images were
+removed from the working tree and `docs/references/README.md` rewritten to
+retain provenance, hashes, and the non-use decision without broken embeds,
+noting they remain reachable in private history pending the owner's lineage
+decision. Original end card built from code-native primitives
+(`docs/media/wordless-relay-end-card.svg` → `.png`, 1920×1080) via the
+deterministic `tools/media/render-wordless-assets.mjs` (byte-identical
+re-render).
+
+Independent review returned no critical/major defects and three accuracy
+fixes, all applied: the README accessibility evidence link now points to the
+document that actually records the 0-violation Axe result; the claim ledger's
+"same drawing, both surfaces" rationale no longer cites an untracked
+countdown-drift observation and instead states that each surface derives its
+own countdown; the narration word count and the end-card/narration/SRT "guess
+from a browser" wording were reconciled; and the polish-ledger Task 14 row
+notes the amendment's canonical OWNER-WAIVED — NOT PASSING label.
+
+Release/verification tooling built test-first:
+`tools/media/build-wordless-final.mjs` (manifest-driven assembler with
+hash-verified inputs, trim/normalize/caption-burn/end-card/loudnorm/faststart;
+`planBuild` unit-tested, 5 cases), `tools/media/verify-wordless-video.mjs`
+(single checked entry point; 12 tests), `tools/security/audit-release-history.mjs`
+(pure scanners, four exit codes 0/10/20/30, value-free reports; 18 tests), and
+`tools/docs/check-relative-links.mjs` (6 tests). Full core suite now 349 tests
+green; the relative-link check is clean over the tracked release surface
+(ignoring generated `Cache`/`Packages`/`node_modules`/`captures` and the
+known-future hero).
+
+Narration (owner-required) path proven without wasting credits: a free
+`GET /v1/voices/{id}` confirmed `iP95p4xoKVk53GoZ742B` resolves to
+"Chris - Charming, Down-to-Earth"; one listening-check line was generated
+through the official REST TTS endpoint (`eleven_multilingual_v2`, settings
+0.45/0.8/0.15/speaker-boost/1.0) producing a valid 4.551 s MP3 (raw −24.2
+LUFS, normalised to −16 by the assembly pipeline). The API key was read
+in-process from the ignored `.env`, never printed, logged, serialised, or
+passed on a command line, and was verified absent from every sidecar, doc,
+tool, and source file. The generator, audio, and safe provenance metadata are
+all ignored under `captures/`. The full numbered set is deferred so its
+captions match the final captured cut; one regeneration pass remains
+authorised; the subjective listening check is owner-only.
+
+Blocker recorded honestly: the 59-second product capture cannot be produced
+autonomously. Full-display recording is the only way to capture the live Lens
+Preview GPU surface (region/window capture freezes it), but the machine's live
+desktop shows unrelated private work, and a clean split-screen would require
+taking over the owner's workspace. Recording the private desktop or fabricating
+footage is disallowed, so the capture — and therefore the assembled cut, the
+README hero extraction, and the complete-cut multimodal panel — awaits an
+owner-arranged clean-desktop session. The overall outcome is CANDIDATE
+ASSEMBLED WITH KNOWN BLOCKERS. No competitive or judge research entered this
 entry.

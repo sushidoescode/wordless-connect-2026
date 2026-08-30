@@ -1,0 +1,78 @@
+1
+00:00:00,400 --> 00:00:03,800
+One draws a clue in midair —
+the same stroke arrives in a friend's browser.
+
+2
+00:00:04,200 --> 00:00:06,000
+A wrong guess —
+and both strokes go coral.
+
+3
+00:00:06,200 --> 00:00:08,800
+WRONG · BOTH STROKES GO CORAL
+
+4
+00:00:09,200 --> 00:00:10,800
+The Lens is the referee.
+
+5
+00:00:11,000 --> 00:00:13,800
+The right answer lands —
+mint, and the word is revealed.
+
+6
+00:00:14,400 --> 00:00:17,400
+The exact path they made
+locks into a shared glyph.
+
+7
+00:00:17,600 --> 00:00:19,600
+No recognition. No redraw.
+
+8
+00:00:20,400 --> 00:00:25,200
+Then they play again — and the painter
+picks a new stroke color.
+
+9
+00:00:26,400 --> 00:00:30,200
+WORDLESS was built as a verified loop —
+
+10
+00:00:30,400 --> 00:00:34,600
+prompt, change, simulated Lens Studio Preview,
+real browser, test, fix.
+
+11
+00:00:35,400 --> 00:00:38,200
+Hundreds of automated tests
+behind one small game.
+
+12
+00:00:38,600 --> 00:00:41,600
+453 AUTOMATED TESTS AT THE PRODUCT FREEZE
+
+13
+00:00:42,200 --> 00:00:46,200
+We measured the relay end to end, rejected
+malformed messages without changing the game,
+
+14
+00:00:46,400 --> 00:00:48,600
+and tested the defined round
+and recovery transitions.
+
+15
+00:00:48,900 --> 00:00:50,900
+RTT MEDIAN 86 MS · 50/50 PINGS ·
+ONE MACHINE, ONE NETWORK (OBSERVED)
+
+16
+00:00:51,600 --> 00:00:55,000
+WORDLESS Relay. Draw in space.
+Guess from a browser.
+
+17
+00:00:55,300 --> 00:00:58,600
+Keep the mark you made together.

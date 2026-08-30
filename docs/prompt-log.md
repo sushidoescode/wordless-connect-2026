@@ -3660,3 +3660,37 @@ README hero extraction, and the complete-cut multimodal panel — awaits an
 owner-arranged clean-desktop session. The overall outcome is CANDIDATE
 ASSEMBLED WITH KNOWN BLOCKERS. No competitive or judge research entered this
 entry.
+
+## 2026-08-30 — Helper-package cleanup, freeze re-verified, soak upgraded live
+
+Resolved the untracked Lens helper packages through Lens Studio MCP:
+`AssetManager.remove` removed `Bitmoji 3D.lsc`, `Leaf.lspkg`,
+`AiPreviewAgentInteract.lspkg`, and `AiPreviewAgentInspect.lspkg`, and
+`scene-graphql deleteSceneObject` removed the `AiPreviewAgent Handler`
+SceneObject the interaction tooling had added after the freeze;
+`project.save` persisted the result. `Assets/Scene.scene` is now byte-identical
+to the freeze commit and the runtime/UI manifest recomputes to
+`bcb3859a…a46705` — the product freeze is intact. The clean project recompiles
+and previews with `errors: []`. The private screen-probe artifacts (which had
+captured unrelated desktop content) were deleted. The tracked `Packages/`
+baseline (SIK, UIKit, SupabaseClient) is unchanged.
+
+With the helpers gone, `QueryRuntimeSceneTool`/`PreviewInteractTool` are no
+longer available; live driving now uses only the base `InjectPreviewGesture`
+(draw/replay) and `CapturePanelScreenshotTool` (visual state read) plus the
+browser. A browser-side in-page auto-resolve loop (try each enabled card until
+one returns correct, in one page evaluation) removes the controller
+turn-latency limit that had made the soak partial, and drove **five contiguous
+rounds** — HEART, HOUSE (real `points=20` glyph), FISH, TREE, STAR — each with
+at least one wrong guess (coral `rgb(255,120,106)`) and one correct guess (mint
+`rgb(115,230,174)`) and a glyph lock. The six consecutive resets
+`r-7E5ODTZ2-2`…`-7` all report identical resources (listeners=1 timers=2
+channels=1 sceneObjects=14 materials=7); no product Logger error appeared. This
+converts the primary five-contiguous-rounds soak requirement from
+aggregate-proven to live-proven; only the exact-128-point round and the
+mid-stroke-correct round remain unit/policy-proven (they resist single-run
+scripted staging). `docs/evidence/resilience.md` §3a, §7, §8 record this.
+
+Capture remains blocked pending an owner-arranged clean-desktop session; the
+overall outcome is unchanged: CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS. No
+competitive or judge research entered this entry.

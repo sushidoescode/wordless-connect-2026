@@ -1,6 +1,6 @@
 # WORDLESS Relay — narration script
 
-Status: **CONFORMED — generated and mixed into the accepted candidate**
+Status: **GENERATED AND MIXED — SPOKEN AUDIO NOT YET VERIFIED**
 (`18f7ce9a…`, 2026-08-30). One narration line per beat, matching the time
 ranges in `docs/submission/video-edl.md`. Written for a warm, down-to-earth male read
 (Chris), with deliberate room for product sound and pauses. Narration never
@@ -8,11 +8,28 @@ carries information the captions or visuals fail to show, cites no exact test
 count (exact numbers live in captions and cards, where they can be updated),
 and is bound by `docs/evidence/claim-ledger.md`.
 
-`docs/submission/wordless-relay-en.srt` is the working caption copy for this
-script. SRT files cannot carry a header comment, so its DRAFT status is
-recorded here: its cue timings are targets from the approved 59-second
-timeline and must be re-timed against the generated audio; the final burned
-captions must match the final spoken words exactly.
+**Audio-verification blocker.** The narration was generated and mixed, and the
+mixed track was measured (integrated −16.89 LUFS, true peak −1.67 dBTP; a
+beat-structured envelope). But **no available reviewer tool can perceive the
+spoken audio.** Three independent complete-cut reviewers each confirmed this and
+recorded the spoken-narration evaluation (words, delivery, voice identity,
+caption-vs-spoken agreement) as BLOCKED rather than substituting this text. So
+whether the actual spoken audio matches this script is UNVERIFIED, and — per the
+finalization rule at the foot of this file — narration is an isolated blocker;
+it needs a human listen-through (or a listening tool) to clear.
+
+`docs/submission/wordless-relay-en.srt` is the **spoken-narration transcript**:
+its cue text is this eight-beat script (SRT files cannot carry a header
+comment, so the note lives here). It is a DISTINCT artifact from the shorter
+burned lower-third captions in the video (which are editorial summaries — e.g.
+beat 1 burns `One person draws a clue in space — a friend sees the same stroke
+in a browser.`, while the SRT/script reads `One draws a clue in midair — the
+same stroke arrives in a friend's browser.`). The burned lower-thirds are not a
+verbatim transcript of the spoken words, and are not required to be. Because
+audio perception is blocked, whether the SRT matches the actual spoken audio
+word-for-word is UNVERIFIED; the SRT's cue timings are targets from the approved
+59-second timeline and should be re-timed against the audio once a listener can
+confirm the spoken words.
 
 ## Script
 
@@ -32,10 +49,12 @@ sound and silence inside beats 5–7.
 
 ## Voice metadata
 
-To be confirmed against the official service before generation — the voice ID
-must still resolve to the named voice, and the current official SDK/API
-instructions must be verified and the resolved SDK version pinned in ignored
-metadata before any credits are spent.
+Used for the accepted candidate's narration generation (2026-08-30). The voice
+ID resolved to the named voice and the provider/model/settings below were the
+generation parameters; provider, voice name/ID, model, settings, SDK version,
+generation date, and output hashes are recorded in ignored local metadata, and
+the ElevenLabs key was never exposed. The one remaining open item is the
+spoken-audio verification (blocked; see the status note above).
 
 - Provider: ElevenLabs (the owner's account)
 - Voice: Chris — Charming, Down-to-Earth
@@ -53,4 +72,8 @@ metadata before any credits are spent.
 If generation or voice-identity verification fails, preserve a fully
 caption-readable cut and report narration as an isolated blocker; because the
 Chris narration is owner-required, finalization is not labelled complete
-without it.
+without it. **This rule is currently in force:** generation succeeded but
+spoken-audio verification is blocked (unperceivable by available tooling), so
+narration stands as an isolated KNOWN BLOCKER and finalization is NOT labelled
+complete. The video is fully caption-readable, so the cut communicates without
+audio; the outstanding item is confirming the spoken narration by listening.

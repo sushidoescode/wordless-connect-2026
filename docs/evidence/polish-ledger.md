@@ -52,17 +52,43 @@ change or retain rationale, and fresh proof. Captures remain local and ignored.
   cleanup.
 - **Reviewer composition:** three fresh, context-isolated multimodal reviewers
   per stage (Stage A blind/muted; Stage B narrated + description + README +
-  claim ledger).
-- **Observed defect / decision:** Stage A round 1 flagged an unexplained
+  claim ledger). The protocol was **rerun on the exact accepted MP4**: each
+  reviewer self-decoded the actual file with ffmpeg (no orchestrator-supplied
+  frames), correcting an earlier run that had used sampled frames.
+- **Observed defect / decision (build repairs, earlier rounds):** an unexplained
   desktop-wallpaper frame in the replay beat and a clipped CLAD card — both
-  fixed (replay beat rebuilt from the clean master take; card shortened).
-  Stage B round 1 flagged one credible blocker: an unscoped on-screen 10 Hz
-  cadence claim — fixed to "a live two-way stroke relay" (scoped 10 Hz remains
-  only in the project description, per the claim ledger). Caption doubling at
-  the 9 s boundary and an unshown "new colour" promise were also corrected.
-- **Evidence:** `local-handoff/reviews/task16/stageA-results.md` and
-  `stageB-results.md` (verbatim answers ignored); `verify-wordless-video.mjs`
-  all-pass; `captures/task16/edit-manifest.json` records the recipe/hashes.
-- **Outcome:** capture/evidence loop PASS. Complete-cut panel PASS (Stage A
-  3/3, Stage B 3/3 after the smallest demonstrated repairs). README hero
-  extracted from the accepted candidate at 17.0 s.
+  fixed (replay beat rebuilt from the clean master take; card shortened); an
+  unscoped on-screen 10 Hz cadence card — dropped (scoped 10 Hz remains only in
+  the project description, per the claim ledger); caption doubling at the 9 s
+  boundary and an unshown "new colour" promise — corrected.
+- **Stage A (rerun):** 3/3 comprehension PASS — each reviewer, blind and muted,
+  identified the painter/guesser roles, the live shared stroke, bilateral coral
+  on a wrong guess (caption read as `WRONG · BOTH STROKES GO CORAL`), the mint
+  correct + word reveal, and the exact-mark glyph medallion. Consistent polish
+  flags (muted): tiny left-HUD text; the intro caption overlaps the browser
+  projection ~0–6 s; the two rounds are near-identical (same STAR clue); a stray
+  cursor sits in the browser well; the closing monogram reads ambiguously.
+- **Stage B (rerun):** verified parts PASS 3/3 (video↔EDL beat structure/timing,
+  narration-script-as-document vs video, claim discipline, cross-document
+  numeric consistency). **Spoken-narration AUDIO perception BLOCKED 3/3** — no
+  available reviewer tool can hear the AAC track; all three measured it
+  (present, ≈−16.8 LUFS, beat-structured) and refused to substitute the
+  transcript. NOT a full PASS.
+- **Evidence:** `local-handoff/reviews/task16/stage-a-actual-mp4-verbatim.md`,
+  `stage-b-narrated-verbatim.md`, and `fixed-prompt.md` (verbatim answers
+  ignored); `verify-wordless-video.mjs` all-pass; `captures/task16/edit-manifest.json`
+  records the recipe/hashes; `captures/task16/review-bundle/bundle-manifest.json`
+  is the immutable hashed review bundle (aggregate `9b566df6…`).
+- **Caption geometry (measured on the locked MP4):** lower-third cap height
+  ~32 px — below the 42 px minimum; contrast strong for ivory/mint/coral but the
+  violet `THE LENS IS THE ONLY REFEREE` header is sub-4.5:1; the intro/wrong
+  lower-thirds overlap the browser projection and partially dim the live stroke.
+  Legible at full/1440×810; the core story survives at 390 px but proof detail
+  and HUD text drop out. A known legibility blocker; a recut to clear it needs
+  §4 owner authority.
+- **Outcome:** capture/evidence loop and Stage A comprehension PASS; README hero
+  extracted from the accepted candidate at 17.0 s. The overall finalization is
+  **CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS** — three recorded blockers: (1) the
+  spoken-narration audio is unverified (unperceivable by available tooling); (2)
+  burned captions miss the 42 px / unobscured / contrast bar; (3) Task 15 stays
+  PARTIAL.

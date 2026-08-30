@@ -3760,3 +3760,76 @@ narration audio, and raw takes remain ignored under `captures/`. The
 video-EDL, release checklist, and polish ledger record the observed values;
 no runtime/UI file changed. No competitive or judge research entered this
 entry. Nothing was pushed, uploaded, published, or submitted.
+
+## 2026-08-30 — Correction: complete the capture-to-binding chain honestly
+
+Independent verification confirmed the `18f7ce9a…b5b5` candidate is technically
+and visually sound but that the capture-to-binding chain was not complete: the
+prior Stage A/B panel had used orchestrator-sampled frames plus the transcript,
+which is exactly the substitution the owner prohibited ("do not substitute
+sampled frames/transcripts and claim PASS — record the blocker"). Seven
+corrections were run, local-only.
+
+**Complete-cut rerun on the exact accepted MP4.** Three fresh, context-isolated
+reviewers each **self-decoded the actual file with ffmpeg** (no supplied
+frames). Stage A (blind, muted): 3/3 comprehension PASS — all independently
+identified the painter/guesser roles, the live shared stroke, bilateral coral on
+a wrong guess (caption read as `WRONG · BOTH STROKES GO CORAL`, never "both
+screens"), the mint correct + word reveal, and the exact-mark glyph. Stage B
+(actual narrated candidate + the six required documents): the verifiable parts
+passed 3/3 (video↔EDL beat structure/timing, narration-script-as-document vs
+video, claim discipline, cross-document numeric consistency), but **spoken-
+narration audio perception is BLOCKED** — no available reviewer tool can hear
+the AAC track. All three measured it (present, ≈−16.8 LUFS, beat-structured) and
+each explicitly refused to read the transcript and declare the audio good,
+recording the blocker instead. The earlier "Stage B 3/3 PASS with no blockers"
+claim is therefore withdrawn as inaccurate. Verbatim answers are under the
+ignored `local-handoff/reviews/task16/stage-a-actual-mp4-verbatim.md` and
+`stage-b-narrated-verbatim.md`.
+
+**Measured caption/playback check (final-revision).** On the locked file, burned
+caption cap height is ~32 px — below the stated 42 px minimum; the intro/wrong
+lower-thirds overlap the browser projection and partially dim the live stroke;
+the one violet build-note header is ~2.7–4.4:1 (sub-4.5:1). Legible at full and
+1440×810 laptop resolution; at 390 px the core story survives but proof detail
+and HUD text drop out. This misses the caption gate and is recorded as a known
+legibility blocker; clearing it needs a recut under the §4 invalidation rule.
+
+**Immutable hashed review bundle.** Nine components (MP4, caption source,
+narration manifest + audio, end card, hero, 1440×900 README first-screen render,
+project description, claim ledger) each SHA-256'd, aggregate digest
+`9b566df6…88ce21` — `captures/task16/review-bundle/bundle-manifest.json` (ignored).
+
+**Safe prospective-tree audit.** `tools/security/audit-prospective-tree.mjs`
+resolves the git tree, extracts every text blob with `git cat-file`, reads the
+ignored `.env` files **in memory**, and calls `auditReleaseHistory` in-process,
+so environment values are never printed or serialized — only variable names can
+appear in a report. The env-value-leak comparison still covers every blob
+(auditor sources included), while secret-SHAPED hits confined to the auditors'
+own detection patterns / synthetic fixtures / the plan's documented commands are
+separated out as benign. Both passes (pre-commit prospective tree and the
+committed HEAD tree) report zero env-value leaks and zero blocking findings; the
+committed tree is proven identical to the audited candidate tree. Tree IDs and
+reports are preserved under the ignored `captures/task16/audit/`. The wrapper's
+verdict logic is covered by `tools/core-tests/prospective-tree-audit.test.mjs`.
+
+**Final-revision verification.** `npm run check` (core 363, web unit 109, tsc
+clean, vite build 55 modules / 253 KB); Playwright E2E 40/40 across the 390×844
+phone and 1440×900 desktop projects; Lens typecheck exit 0; `git diff --check`
+clean; relative-link check `ok:true` on the authored tree; hero SHA `d2fccfaa…`
+consistent across the edit manifest and bundle manifest.
+
+**Reconciliation.** The EDL observed columns were filled from the exported file,
+the Stage B claim corrected, the caption/card deviations (beats 1–4 full-sentence
+wording, the beat-6/7 card redistribution, the dropped `10 HZ` card) recorded,
+and the SRT clarified as the intended spoken-narration transcript (a distinct
+artifact from the burned lower-thirds; word-for-word agreement with the actual
+audio is UNVERIFIED because audio is blocked). narration.md now records the
+audio-verification blocker; the outcome was relabelled to **CANDIDATE ASSEMBLED
+WITH KNOWN BLOCKERS** across the judged package (owner packet, EDL, checklist,
+polish ledger, progress tracker). Three blockers stand: unverifiable spoken
+audio, sub-42 px / obscured captions, and the PARTIAL Task 15 soak sub-cases.
+
+All Lens inspection stayed on Lens Studio MCP; no raw HTTP was used. No
+competitive or judge research entered this entry. Nothing was pushed, uploaded,
+published, made public, or submitted.

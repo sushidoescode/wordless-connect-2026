@@ -65,7 +65,10 @@ const JWT_SHAPE = /\beyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}/
 // text; the matched path itself is never echoed into any finding.
 const HOME_PATH_SHAPE = /\/Users\/[A-Za-z0-9._-]+\//g
 const ENV_FILENAME = /(^|\/)\.env(\.[^/]+)?$/
-const ENV_EXAMPLE_FILENAME = /(^|\/)\.env\.example$/
+// Redacted templates the project contract explicitly tracks (.gitignore
+// whitelists .env.example and .env.production.example). Only the exact
+// `.example` suffix is exempt; every other .env* name stays forbidden.
+const ENV_EXAMPLE_FILENAME = /(^|\/)\.env(\.[^/]+)*\.example$/
 const LOCAL_ONLY_SEGMENT = /(^|\/)Assets\/LocalOnly(\/|$)/
 const REFERENCE_VISUALS_PREFIX = 'docs/references/visuals/'
 // Env-value leak comparison threshold. Only env values with at least this many

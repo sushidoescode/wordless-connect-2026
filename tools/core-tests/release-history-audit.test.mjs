@@ -119,11 +119,19 @@ test('forbidden filename patterns fire on name alone', () => {
     .some((finding) => finding.rule === 'forbidden-filename'))
   assert.ok(scanBlobForFindings('', 'web/.env.local')
     .some((finding) => finding.rule === 'forbidden-filename'))
+  assert.ok(scanBlobForFindings('', 'web/.env.production')
+    .some((finding) => finding.rule === 'forbidden-filename'))
   assert.ok(scanBlobForFindings('', 'Wordless/Assets/LocalOnly/notes.md')
     .some((finding) => finding.rule === 'forbidden-filename'))
-  // The redacted template is explicitly allowed by the project contract.
+  // Redacted templates are explicitly allowed by the project contract
+  // (.gitignore whitelists .env.example and .env.production.example).
   assert.equal(scanBlobForFindings('', '.env.example')
     .some((finding) => finding.rule === 'forbidden-filename'), false)
+  assert.equal(scanBlobForFindings('', 'web/.env.production.example')
+    .some((finding) => finding.rule === 'forbidden-filename'), false)
+  // A name merely containing 'example' without the suffix stays forbidden.
+  assert.ok(scanBlobForFindings('', 'web/.env.examples')
+    .some((finding) => finding.rule === 'forbidden-filename'))
 })
 
 test('reference-only visual material is flagged by path', () => {

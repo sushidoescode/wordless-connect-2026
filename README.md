@@ -18,10 +18,11 @@ from the HUD, and enter it in the hosted page (a `?room=` link prefills the
 form; joining is always an explicit click). The page is a static build of
 `web/` on Vercel's free tier; the relay is ordinary hosted Supabase Realtime.
 
-**Demo video:** uploaded separately by the owner for submission (the video
-shows the earlier frozen three-color runtime; the current runtime adds the
-eight-color palette, generated room codes, protocol v3, and the hosted
-browser — see `docs/evidence/hosted-browser.md` for its live proof).
+**Demo video (59 s):**
+<https://drive.google.com/file/d/1uVv-LNj2woNxk6wxGAoXBcy9566Hox6A/view?usp=sharing>
+— the video shows the earlier frozen three-color runtime; the current runtime
+adds the eight-color palette, generated room codes, protocol v3, and the
+hosted browser — see `docs/evidence/hosted-browser.md` for its live proof.
 
 ## Current status
 

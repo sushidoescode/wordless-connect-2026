@@ -193,8 +193,13 @@ export class PainterPaletteController extends BaseScriptComponent {
         seen.push(binding)
       }
     }
-    for (let index = 0; index < SWATCH_COUNT; index += 1) {
-      if (this.swatchRoots[index] === this.swatchRings[index]) failClosed()
+    // Roots and rings must also be disjoint across indices — a ring aliased
+    // to any root object would let one scene object play two visual roles.
+    const rootsAndRings: unknown[] = []
+    for (const binding of this.swatchRoots) rootsAndRings.push(binding)
+    for (const binding of this.swatchRings) {
+      if (rootsAndRings.indexOf(binding) !== -1) failClosed()
+      rootsAndRings.push(binding)
     }
   }
 }

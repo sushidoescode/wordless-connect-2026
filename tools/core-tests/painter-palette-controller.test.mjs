@@ -328,3 +328,12 @@ test('runtime controller fails closed when a ring is bound to its own root', () 
     /requires eight ordered swatch bindings/i,
   )
 })
+
+test('runtime controller fails closed on cross-index root/ring aliasing', () => {
+  const { controller } = boundController()
+  controller.swatchRings[2] = controller.swatchRoots[5]
+  assert.throws(
+    () => controller.onAwake(),
+    /requires eight ordered swatch bindings/i,
+  )
+})

@@ -6,6 +6,7 @@
     - !<own> f5d74682-203a-4970-81ea-9fa7b88c96bb
     - !<own> 24212fb9-0f96-47aa-b404-5848f7d22acd
     - !<own> 2a7f4e85-faa1-451e-bfe3-d3ba78f140c0
+    - !<own> 528ca438-5c36-4ce3-b068-156f5415eec4
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
     userLayers:
       - id: 1
@@ -1918,6 +1919,22 @@
     []
   Components:
     - !<own> 1b1ef317-f304-424a-901a-23e8f0239ffc
+- !<ScriptComponent/4f18ef92-0a9a-4a27-8cdb-dce8f390e0ac>
+  PrefabRemaps:
+    []
+  Name: AgentInspectScript
+  Enabled: true
+  ScriptAsset: !<reference> 0b25079c-f5bf-4c6d-96c4-f43b89dfa213
+  ScriptInputsDefault:
+    {}
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      {}
+  ScriptTypes:
+    "":
+      {}
 - !<ColliderComponent/4fc53a6a-e7c0-4a34-a2c6-78782ffb85a4>
   PrefabRemaps:
     []
@@ -1966,6 +1983,21 @@
     []
   Components:
     - !<own> d8a7d42f-80c8-4e44-90a0-571920be612c
+- !<SceneObject/528ca438-5c36-4ce3-b068-156f5415eec4>
+  PrefabRemaps:
+    []
+  Name: AiPreviewAgent Handler
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 4f18ef92-0a9a-4a27-8cdb-dce8f390e0ac
 - !<Text/52c49360-6b96-4a24-9ae1-f740dfd8ca4e>
   PrefabRemaps:
     []
@@ -4066,7 +4098,7 @@
   MeshShadowMode: None
   ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
   ShadowDensity: 1.000000
-  Text: WAITING FOR GUESSER
+  Text: ROOM · ——
   Editable: false
   ShowEditingPreview: true
   TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
@@ -4085,7 +4117,7 @@
   OverflowHorizontal: Overflow
   Fill: !<TextFill>
     Mode: Solid
-    Color: {x: 1.000000, y: 0.839216, z: 0.352941, w: 1.000000}
+    Color: {x: 1.000000, y: 0.964706, z: 0.909804, w: 1.000000}
     Texture: !<reference> 00000000-0000-0000-0000-000000000000
     ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
     TileCount: 5.000000

@@ -232,13 +232,13 @@ unproven):
    preview draw driver and the browser guess driver, which the two separate
    tools cannot stage within one controller turn.
 
-Neither reflects an unproven product behaviour. The overall finalization is
-reported as CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS for a reason outside Task 15
-— the spoken-narration audio is unverifiable by available tooling and awaits the
-owner listen-through (the earlier caption-legibility blocker was cleared by the
-recut; see the release checklist and video EDL). Task 15 itself is substantially
-complete, with only these two narrow soak sub-cases carried as unit/policy-proven
-rather than single-run live.
+Neither reflects an unproven product behaviour. With both media blockers now
+cleared (the recut fixed caption legibility, and the owner listen-through on
+2026-08-30 confirmed the spoken narration), Task 15 is the only remaining
+non-complete item, so the overall finalization is reported as CANDIDATE
+ASSEMBLED WITH KNOWN RESILIENCE GAPS. Task 15 itself is substantially complete,
+with only these two narrow soak sub-cases carried as unit/policy-proven rather
+than single-run live.
 
 ## 8. Freeze preserved through helper-package cleanup
 

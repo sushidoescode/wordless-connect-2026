@@ -1,24 +1,23 @@
 # WORDLESS Relay — narration script
 
-Status: **GENERATED AND MIXED — SPOKEN AUDIO NOT YET VERIFIED**
-(`18f7ce9a…`, 2026-08-30). One narration line per beat, matching the time
+Status: **GENERATED AND MIXED — SPOKEN AUDIO OWNER-SIGNED-OFF**
+(recut candidate `254945f2…`, 2026-08-30). One narration line per beat, matching the time
 ranges in `docs/submission/video-edl.md`. Written for a warm, down-to-earth male read
 (Chris), with deliberate room for product sound and pauses. Narration never
 carries information the captions or visuals fail to show, cites no exact test
 count (exact numbers live in captions and cards, where they can be updated),
 and is bound by `docs/evidence/claim-ledger.md`.
 
-**Audio-verification blocker.** For the recut candidate (`254945f2`) the
-narration was **re-mixed from the eight frozen MP3 inputs without any new
-generation** (mono; gentle compression + dynamic loudnorm), and the mixed track
-was measured (integrated **−16.12 LUFS**, true peak **−1.75 dBTP**; no trailing
-silence; a beat-structured envelope). But **no available reviewer tool can
-perceive the spoken audio.** Independent complete-cut reviewers confirmed this
-and recorded the spoken-narration evaluation (words, delivery, voice identity,
-caption-vs-spoken agreement) as BLOCKED rather than substituting this text. So
-whether the actual spoken audio matches this script is UNVERIFIED, and — per the
-finalization rule at the foot of this file — narration is an isolated blocker;
-it needs a human listen-through (or a listening tool) to clear.
+**Audio verification — OWNER-SIGNED-OFF (2026-08-30).** For the recut candidate
+(`254945f2`) the narration was **re-mixed from the eight frozen MP3 inputs
+without any new generation** (mono; gentle compression + dynamic loudnorm), and
+the mixed track was measured (integrated **−16.12 LUFS**, true peak **−1.75
+dBTP**; no trailing silence; a beat-structured envelope). No reviewer tool can
+perceive audio, so the complete-cut reviewers recorded the spoken evaluation as
+tool-unperceivable rather than substituting this text. The **owner then
+listened end to end** and confirmed the eight intended lines, the Chris voice,
+delivery, per-beat timing, no clipping (including the final word "together"),
+and no audible defects — clearing the audio blocker.
 
 Beat 5 note: the shipped `line-05.mp3` (SHA `71d3c5cc…`) is the regenerated
 reworded line matching both the beat-5 caption and the script row below ("a
@@ -79,9 +78,8 @@ spoken-audio verification (blocked; see the status note above).
 
 If generation or voice-identity verification fails, preserve a fully
 caption-readable cut and report narration as an isolated blocker; because the
-Chris narration is owner-required, finalization is not labelled complete
-without it. **This rule is currently in force:** generation succeeded but
-spoken-audio verification is blocked (unperceivable by available tooling), so
-narration stands as an isolated KNOWN BLOCKER and finalization is NOT labelled
-complete. The video is fully caption-readable, so the cut communicates without
-audio; the outstanding item is confirming the spoken narration by listening.
+Chris narration is owner-required, finalization is not labelled complete without
+it. **This rule is now satisfied:** generation and mixing succeeded, and the
+owner listen-through (2026-08-30) confirmed the spoken narration on `254945f2…`,
+so narration is no longer a blocker. The video also remains fully
+caption-readable, so the cut communicates without audio as well.

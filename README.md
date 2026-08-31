@@ -18,11 +18,16 @@ verdicts — the Lens validates every answer and publishes each result.
 
 - Gate 0 (Lens↔browser realtime spike) is **GO** and Gate 1 (integrated
   vertical slice) is **PASS**; the evidence table below links both records.
-- Product scope and the runtime are **frozen** for final capture. Remaining
-  work is capture, submission documents, and the reviewed release candidate.
+- Product scope and the runtime are **frozen**. The 59-second demo candidate is
+  captured, assembled, narrated, and technically verified; its captions pass the
+  legibility gates and the spoken narration is **owner-signed-off**. Overall
+  status: **CANDIDATE ASSEMBLED WITH KNOWN RESILIENCE GAPS** — the one remaining
+  non-complete item is Task 15 resilience (PARTIAL: two soak sub-cases are
+  unit/policy-proven, not single-run live).
 - The five-second comprehension gate is **OWNER-WAIVED — NOT PASSING**. No
   five-second comprehension pass is claimed anywhere in this project.
-- The repository is private until the owner authorizes publication.
+- The repository is private until the owner authorizes publication; the demo
+  video upload, hosted link, and submission remain owner-gated.
 
 ## What actually happens in a round
 

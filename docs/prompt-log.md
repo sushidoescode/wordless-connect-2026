@@ -3857,7 +3857,7 @@ intro captions overlapped the browser stroke, and one card header was sub-4.5:1
 candidate from the FROZEN raw `split-screen-master.mov` (no recapture): panes
 re-composited to 840 px with a bottom overlay band so no caption/card covers a
 pane, stroke, or glyph; caption/card main text 64 px (cap height 46–48 px);
-two-row cards clearing the held glyph by ~79 px; the violet referee eyebrow
+two-row cards clearing the held glyph (card band ~48 px below the pane bottom); the violet referee eyebrow
 replaced with lemon (~12.9:1); captions retimed to the on-screen events
 (CORRECT caption onset == visual onset). The narration was re-mixed from the
 eight frozen MP3s with NO regeneration (mono, compressor + dynamic loudnorm →
@@ -3868,8 +3868,9 @@ touched by the recut. Final candidate `wordless-relay-final-59s-v2.mp4`, SHA-256
 `254945f2977a69221c30b13e0f6cde7cd9af95d8097b6bc61529688c496050c1`, verifier
 all-pass; `recut.mjs` reproduces the exact sha deterministically.
 
-Verification: a measurement pass (cap height, ≥42 px; ≥79 px glyph clearance;
-contrast ≥7:1; lemon eyebrow; title-safe; transition gates; 1440×810 + 390 px)
+Verification: a measurement pass (cap height, ≥42 px; pane-bottom-to-overlay gaps
+~48 px cards / ~87 px captions; contrast ≥7:1; lemon eyebrow; title-safe;
+transition gates; 1440×810 + 390 px)
 and a fresh 3-reviewer Stage A comprehension panel both PASS on the recut; the
 one issue they surfaced (an over-long "no redraw" card line overrunning
 title-safe) was fixed and re-measured. Stage B spoken-audio perception remains
@@ -3882,3 +3883,48 @@ force-chased. Per the owner instruction, the exact final MP4 path/hash is handed
 back for the human listen-through and spoken narration is NOT cleared. All Lens
 inspection stayed on Lens Studio MCP. No competitive or judge research entered
 this entry. Nothing was pushed, uploaded, published, made public, or submitted.
+
+## 2026-08-30 — Owner audio sign-off + release-evidence corrections (no recut)
+
+The owner listened end to end to the exact candidate `254945f2…` and confirmed
+the eight lines, the Chris voice, delivery, per-beat timing, no clipping (incl.
+the final word "together"), and no audible defects — recorded as the owner audio
+sign-off (`local-handoff/reviews/task16/owner-audio-signoff.md`). That clears the
+spoken-audio blocker; with the caption blocker already cleared by the recut, the
+only remaining non-complete item is Task 15 (PARTIAL), so the outcome is upgraded
+to **CANDIDATE ASSEMBLED WITH KNOWN RESILIENCE GAPS**. Six release-evidence
+defects were then corrected WITHOUT changing or recutting the MP4:
+
+1. **Audit text detection is now content-based, not an extension allowlist.**
+   `audit-prospective-tree.mjs` decides text vs binary from the blob's own bytes
+   (a NUL byte in the sniff window or invalid UTF-8 → binary/filename-only; else
+   full content scanned). Any reviewable text is now scanned regardless of
+   extension (.toml, Lens `.mat`/`.graphShader`, extensionless). Added fail-closed
+   tests using `.toml`, a Lens `.mat` resource, and an extensionless file (all
+   block a non-enumerated home path), plus a binary-stays-filename-only test. The
+   two literal NUL bytes in the JS `selfRefKey` separator were replaced with
+   `\u0000` textual escapes so Git treats the source as reviewable text.
+2. **Env-comparison threshold documented.** The ≥12-character env-value-leak
+   threshold is now explained in `audit-release-history.mjs`: every real
+   credential exceeds it (ELEVENLABS_API_KEY 51, VITE_SUPABASE_URL 40,
+   VITE_SUPABASE_PUBLIC_KEY 46 — all compared); the only sub-threshold value is
+   the 6-char non-secret session code, intentionally in the scene, so comparing
+   it would false-positive. Also recorded in the release checklist §7.
+3. **Fresh two-stage panel on the exact final hash.** The fixed prompt was
+   updated to the v2 path/SHA and the rebuilt bundle digest; three fresh Stage A
+   reviewers self-decoded `254945f2` (not the `7c053405` panel or the v1 Stage B)
+   and their verbatim answers were preserved, then Stage B ran against the exact
+   rebuilt bundle + README first-screen.
+4. **Reconciled** README status, narration's header SHA, EDL timings/caption
+   copy, mdat @ 95646, core 376 tests, 25 enumerated audit findings, 22 audit
+   tests, the v2 bundle aggregate, Task 15 PARTIAL, and the actual pane gaps
+   (~48 px cards / ~87 px captions, correcting the earlier ~119 px). Refreshed
+   the narration provenance sidecar (full set + owner sign-off).
+5. **README first screen re-rendered** and the review bundle + aggregate rebuilt
+   (`f9b3f28a…`, 19 components: overlay renderer + rendered-overlay hashes +
+   narration provenance, no SRT masquerading as caption source); the fresh
+   reviews are bound to that aggregate. The MP4 was not changed.
+6. **Two-pass audit re-run** with all 65 sidecars (content-based detection,
+   in-memory env comparison): 0 env-value leaks, 0 blocking; committed tree ==
+   audited tree. Full verification suite green. Committed locally; stopped before
+   every external action. Nothing pushed, uploaded, published, or submitted.

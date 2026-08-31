@@ -231,3 +231,53 @@ test('CLI: wrapper exits 0 on a repo whose only hits are enumerated fixture name
     rmSync(dir, { recursive: true, force: true })
   }
 })
+
+// --- CONTENT-based text detection (no extension allowlist) ---
+
+// Runs the wrapper against a throwaway repo whose files are given as
+// { relpath: Buffer|string }; returns the wrapper exit code.
+function runWrapperOnFiles(files) {
+  const dir = mkdtempSync(join(tmpdir(), 'wl-audit-content-'))
+  try {
+    mkdirSync(join(dir, 'tools/security'), { recursive: true })
+    execFileSync('cp', [resolve('tools/security/audit-prospective-tree.mjs'), join(dir, 'tools/security/audit-prospective-tree.mjs')])
+    execFileSync('cp', [resolve('tools/security/audit-release-history.mjs'), join(dir, 'tools/security/audit-release-history.mjs')])
+    for (const [rel, content] of Object.entries(files)) {
+      const full = join(dir, rel)
+      mkdirSync(join(full, '..'), { recursive: true })
+      writeFileSync(full, content)
+    }
+    execFileSync('git', ['init', '-q'], { cwd: dir })
+    execFileSync('git', ['config', 'user.email', 't@t'], { cwd: dir })
+    execFileSync('git', ['config', 'user.name', 't'], { cwd: dir })
+    execFileSync('git', ['add', '-A'], { cwd: dir })
+    let code = 0
+    try {
+      execFileSync('node', ['tools/security/audit-prospective-tree.mjs', '--tree', 'INDEX'], { cwd: dir, stdio: 'pipe' })
+    } catch (e) { code = e.status }
+    return code
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+}
+
+const HOME = ['', 'Users', 'someone', 'proj', 'x.txt'].join('/') // matches the home-path rule
+
+test('CONTENT: a home path in a .toml (not in any extension allowlist) is scanned and BLOCKS', () => {
+  assert.equal(runWrapperOnFiles({ 'config.toml': `path = "${HOME}"\n`, 'README.md': 'clean\n' }), 20)
+})
+
+test('CONTENT: a home path in a Lens .mat text resource is scanned and BLOCKS', () => {
+  // Lens material files are YAML-like text; the old extension allowlist omitted
+  // them, so this proves content-detection now scans them.
+  assert.equal(runWrapperOnFiles({ 'Assets/M.mat': `- !<Material>\n  path: "${HOME}"\n`, 'README.md': 'clean\n' }), 20)
+})
+
+test('CONTENT: an extensionless text file with a home path is scanned and BLOCKS', () => {
+  assert.equal(runWrapperOnFiles({ NOTES: `see ${HOME}\n`, 'README.md': 'clean\n' }), 20)
+})
+
+test('CONTENT: a BINARY blob (NUL byte) carrying a home-path-shaped string stays filename-only (exit 0)', () => {
+  // A NUL in the sniff window makes the blob binary -> content is NOT scanned, so
+  // the home-path-shaped bytes inside do not trigger a finding.
+  const bin = Buffer.concat([Buffer.from([0x00, 0x01, 0x02]), Buffer.from(`${HOME}\n`)])
+  assert.equal(runWrapperOnFiles({ 'blob.mesh': bin, 'README.md': 'clean\n' }), 0)
+})

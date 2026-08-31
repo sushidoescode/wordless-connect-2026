@@ -68,6 +68,15 @@ const ENV_FILENAME = /(^|\/)\.env(\.[^/]+)?$/
 const ENV_EXAMPLE_FILENAME = /(^|\/)\.env\.example$/
 const LOCAL_ONLY_SEGMENT = /(^|\/)Assets\/LocalOnly(\/|$)/
 const REFERENCE_VISUALS_PREFIX = 'docs/references/visuals/'
+// Env-value leak comparison threshold. Only env values with at least this many
+// characters are searched for inside release blobs. Rationale: every real
+// credential in this project is long (ELEVENLABS_API_KEY 51, VITE_SUPABASE_URL
+// 40, VITE_SUPABASE_PUBLIC_KEY 46 chars — all compared); the only sub-threshold
+// value is the six-character session-coordination code (VITE_RELAY_SESSION_ID,
+// e.g. EOU4LZ), which is NOT a secret and is intentionally committed in the Lens
+// scene, so comparing it would raise a false positive on legitimate content.
+// Short values are therefore excluded by design; see docs/submission/release-checklist.md
+// §7. If a genuinely short secret is ever introduced, lower this threshold.
 const ENV_LEAK_MIN_VALUE_LENGTH = 12
 
 const countMatches = (text, pattern) => {

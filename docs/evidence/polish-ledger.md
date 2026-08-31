@@ -97,28 +97,36 @@ change or retain rationale, and fresh proof. Captures remain local and ignored.
   compliant overlays and the eight frozen narration MP3s.
 - **Recut candidate:** `captures/task16/wordless-relay-final-59s-v2.mp4`, SHA-256
   `254945f2977a69221c30b13e0f6cde7cd9af95d8097b6bc61529688c496050c1`, reproducible
-  via `captures/task16/recut.mjs` (deterministic).
+  via `captures/task16/recut.mjs` (deterministic). Bound to the rebuilt review
+  bundle aggregate `f9b3f28a5e1095d0617a8595423f09ffe844fe55ee6ac94910a1a90b24e02188`
+  (19 components: overlay renderer + rendered-overlay hashes + narration
+  provenance, no SRT) and README first-screen `45b22483…`.
 - **Smallest changes that clear the blocker:** re-composite panes to 840 px at
   y=60 with a dedicated bottom overlay band; caption/card main text 64 px
   (measured cap height 46–48 px ≥ 42); two-row cards so they clear the held glyph
-  (~79 px gap); the sub-4.5:1 violet `THE LENS IS THE ONLY REFEREE` eyebrow
+  (card band sits ~48 px below the pane bottom); the sub-4.5:1 violet `THE LENS IS THE ONLY REFEREE` eyebrow
   replaced with lemon (~12.9:1); captions retimed to the on-screen events
   (CORRECT caption onset == visual onset); the over-long "no redraw" card line
   shortened to fit title-safe. Narration re-mixed from the eight MP3s (no
   regeneration), mono, → −16.12 LUFS / −1.75 dBTP, no trailing silence.
-- **Measured PASS:** verifier all-pass; cap height 46–48 px; ≥79 px glyph
-  clearance / ≥119 px pane clearance (nothing obscured); contrast ivory 16.9 /
+- **Measured PASS:** verifier all-pass; cap height 46–48 px; pane-bottom-to-overlay
+  gaps ~48 px (cards) / ~87 px (captions), nothing obscured; contrast ivory 16.9 /
   coral 7.1 / mint 11.9 / lemon 12.9:1; title-safe on every overlay; transitions
   (correct ~10.3 s, medallions before 20, split 0–51, disclosure all segments,
   exact `WRONG · BOTH STROKES GO CORAL`); 1440×810 + 390 px legible.
 - **Fresh Stage A panel:** 3/3 comprehension PASS on the recut; all three
-  confirmed captions no longer obscure the panels/stroke/glyph. Stage B spoken
-  audio remains BLOCKED. Review: `local-handoff/reviews/task16/recut-review-verbatim.md`.
+  confirmed captions no longer obscure the panels/stroke/glyph. Stage B verified
+  parts PASS; spoken audio is tool-unperceivable and was cleared by the owner
+  listen-through. Review: `local-handoff/reviews/task16/recut-review-verbatim.md`
+  (the fresh final-hash panel is in `final-panel-verbatim.md`).
 - **Hero:** re-extracted from the recut @ 17.0 s (`docs/media/wordless-relay-hero.png`,
   SHA `72664be3…`).
-- **Outcome:** the caption-legibility blocker is CLEARED. Finalization stays
-  **CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS** — two remaining: (1) spoken-narration
-  audio unverified (owner listen-through, Task 7); (2) Task 15 PARTIAL. Inherent
-  non-blocking notes: the left in-world Lens HUD is small/low-contrast and the
+- **Outcome:** both media blockers CLEARED — the caption-legibility blocker by
+  the recut, and the spoken-narration audio by the **owner listen-through
+  (2026-08-30)** confirming the eight lines, Chris voice, delivery, timing, and
+  no clipping/defects. Finalization is **CANDIDATE ASSEMBLED WITH KNOWN
+  RESILIENCE GAPS** — the sole remaining non-complete item is Task 15 PARTIAL.
+  Inherent non-blocking notes: the left in-world Lens HUD is small/low-contrast
+  and the
   26–51 s explainer holds a frozen glyph — both inherent to the frozen raw
   (not addressable by an overlay-only recut).

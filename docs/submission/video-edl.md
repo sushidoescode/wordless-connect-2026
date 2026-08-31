@@ -1,16 +1,18 @@
 # WORDLESS Relay — final video EDL
 
-Status: **RECONCILED TO THE RECUT CANDIDATE — SPOKEN-AUDIO REVIEW BLOCKED.**
+Status: **RECONCILED TO THE RECUT CANDIDATE — AUDIO OWNER-SIGNED-OFF.**
 This is the approved 59-second timeline from
 `docs/superpowers/specs/2026-08-29-wordless-submission-review-amendment.md`
 §3. The candidate was **re-cut from the frozen raw capture** (no recapture) to
 fix caption legibility, obscuring, contrast, and the sub-contrast card header;
 the observed columns record what the recut actually shows, including honest
-deviations. The claim ledger is never weakened to fit the cut. The candidate's
-**spoken narration audio could not be perceived by any available reviewer tool**
-(recorded as a blocker rather than substituting the transcript); that gap gates
-the outcome to **CANDIDATE ASSEMBLED WITH KNOWN BLOCKERS** (the earlier
-caption-legibility blocker is now cleared by the recut).
+deviations. The claim ledger is never weakened to fit the cut. The
+caption-legibility blocker is cleared by the recut, and the spoken-narration
+audio — which no reviewer tool can perceive — was **cleared by the owner
+listen-through on 2026-08-30** (owner confirmed the eight lines, the Chris voice,
+delivery, timing, and no clipping/defects on `254945f2…`). The remaining
+non-complete item is Task 15 (PARTIAL), so the outcome is **CANDIDATE ASSEMBLED
+WITH KNOWN RESILIENCE GAPS**.
 
 Candidate: `captures/task16/wordless-relay-final-59s-v2.mp4` (ignored; hosted
 link owner-gated), SHA-256
@@ -20,9 +22,10 @@ product-freeze commit `31123d34006bb740f397a1bfc467925483e66955` (runtime/UI
 unchanged by the recut). Narration and caption copy: `docs/submission/narration.md`
 and `docs/submission/wordless-relay-en.srt`. The SRT transcribes the **intended
 spoken narration** (it matches `narration.md`); it is a distinct artifact from
-the shorter burned lower-third captions listed here. Whether the actual spoken
-audio matches the SRT word-for-word is **UNVERIFIED** — audio perception is
-blocked; see the Observed record.
+the shorter burned lower-third captions listed here. No reviewer tool can
+perceive audio, but the **owner listen-through (2026-08-30) confirmed the spoken
+lines** (the eight intended lines, Chris voice, delivery, timing, no clipping/
+defects); see the Observed record.
 
 ## Global presentation rules
 
@@ -82,8 +85,8 @@ bottom overlay band so no caption/card covers a pane, stroke, or glyph.
   segment (00.0–51.0); absent only on the end card (its own prototype line).
 - **Caption geometry — PASS (recut).** Measured: caption/card main cap height
   **46–48 px** (≥42); all overlays sit in a plum band below the panes —
-  **~79 px** gap to the browser glyph ring, **~119 px** to the pane bottoms
-  (nothing obscured); contrast ivory 16.9:1 / coral 7.1:1 / mint 11.9:1 /
+  pane-bottom-to-overlay gaps of **~48 px** (cards) and **~87 px** (captions),
+  so nothing overlaps a pane, stroke, or glyph; contrast ivory 16.9:1 / coral 7.1:1 / mint 11.9:1 /
   **lemon eyebrows 12.8–12.9:1** (the failing violet header replaced with lemon);
   title-safe margins met on every caption and card. Legible at 1440×810 and
   390 px. (The left in-world Lens HUD stays small/low-contrast — inherent to the
@@ -98,11 +101,13 @@ bottom overlay band so no caption/card covers a pane, stroke, or glyph.
     as `WRONG · BOTH STROKES GO CORAL`), the mint correct + word reveal, and the
     exact-mark glyph medallion; all three confirmed the captions no longer obscure
     the panels/stroke/glyph.
-  - **Stage B — verified parts PASS, spoken audio BLOCKED; NOT a full PASS.**
+  - **Stage B — verified parts PASS; spoken audio owner-signed-off.**
     Video↔EDL, narration-script-as-document, claim discipline, and cross-document
-    consistency hold. But **no available reviewer tool can perceive the spoken
-    narration audio.** It is recorded as **BLOCKED**, not substituted — the
-    remaining KNOWN BLOCKER, requiring the owner listen-through (Task 7).
+    consistency hold. No reviewer tool can perceive the spoken audio, so the
+    reviewers recorded it as tool-unperceivable rather than substituting the
+    transcript; the **owner listen-through (2026-08-30) then confirmed** the eight
+    spoken lines, the Chris voice, delivery, timing, and no clipping/defects,
+    clearing the audio blocker.
 
 ### Shipped-caption reconciliation
 
@@ -137,9 +142,9 @@ still matches its ledger row and scope.
   cadence figure.
 - **SRT vs burned captions.** `docs/submission/wordless-relay-en.srt` is the
   intended **spoken-narration transcript** (it matches `narration.md`), not the
-  burned lower-thirds; the two are deliberately different forms. Because audio
-  perception is blocked, whether the actual spoken audio matches the SRT
-  word-for-word is UNVERIFIED and recorded as part of the KNOWN BLOCKER.
+  burned lower-thirds; the two are deliberately different forms. No reviewer tool
+  can perceive audio, but the owner listen-through (2026-08-30) confirmed the
+  eight spoken lines match the intended script.
 - **On-screen countdown vs round length.** The Lens countdown reads 0:14 (round
   1) and 0:19 (round 2) because the demo joins each round already in progress;
   this is not a change to the documented 20-second round length.
@@ -153,9 +158,9 @@ caption-legibility blocker. What changed vs the `18f7ce9a` notes above:
 
 - **Layout.** Panes re-composited to 840 px wide at y=60 on the plum ground,
   reserving a bottom band. Every caption/card now sits in that band, so
-  **nothing overlaps a pane, the stroke, or the glyph** (measured ~79 px gap to
-  the browser glyph ring). The intro/wrong caption no longer covers the browser
-  projection.
+  **nothing overlaps a pane, the stroke, or the glyph** (measured pane-bottom-to-
+  overlay gaps ~48 px for cards, ~87 px for captions). The intro/wrong caption
+  no longer covers the browser projection.
 - **Caption size/contrast.** Caption/card main text is 64 px (measured cap
   height 46–48 px ≥ 42); the sub-4.5:1 violet `THE LENS IS THE ONLY REFEREE`
   header is replaced with lemon (~12.9:1). Cards are two rows (eyebrow + one
@@ -175,8 +180,8 @@ caption-legibility blocker. What changed vs the `18f7ce9a` notes above:
 - **Audio.** Rebuilt from the eight frozen MP3s (no regeneration): mono, gentle
   compression + dynamic loudnorm → −16.12 LUFS / −1.75 dBTP, no trailing
   silence. beat-5 uses the regenerated `line-05.mp3` (71d3c5cc, matching the
-  caption); the stale `lines.json` entry was corrected. Spoken words still
-  require the owner listen-through (audio perception is blocked).
+  caption); the stale `lines.json` entry was corrected. The spoken words were
+  confirmed by the owner listen-through (2026-08-30).
 - **Held explainer / dim Lens HUD.** The 26–51 s explainer holds a frozen glyph
   under the cards (approved beat-6/7 structure), and the left in-world Lens HUD
   stays small/low-contrast — both inherent to the frozen raw; not addressed by

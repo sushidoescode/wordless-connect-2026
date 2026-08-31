@@ -201,18 +201,32 @@ export function collectSidecars(dirs) {
   return out
 }
 
-function parseArgs(argv) {
+// Parses the CLI. Returns null (-> usage/exit 30) on any malformed input, FAILING
+// CLOSED on ambiguity: a flag with no value, an EXPLICITLY EMPTY value (an omitted
+// option is expressed by leaving the flag out, never by passing ""), an unknown
+// flag, or a repeated singleton flag. Only --sidecars may repeat; --tree,
+// --root-env, --web-env, --report and --tree-id-out are singletons. An omitted
+// optional flag stays valid (its field keeps its null/[] default). Exported for
+// focused unit tests.
+const SINGLETON_FLAGS = new Set(['--tree', '--root-env', '--web-env', '--report', '--tree-id-out'])
+export function parseArgs(argv) {
   const o = { tree: null, rootEnv: null, webEnv: null, sidecars: [], report: null, treeIdOut: null }
+  const seen = new Set()
   for (let i = 0; i < argv.length; i += 2) {
     const k = argv[i]; const v = argv[i + 1]
-    if (v === undefined) return null
+    if (v === undefined) return null // flag with no value
+    if (v === '') return null // explicitly empty value is invalid, for every flag
+    if (SINGLETON_FLAGS.has(k)) {
+      if (seen.has(k)) return null // a singleton flag may not repeat
+      seen.add(k)
+    }
     if (k === '--tree') o.tree = v
     else if (k === '--root-env') o.rootEnv = v
     else if (k === '--web-env') o.webEnv = v
     else if (k === '--sidecars') o.sidecars.push(v)
     else if (k === '--report') o.report = v
     else if (k === '--tree-id-out') o.treeIdOut = v
-    else return null
+    else return null // unknown flag
   }
   return o
 }
@@ -240,8 +254,8 @@ async function main() {
   // closed via a throw -> exit 30. Never `readFileSync(p, 'utf8')`, which would
   // silently substitute U+FFFD for invalid UTF-8.
   const readEnv = (p) => {
-    if (!p) return null
-    const st = statSync(p) // throws if missing/unreadable
+    if (p === null) return null // ONLY an omitted option is null; "" is not omission
+    const st = statSync(p) // throws if missing/unreadable (statSync("") -> ENOENT -> exit 30)
     if (!st.isFile()) throw new Error(`env path is not a regular file: ${p}`)
     const buf = readFileSync(p)
     if (looksBinary(buf)) throw new Error(`env file is not valid UTF-8 text or contains a NUL byte: ${p}`)

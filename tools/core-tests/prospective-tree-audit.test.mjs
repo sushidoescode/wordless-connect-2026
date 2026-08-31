@@ -12,6 +12,7 @@ import {
   blobFromBuffer,
   collectTreeBlobs,
   collectSidecars,
+  parseArgs,
 } from '../security/audit-prospective-tree.mjs'
 import { auditReleaseHistory } from '../security/audit-release-history.mjs'
 
@@ -598,4 +599,69 @@ test('FAIL-CLOSED: a well-formed multi-record NUL-terminated tree parses every b
   const blobs = collectTreeBlobs('T', fakeRun(entries))
   assert.equal(blobs.length, 2)
   assert.deepEqual(blobs.map((b) => b.path).sort(), ['dir/two.md', 'one.md'])
+})
+
+// --- parseArgs: omitted-vs-empty and duplicate singleton flags (fail closed) ---
+
+test('parseArgs: omitted optional flags are valid (null/[] defaults)', () => {
+  const o = parseArgs(['--tree', 'HEAD'])
+  assert.equal(o.tree, 'HEAD')
+  assert.equal(o.rootEnv, null)
+  assert.equal(o.webEnv, null)
+  assert.deepEqual(o.sidecars, [])
+  assert.equal(o.report, null)
+  assert.equal(o.treeIdOut, null)
+})
+
+test('parseArgs: an explicitly EMPTY --root-env value is rejected (null, not omission)', () => {
+  assert.equal(parseArgs(['--tree', 'HEAD', '--root-env', '']), null)
+})
+
+test('parseArgs: an explicitly EMPTY --web-env value is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree', 'HEAD', '--web-env', '']), null)
+})
+
+test('parseArgs: an explicitly EMPTY --sidecars value is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree', 'HEAD', '--sidecars', '']), null)
+})
+
+test('parseArgs: an empty --tree value is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree', '']), null)
+})
+
+test('parseArgs: a duplicate singleton --tree is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree', 'HEAD', '--tree', 'INDEX']), null)
+})
+
+test('parseArgs: a duplicate --root-env is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree', 'HEAD', '--root-env', '.env', '--root-env', 'other.env']), null)
+})
+
+test('parseArgs: a duplicate --report is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree', 'HEAD', '--report', 'a.json', '--report', 'b.json']), null)
+})
+
+test('parseArgs: --sidecars MAY repeat (valid, order preserved)', () => {
+  const o = parseArgs(['--tree', 'HEAD', '--sidecars', 'a', '--sidecars', 'b'])
+  assert.deepEqual(o.sidecars, ['a', 'b'])
+})
+
+test('parseArgs: a flag with no value is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree']), null)
+})
+
+test('parseArgs: an unknown flag is rejected (null)', () => {
+  assert.equal(parseArgs(['--tree', 'HEAD', '--bogus', 'x']), null)
+})
+
+test('CLI: an explicitly empty --root-env value exits 30', () => {
+  const dir = setupWrapperRepo()
+  try { assert.equal(runWrapper(dir, ['--root-env', '']), 30) }
+  finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: an explicitly empty --web-env value exits 30', () => {
+  const dir = setupWrapperRepo()
+  try { assert.equal(runWrapper(dir, ['--web-env', '']), 30) }
+  finally { rmSync(dir, { recursive: true, force: true }) }
 })

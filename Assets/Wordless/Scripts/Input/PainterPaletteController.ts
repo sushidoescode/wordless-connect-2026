@@ -2,7 +2,7 @@ import { TargetingMode } from 'SpectaclesInteractionKit.lspkg/Core/Interactor/In
 import type { Interactable } from 'SpectaclesInteractionKit.lspkg/Components/Interaction/Interactable/Interactable'
 import type { unsubscribe } from 'SpectaclesInteractionKit.lspkg/Utils/Event'
 
-import { isStrokeColorId } from '../Core/Protocol'
+import { PAINTER_COLOR_IDS, isStrokeColorId } from '../Core/Protocol'
 import type { StrokeColorId } from '../Core/Protocol'
 
 export interface PaletteSelectionListener {
@@ -12,6 +12,13 @@ export interface PaletteSelectionListener {
 const NORMAL_SCALE = 1
 const HOVER_SCALE = 1.08
 const SELECTED_SCALE = 1.15
+const SWATCH_COUNT = PAINTER_COLOR_IDS.length
+
+function createHoverState(): Record<StrokeColorId, boolean> {
+  const state = {} as Record<StrokeColorId, boolean>
+  for (const colorId of PAINTER_COLOR_IDS) state[colorId] = false
+  return state
+}
 
 export class PainterPaletteGate {
   private selectedColorId: StrokeColorId = 'violet'
@@ -37,27 +44,21 @@ export class PainterPaletteGate {
   }
 }
 
+/**
+ * Data-driven controller over the eight canonical swatches. Every binding
+ * array is ordered exactly by PAINTER_COLOR_IDS; startup fails closed on a
+ * missing, duplicate, or miscounted binding so a half-wired palette can never
+ * silently drop a color.
+ */
 @component
 export class PainterPaletteController extends BaseScriptComponent {
-  @input violetRoot: SceneObject
-  @input lemonRoot: SceneObject
-  @input mintRoot: SceneObject
-  @input violetRing: SceneObject
-  @input lemonRing: SceneObject
-  @input mintRing: SceneObject
-  @input violetCollider: ColliderComponent
-  @input lemonCollider: ColliderComponent
-  @input mintCollider: ColliderComponent
-  @input violetInteractable: Interactable
-  @input lemonInteractable: Interactable
-  @input mintInteractable: Interactable
+  @input swatchRoots: SceneObject[]
+  @input swatchRings: SceneObject[]
+  @input swatchColliders: ColliderComponent[]
+  @input swatchInteractables: Interactable[]
 
   private readonly gate = new PainterPaletteGate()
-  private readonly hovered: Record<StrokeColorId, boolean> = {
-    violet: false,
-    lemon: false,
-    mint: false,
-  }
+  private readonly hovered: Record<StrokeColorId, boolean> = createHoverState()
   private readonly unsubscribeBag: unsubscribe[] = []
   private listener: PaletteSelectionListener | null = null
   private interactablesStarted = false
@@ -87,12 +88,11 @@ export class PainterPaletteController extends BaseScriptComponent {
 
   private onStart(): void {
     if (this.interactablesStarted || this.destroyed) return
-    this.subscribeSwatch('violet', this.violetInteractable)
-    this.subscribeSwatch('lemon', this.lemonInteractable)
-    this.subscribeSwatch('mint', this.mintInteractable)
-    this.violetInteractable.targetingMode = TargetingMode.Indirect
-    this.lemonInteractable.targetingMode = TargetingMode.Indirect
-    this.mintInteractable.targetingMode = TargetingMode.Indirect
+    PAINTER_COLOR_IDS.forEach((colorId, index) => {
+      const interactable = this.swatchInteractables[index]
+      this.subscribeSwatch(colorId, interactable)
+      interactable.targetingMode = TargetingMode.Indirect
+    })
     this.interactablesStarted = true
     this.applyVisualState()
   }
@@ -122,24 +122,22 @@ export class PainterPaletteController extends BaseScriptComponent {
   }
 
   private applyVisualState(): void {
-    const selectedColorId = this.gate.getSelectedColorId()
-    this.applySwatchVisual('violet', this.violetRoot, this.violetRing)
-    this.applySwatchVisual('lemon', this.lemonRoot, this.lemonRing)
-    this.applySwatchVisual('mint', this.mintRoot, this.mintRing)
-    this.violetRing.enabled = selectedColorId === 'violet'
-    this.lemonRing.enabled = selectedColorId === 'lemon'
-    this.mintRing.enabled = selectedColorId === 'mint'
+    PAINTER_COLOR_IDS.forEach((colorId, index) => {
+      this.applySwatchVisual(
+        colorId,
+        this.swatchRoots[index],
+        this.swatchRings[index],
+      )
+    })
 
     const enabled = this.interactablesStarted &&
       !this.gate.isInputLocked() &&
       !this.destroyed
-    this.violetCollider.enabled = enabled
-    this.lemonCollider.enabled = enabled
-    this.mintCollider.enabled = enabled
-    if (this.interactablesStarted) {
-      this.violetInteractable.enabled = enabled
-      this.lemonInteractable.enabled = enabled
-      this.mintInteractable.enabled = enabled
+    for (let index = 0; index < SWATCH_COUNT; index += 1) {
+      this.swatchColliders[index].enabled = enabled
+      if (this.interactablesStarted) {
+        this.swatchInteractables[index].enabled = enabled
+      }
     }
   }
 
@@ -159,9 +157,7 @@ export class PainterPaletteController extends BaseScriptComponent {
   }
 
   private clearHoverState(): void {
-    this.hovered.violet = false
-    this.hovered.lemon = false
-    this.hovered.mint = false
+    for (const colorId of PAINTER_COLOR_IDS) this.hovered[colorId] = false
   }
 
   private onDestroy(): void {
@@ -177,14 +173,28 @@ export class PainterPaletteController extends BaseScriptComponent {
   }
 
   private assertBindings(): void {
-    if (!this.violetRoot || !this.lemonRoot || !this.mintRoot ||
-        !this.violetRing || !this.lemonRing || !this.mintRing ||
-        !this.violetCollider || !this.lemonCollider || !this.mintCollider ||
-        !this.violetInteractable || !this.lemonInteractable ||
-        !this.mintInteractable) {
+    const failClosed = (): never => {
       throw new Error(
-        'PainterPaletteController requires three roots, rings, colliders, and interactables',
+        'PainterPaletteController requires eight ordered swatch bindings: ' +
+        'roots, rings, colliders, and interactables in canonical palette order',
       )
+    }
+    const arrays: readonly (readonly unknown[])[] = [
+      this.swatchRoots,
+      this.swatchRings,
+      this.swatchColliders,
+      this.swatchInteractables,
+    ]
+    for (const bindings of arrays) {
+      if (!bindings || bindings.length !== SWATCH_COUNT) failClosed()
+      const seen: unknown[] = []
+      for (const binding of bindings) {
+        if (!binding || seen.indexOf(binding) !== -1) failClosed()
+        seen.push(binding)
+      }
+    }
+    for (let index = 0; index < SWATCH_COUNT; index += 1) {
+      if (this.swatchRoots[index] === this.swatchRings[index]) failClosed()
     }
   }
 }

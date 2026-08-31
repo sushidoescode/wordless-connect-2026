@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import ts from 'typescript'
 
+import { PAINTER_COLOR_IDS } from '@wordless/core/Palette'
+
 async function loadPainterPaletteController() {
   const fileUrl = new URL(
     '../../Assets/Wordless/Scripts/Input/PainterPaletteController.ts',
@@ -64,6 +66,18 @@ const {
   PainterPaletteGate,
 } = await loadPainterPaletteController()
 
+const REJECTED_COLOR_VALUES = [
+  'mint',
+  'coral',
+  'ivory',
+  'plum',
+  '#2DE2E6',
+  'rgb(45,226,230)',
+  '',
+  1,
+  null,
+]
+
 function signal(unsubscribeCounts) {
   const listeners = []
   return {
@@ -108,53 +122,79 @@ function swatch(unsubscribeCounts) {
   }
 }
 
+function buildSwatches(unsubscribeCounts) {
+  const byColor = {}
+  for (const colorId of PAINTER_COLOR_IDS) {
+    byColor[colorId] = swatch(unsubscribeCounts)
+  }
+  return byColor
+}
+
 function bindController(controller, swatches) {
-  controller.violetRoot = swatches.violet.root
-  controller.lemonRoot = swatches.lemon.root
-  controller.mintRoot = swatches.mint.root
-  controller.violetRing = swatches.violet.ring
-  controller.lemonRing = swatches.lemon.ring
-  controller.mintRing = swatches.mint.ring
-  controller.violetCollider = swatches.violet.collider
-  controller.lemonCollider = swatches.lemon.collider
-  controller.mintCollider = swatches.mint.collider
-  controller.violetInteractable = swatches.violet.interactable
-  controller.lemonInteractable = swatches.lemon.interactable
-  controller.mintInteractable = swatches.mint.interactable
+  controller.swatchRoots = PAINTER_COLOR_IDS.map(
+    (colorId) => swatches[colorId].root,
+  )
+  controller.swatchRings = PAINTER_COLOR_IDS.map(
+    (colorId) => swatches[colorId].ring,
+  )
+  controller.swatchColliders = PAINTER_COLOR_IDS.map(
+    (colorId) => swatches[colorId].collider,
+  )
+  controller.swatchInteractables = PAINTER_COLOR_IDS.map(
+    (colorId) => swatches[colorId].interactable,
+  )
+}
+
+function boundController(unsubscribeCounts = { count: 0 }) {
+  const swatches = buildSwatches(unsubscribeCounts)
+  const controller = new PainterPaletteController()
+  bindController(controller, swatches)
+  return { controller, swatches }
 }
 
 test('gate emits intent without changing the authoritative rendered selection', () => {
   const gate = new PainterPaletteGate()
-  gate.render('violet', false)
+  assert.equal(gate.getSelectedColorId(), 'violet')
+  assert.equal(gate.isInputLocked(), true)
+  assert.equal(gate.request('violet'), null)
 
+  gate.render('violet', false)
   assert.equal(gate.request('lemon'), 'lemon')
   assert.equal(gate.getSelectedColorId(), 'violet')
 
   gate.render('lemon', true)
-  assert.equal(gate.request('mint'), null)
+  assert.equal(gate.request('cyan'), null)
   assert.equal(gate.getSelectedColorId(), 'lemon')
   assert.equal(gate.isInputLocked(), true)
 })
 
+test('gate accepts exactly the eight canonical stroke color ids', () => {
+  const gate = new PainterPaletteGate()
+  gate.render('violet', false)
+
+  assert.equal(PAINTER_COLOR_IDS.length, 8)
+  for (const colorId of PAINTER_COLOR_IDS) {
+    assert.equal(gate.request(colorId), colorId)
+    gate.render(colorId, false)
+    assert.equal(gate.getSelectedColorId(), colorId)
+  }
+})
+
 test('gate rejects values outside the shared stroke color enum', () => {
   const gate = new PainterPaletteGate()
-  gate.render('mint', false)
-  gate.render('coral', true)
+  gate.render('cyan', false)
 
-  assert.equal(gate.getSelectedColorId(), 'mint')
-  assert.equal(gate.isInputLocked(), false)
-  assert.equal(gate.request('coral'), null)
+  for (const rejected of REJECTED_COLOR_VALUES) {
+    assert.equal(gate.request(rejected), null, String(rejected))
+    gate.render(rejected, true)
+    assert.equal(gate.getSelectedColorId(), 'cyan', String(rejected))
+    assert.equal(gate.isInputLocked(), false, String(rejected))
+  }
 })
 
 test('runtime selection is snapshot-driven, hover-safe, and disabled on lock', () => {
   const unsubscribeCounts = { count: 0 }
-  const swatches = {
-    violet: swatch(unsubscribeCounts),
-    lemon: swatch(unsubscribeCounts),
-    mint: swatch(unsubscribeCounts),
-  }
-  const controller = new PainterPaletteController()
-  bindController(controller, swatches)
+  const { controller, swatches } = boundController(unsubscribeCounts)
   const intents = []
   controller.setListener({
     onPaletteColorSelected(colorId) {
@@ -163,49 +203,128 @@ test('runtime selection is snapshot-driven, hover-safe, and disabled on lock', (
   })
   controller.onAwake()
   controller.render('violet', false)
+
+  for (const colorId of PAINTER_COLOR_IDS) {
+    assert.equal(swatches[colorId].collider.enabled, false, colorId)
+    assert.equal(swatches[colorId].interactable.enabled, true, colorId)
+    assert.equal(swatches[colorId].interactable.targetingMode, null, colorId)
+  }
+
   controller.testEvents.get('OnStartEvent')()
 
   assert.deepEqual(swatches.violet.scales.at(-1), [1.15, 1.15, 1.15])
-  assert.deepEqual(swatches.lemon.scales.at(-1), [1, 1, 1])
-  assert.deepEqual(swatches.mint.scales.at(-1), [1, 1, 1])
-  assert.equal(swatches.violet.ring.enabled, true)
-  assert.equal(swatches.lemon.ring.enabled, false)
-  assert.equal(swatches.mint.ring.enabled, false)
+  for (const colorId of PAINTER_COLOR_IDS) {
+    if (colorId !== 'violet') {
+      assert.deepEqual(swatches[colorId].scales.at(-1), [1, 1, 1], colorId)
+    }
+    assert.equal(swatches[colorId].ring.enabled, colorId === 'violet', colorId)
+    assert.equal(swatches[colorId].collider.enabled, true, colorId)
+    assert.equal(swatches[colorId].interactable.enabled, true, colorId)
+    assert.equal(
+      swatches[colorId].interactable.targetingMode,
+      'Indirect',
+      colorId,
+    )
+  }
 
-  swatches.lemon.interactable.onHoverEnter.emit()
-  assert.deepEqual(swatches.lemon.scales.at(-1), [1.08, 1.08, 1.08])
-  swatches.lemon.interactable.onTriggerStart.emit()
-  assert.deepEqual(intents, ['lemon'])
+  swatches.cyan.interactable.onHoverEnter.emit()
+  assert.deepEqual(swatches.cyan.scales.at(-1), [1.08, 1.08, 1.08])
+  swatches.cyan.interactable.onTriggerStart.emit()
+  assert.deepEqual(intents, ['cyan'])
   assert.deepEqual(swatches.violet.scales.at(-1), [1.15, 1.15, 1.15])
   assert.equal(swatches.violet.ring.enabled, true)
 
-  controller.render('lemon', true)
-  assert.deepEqual(swatches.lemon.scales.at(-1), [1.15, 1.15, 1.15])
+  controller.render('cyan', true)
+  assert.deepEqual(swatches.cyan.scales.at(-1), [1.15, 1.15, 1.15])
   assert.equal(swatches.violet.ring.enabled, false)
-  assert.equal(swatches.lemon.ring.enabled, true)
-  assert.equal(swatches.mint.ring.enabled, false)
-  for (const colorId of ['violet', 'lemon', 'mint']) {
+  assert.equal(swatches.cyan.ring.enabled, true)
+  for (const colorId of PAINTER_COLOR_IDS) {
+    if (colorId !== 'cyan') {
+      assert.deepEqual(swatches[colorId].scales.at(-1), [1, 1, 1], colorId)
+      assert.equal(swatches[colorId].ring.enabled, false, colorId)
+    }
     assert.equal(swatches[colorId].collider.enabled, false, colorId)
     assert.equal(swatches[colorId].interactable.enabled, false, colorId)
-    assert.equal(swatches[colorId].interactable.targetingMode, 'Indirect')
   }
 
-  swatches.mint.interactable.onHoverEnter.emit()
-  swatches.mint.interactable.onTriggerStart.emit()
-  assert.deepEqual(swatches.mint.scales.at(-1), [1, 1, 1])
-  assert.deepEqual(intents, ['lemon'])
+  swatches.magenta.interactable.onHoverEnter.emit()
+  swatches.magenta.interactable.onTriggerStart.emit()
+  assert.deepEqual(swatches.magenta.scales.at(-1), [1, 1, 1])
+  assert.deepEqual(intents, ['cyan'])
 
   controller.testEvents.get('OnDestroyEvent')()
-  assert.equal(unsubscribeCounts.count, 9)
-  controller.render('mint', false)
-  swatches.mint.interactable.onTriggerStart.emit()
-  assert.deepEqual(intents, ['lemon'])
+  assert.equal(unsubscribeCounts.count, 24)
+  controller.render('lime', false)
+  swatches.lime.interactable.onTriggerStart.emit()
+  assert.deepEqual(intents, ['cyan'])
+  for (const colorId of PAINTER_COLOR_IDS) {
+    assert.equal(swatches[colorId].collider.enabled, false, colorId)
+  }
 })
 
-test('runtime controller rejects an incomplete explicit binding set', () => {
+test('lock clears hover so unlock does not resurrect a stale hover scale', () => {
+  const { controller, swatches } = boundController()
+  controller.onAwake()
+  controller.render('violet', false)
+  controller.testEvents.get('OnStartEvent')()
+
+  swatches.lemon.interactable.onHoverEnter.emit()
+  assert.deepEqual(swatches.lemon.scales.at(-1), [1.08, 1.08, 1.08])
+
+  controller.render('violet', true)
+  assert.deepEqual(swatches.lemon.scales.at(-1), [1, 1, 1])
+
+  controller.render('violet', false)
+  assert.deepEqual(swatches.lemon.scales.at(-1), [1, 1, 1])
+})
+
+test('runtime render with an id outside the enum is a strict no-op', () => {
+  const { controller, swatches } = boundController()
+  controller.onAwake()
+  controller.render('violet', false)
+  controller.testEvents.get('OnStartEvent')()
+
+  for (const rejected of REJECTED_COLOR_VALUES) {
+    controller.render(rejected, true)
+    assert.equal(swatches.violet.ring.enabled, true, String(rejected))
+    for (const colorId of PAINTER_COLOR_IDS) {
+      assert.equal(swatches[colorId].collider.enabled, true, colorId)
+      assert.equal(swatches[colorId].interactable.enabled, true, colorId)
+    }
+  }
+})
+
+test('runtime controller fails closed on entirely missing binding arrays', () => {
   const controller = new PainterPaletteController()
   assert.throws(
     () => controller.onAwake(),
-    /requires three roots, rings, colliders, and interactables/i,
+    /requires eight ordered swatch bindings/i,
+  )
+})
+
+test('runtime controller fails closed on a seven-length binding array', () => {
+  const { controller } = boundController()
+  controller.swatchInteractables = controller.swatchInteractables.slice(0, 7)
+  assert.throws(
+    () => controller.onAwake(),
+    /requires eight ordered swatch bindings/i,
+  )
+})
+
+test('runtime controller fails closed on a duplicated root binding', () => {
+  const { controller } = boundController()
+  controller.swatchRoots[3] = controller.swatchRoots[0]
+  assert.throws(
+    () => controller.onAwake(),
+    /requires eight ordered swatch bindings/i,
+  )
+})
+
+test('runtime controller fails closed when a ring is bound to its own root', () => {
+  const { controller } = boundController()
+  controller.swatchRings[2] = controller.swatchRoots[2]
+  assert.throws(
+    () => controller.onAwake(),
+    /requires eight ordered swatch bindings/i,
   )
 })

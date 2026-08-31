@@ -3,6 +3,9 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import ts from 'typescript'
 
+import { painterColorNormalizedRgb } from '../../Assets/Wordless/Scripts/Core/Palette.ts'
+import { PAINTER_COLOR_IDS } from '../../Assets/Wordless/Scripts/Core/Protocol.ts'
+
 async function loadDecoratedTypeScript(relativePath) {
   const fileUrl = new URL(relativePath, import.meta.url)
   const source = await readFile(fileUrl, 'utf8')
@@ -53,6 +56,30 @@ const {
 } = await loadDecoratedTypeScript(
   '../../Assets/Wordless/Scripts/View/GlyphMedallionView.ts',
 )
+
+function buildGlyphMaterials() {
+  return PAINTER_COLOR_IDS.map((colorId) => {
+    const [r, g, b] = painterColorNormalizedRgb(colorId)
+    return {
+      name: `Wordless Painter ${colorId[0].toUpperCase()}${colorId.slice(1)}`,
+      mainPass: { baseColor: { r, g, b, a: 1 } },
+    }
+  })
+}
+
+function buildBoundViewWithMaterials(glyphMaterials) {
+  const view = new GlyphMedallionView()
+  view.medallionRoot = {}
+  view.frameVisual = {}
+  view.glyphVisual = {}
+  view.revealedWordLabel = {}
+  view.ivoryFrameMaterial = {
+    name: 'ivory-frame',
+    mainPass: { baseColor: { r: 1, g: 246 / 255, b: 232 / 255, a: 1 } },
+  }
+  view.glyphMaterials = glyphMaterials
+  return view
+}
 
 test('builds a thin circular frame outside every possible 34 cm glyph vertex', () => {
   const geometry = buildMedallionFrameGeometry()
@@ -306,23 +333,10 @@ test('runtime view reuses exact authored color resources without mutation or chu
     name: 'ivory-frame',
     mainPass: { baseColor: { r: 1, g: 246 / 255, b: 232 / 255, a: 1 } },
   }
-  view.violetGlyphMaterial = {
-    name: 'violet-glyph',
-    mainPass: { baseColor: { r: 139 / 255, g: 92 / 255, b: 246 / 255, a: 1 } },
-  }
-  view.lemonGlyphMaterial = {
-    name: 'lemon-glyph',
-    mainPass: { baseColor: { r: 1, g: 214 / 255, b: 90 / 255, a: 1 } },
-  }
-  view.mintGlyphMaterial = {
-    name: 'mint-glyph',
-    mainPass: { baseColor: { r: 115 / 255, g: 230 / 255, b: 174 / 255, a: 1 } },
-  }
-  const originalSharedColors = [
-    structuredClone(view.violetGlyphMaterial.mainPass.baseColor),
-    structuredClone(view.lemonGlyphMaterial.mainPass.baseColor),
-    structuredClone(view.mintGlyphMaterial.mainPass.baseColor),
-  ]
+  view.glyphMaterials = buildGlyphMaterials()
+  const originalMaterialColors = view.glyphMaterials.map(
+    (material) => structuredClone(material.mainPass.baseColor),
+  )
   view.onAwake()
 
   assert.equal(builders.length, 2)
@@ -330,7 +344,8 @@ test('runtime view reuses exact authored color resources without mutation or chu
   assert.equal(view.glyphVisual.enabled, false)
   assert.equal(view.revealedWordLabel.text, '')
   assert.strictEqual(view.frameVisual.mainMaterial, view.ivoryFrameMaterial)
-  assert.strictEqual(view.glyphVisual.mainMaterial, view.violetGlyphMaterial)
+  assert.equal(PAINTER_COLOR_IDS[6], 'violet')
+  assert.strictEqual(view.glyphVisual.mainMaterial, view.glyphMaterials[6])
   assert.strictEqual(view.frameVisual.mesh, builders[1].mesh)
   assert.equal(view.frameVisual.meshShadowMode, 0)
   assert.equal(view.glyphVisual.meshShadowMode, 0)
@@ -346,7 +361,10 @@ test('runtime view reuses exact authored color resources without mutation or chu
   ]
   const destination = [[100, 100], [900, 900]]
   view.render(source, destination, 'SNAKE', 'violet')
-  assert.strictEqual(view.glyphVisual.mainMaterial, view.violetGlyphMaterial)
+  assert.strictEqual(
+    view.glyphVisual.mainMaterial,
+    view.glyphMaterials[PAINTER_COLOR_IDS.indexOf('violet')],
+  )
   assert.equal(view.medallionRoot.enabled, true)
   assert.equal(view.glyphVisual.enabled, true)
   assert.equal(view.glyphVisual.mesh, originalMesh)
@@ -396,20 +414,34 @@ test('runtime view reuses exact authored color resources without mutation or chu
     'DOT',
     'lemon',
   )
-  assert.strictEqual(view.glyphVisual.mainMaterial, view.lemonGlyphMaterial)
+  assert.strictEqual(
+    view.glyphVisual.mainMaterial,
+    view.glyphMaterials[PAINTER_COLOR_IDS.indexOf('lemon')],
+  )
   assert.equal(builders[0].vertices.length, 32)
   assert.deepEqual(
     builders[0].vertices.filter((_, index) => index % 8 === 2),
     Array(4).fill(-5.2),
   )
 
-  view.render(source, destination, 'SNAKE', 'mint')
-  assert.strictEqual(view.glyphVisual.mainMaterial, view.mintGlyphMaterial)
-  assert.deepEqual([
-    view.violetGlyphMaterial.mainPass.baseColor,
-    view.lemonGlyphMaterial.mainPass.baseColor,
-    view.mintGlyphMaterial.mainPass.baseColor,
-  ], originalSharedColors)
+  view.render(source, destination, 'SNAKE', 'cyan')
+  assert.strictEqual(
+    view.glyphVisual.mainMaterial,
+    view.glyphMaterials[PAINTER_COLOR_IDS.indexOf('cyan')],
+  )
+
+  PAINTER_COLOR_IDS.forEach((colorId, index) => {
+    view.render(source, destination, 'SNAKE', colorId)
+    assert.strictEqual(
+      view.glyphVisual.mainMaterial,
+      view.glyphMaterials[index],
+      `${colorId} renders with its own authored material`,
+    )
+  })
+  assert.deepEqual(
+    view.glyphMaterials.map((material) => material.mainPass.baseColor),
+    originalMaterialColors,
+  )
   const updateCountBeforeHide = builders[0].updateCount
   view.hide()
   clock.seconds = 20
@@ -420,7 +452,7 @@ test('runtime view reuses exact authored color resources without mutation or chu
     () => view.render([
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 1, z: 1 },
-    ], [[0, 0], [1000, 1000]], 'SNAKE', 'mint'),
+    ], [[0, 0], [1000, 1000]], 'SNAKE', 'cyan'),
     /one display plane/i,
   )
 
@@ -439,6 +471,42 @@ test('runtime view rejects an incomplete authored medallion binding set', () => 
   const view = new GlyphMedallionView()
   assert.throws(
     () => view.onAwake(),
-    /requires root, frame, glyph, word, and four material bindings/i,
+    /requires root, frame, glyph, word, and frame material bindings/i,
   )
+})
+
+test('runtime view fails closed on a short, duplicated, or misordered glyph material palette', () => {
+  const sevenMaterials = buildGlyphMaterials().slice(0, 7)
+
+  const duplicated = buildGlyphMaterials()
+  duplicated[3] = duplicated[2]
+
+  const cyanAtCobaltIndex = buildGlyphMaterials()
+  ;[cyanAtCobaltIndex[4], cyanAtCobaltIndex[5]] = [
+    cyanAtCobaltIndex[5],
+    cyanAtCobaltIndex[4],
+  ]
+
+  const missingEntry = buildGlyphMaterials()
+  missingEntry[7] = null
+
+  const unnamed = buildGlyphMaterials()
+  unnamed[0] = { mainPass: unnamed[0].mainPass }
+
+  const invalidPalettes = [
+    undefined,
+    [],
+    sevenMaterials,
+    duplicated,
+    cyanAtCobaltIndex,
+    missingEntry,
+    unnamed,
+  ]
+  for (const glyphMaterials of invalidPalettes) {
+    const view = buildBoundViewWithMaterials(glyphMaterials)
+    assert.throws(
+      () => view.onAwake(),
+      /requires eight ordered glyph materials/i,
+    )
+  }
 })

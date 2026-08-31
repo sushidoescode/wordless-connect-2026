@@ -3,7 +3,7 @@ import {
   interpolatePath,
   type GlyphTransitionPoint,
 } from '../Core/GlyphTransition'
-import { MAX_STROKE_POINTS } from '../Core/Protocol'
+import { MAX_STROKE_POINTS, PAINTER_COLOR_IDS } from '../Core/Protocol'
 import type {
   QuantizedPoint,
   StrokeColorId,
@@ -320,9 +320,7 @@ export class GlyphMedallionView extends BaseScriptComponent {
   @input glyphVisual: RenderMeshVisual
   @input revealedWordLabel: Text
   @input ivoryFrameMaterial: Material
-  @input violetGlyphMaterial: Material
-  @input lemonGlyphMaterial: Material
-  @input mintGlyphMaterial: Material
+  @input glyphMaterials: Material[]
 
   private glyphBuilder: MeshBuilder | null = null
   private frameBuilder: MeshBuilder | null = null
@@ -342,7 +340,7 @@ export class GlyphMedallionView extends BaseScriptComponent {
     this.frameVisual.mesh = this.frameBuilder.getMesh()
     this.writeGeometry(this.frameBuilder, buildMedallionFrameGeometry())
     this.glyphVisual.mesh = this.glyphBuilder.getMesh()
-    this.glyphVisual.mainMaterial = this.violetGlyphMaterial
+    this.glyphVisual.mainMaterial = this.glyphMaterial('violet')
     this.glyphVisual.meshShadowMode = MeshShadowMode.None
     this.createEvent('UpdateEvent').bind(() => this.updateTransition())
     this.createEvent('OnDestroyEvent').bind(() => this.onDestroy())
@@ -448,11 +446,9 @@ export class GlyphMedallionView extends BaseScriptComponent {
   }
 
   private glyphMaterial(colorId: StrokeColorId): Material {
-    switch (colorId) {
-      case 'lemon': return this.lemonGlyphMaterial
-      case 'mint': return this.mintGlyphMaterial
-      case 'violet': return this.violetGlyphMaterial
-    }
+    return this.glyphMaterials[
+      (PAINTER_COLOR_IDS as readonly string[]).indexOf(colorId)
+    ]
   }
 
   private createBuilder(): MeshBuilder {
@@ -485,13 +481,30 @@ export class GlyphMedallionView extends BaseScriptComponent {
         !this.frameVisual ||
         !this.glyphVisual ||
         !this.revealedWordLabel ||
-        !this.ivoryFrameMaterial ||
-        !this.violetGlyphMaterial ||
-        !this.lemonGlyphMaterial ||
-        !this.mintGlyphMaterial) {
+        !this.ivoryFrameMaterial) {
       throw new Error(
-        'GlyphMedallionView requires root, frame, glyph, word, and four material bindings',
+        'GlyphMedallionView requires root, frame, glyph, word, and frame material bindings',
       )
     }
+    const materials = this.glyphMaterials
+    const failClosed = (): never => {
+      throw new Error(
+        'GlyphMedallionView requires eight ordered glyph materials, one per ' +
+        'canonical painter color, named for their color IDs',
+      )
+    }
+    if (!materials || materials.length !== PAINTER_COLOR_IDS.length) {
+      failClosed()
+    }
+    const seen: Material[] = []
+    PAINTER_COLOR_IDS.forEach((colorId, index) => {
+      const material = materials[index]
+      if (!material || seen.indexOf(material) !== -1) failClosed()
+      seen.push(material)
+      const materialName = typeof material.name === 'string'
+        ? material.name.toLowerCase()
+        : ''
+      if (materialName.indexOf(colorId) === -1) failClosed()
+    })
   }
 }

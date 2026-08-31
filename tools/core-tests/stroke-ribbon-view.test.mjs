@@ -3,6 +3,11 @@ import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import ts from 'typescript'
 
+import {
+  PAINTER_COLOR_IDS,
+  painterColorNormalizedRgb,
+} from '../../Assets/Wordless/Scripts/Core/Palette.ts'
+
 const fileUrl = new URL(
   '../../Assets/Wordless/Scripts/View/StrokeRibbonView.ts',
   import.meta.url,
@@ -25,11 +30,17 @@ const protocolUrl = new URL(
   '../../Assets/Wordless/Scripts/Core/Protocol.ts',
   import.meta.url,
 ).href
+const paletteUrl = new URL(
+  '../../Assets/Wordless/Scripts/Core/Palette.ts',
+  import.meta.url,
+).href
 const executableSource = output.outputText
   .replaceAll("'./StrokeRibbonMesh'", JSON.stringify(meshUrl))
   .replaceAll('"./StrokeRibbonMesh"', JSON.stringify(meshUrl))
   .replaceAll("'../Core/Protocol'", JSON.stringify(protocolUrl))
   .replaceAll('"../Core/Protocol"', JSON.stringify(protocolUrl))
+  .replaceAll("'../Core/Palette'", JSON.stringify(paletteUrl))
+  .replaceAll('"../Core/Palette"', JSON.stringify(paletteUrl))
 
 globalThis.component = (target) => target
 globalThis.input = () => undefined
@@ -115,7 +126,7 @@ function colorTuple(materialClone) {
   return [color.x, color.y, color.z, color.w]
 }
 
-test('applies every selected production color to both existing ribbon layers', () => {
+test('applies every registry painter color to both existing ribbon layers', () => {
   const clones = []
   const view = new StrokeRibbonView()
   view.outerMaterial = material(0.28, clones)
@@ -123,13 +134,10 @@ test('applies every selected production color to both existing ribbon layers', (
   view.drawHeadVisual = { enabled: true }
   view.onAwake()
 
-  const cases = [
-    ['violet', [139 / 255, 92 / 255, 246 / 255]],
-    ['lemon', [1, 214 / 255, 90 / 255]],
-    ['mint', [115 / 255, 230 / 255, 174 / 255]],
-  ]
-  for (const [colorId, rgb] of cases) {
+  assert.equal(PAINTER_COLOR_IDS.length, 8)
+  for (const colorId of PAINTER_COLOR_IDS) {
     view.setStrokeColor(colorId)
+    const rgb = painterColorNormalizedRgb(colorId)
     assert.deepEqual(colorTuple(clones[0]), [...rgb, 0.28], colorId)
     assert.deepEqual(colorTuple(clones[1]), [...rgb, 1], colorId)
   }
@@ -137,7 +145,7 @@ test('applies every selected production color to both existing ribbon layers', (
   assert.equal(clones.length, 2)
 })
 
-test('incorrect coral override restores mint without material recreation', () => {
+test('incorrect coral override restores cyan without material recreation', () => {
   const clones = []
   const view = new StrokeRibbonView()
   view.outerMaterial = material(0.28, clones)
@@ -145,16 +153,16 @@ test('incorrect coral override restores mint without material recreation', () =>
   view.drawHeadVisual = { enabled: true }
   view.onAwake()
 
-  view.setStrokeColor('mint')
-  assert.deepEqual(colorTuple(clones[0]), [115 / 255, 230 / 255, 174 / 255, 0.28])
-  assert.deepEqual(colorTuple(clones[1]), [115 / 255, 230 / 255, 174 / 255, 1])
+  view.setStrokeColor('cyan')
+  assert.deepEqual(colorTuple(clones[0]), [45 / 255, 226 / 255, 230 / 255, 0.28])
+  assert.deepEqual(colorTuple(clones[1]), [45 / 255, 226 / 255, 230 / 255, 1])
 
   view.setIncorrectFeedbackActive(true)
   assert.deepEqual(colorTuple(clones[0]), [1, 120 / 255, 106 / 255, 0.28])
   assert.deepEqual(colorTuple(clones[1]), [1, 120 / 255, 106 / 255, 1])
 
   view.setIncorrectFeedbackActive(false)
-  assert.deepEqual(colorTuple(clones[0]), [115 / 255, 230 / 255, 174 / 255, 0.28])
-  assert.deepEqual(colorTuple(clones[1]), [115 / 255, 230 / 255, 174 / 255, 1])
+  assert.deepEqual(colorTuple(clones[0]), [45 / 255, 226 / 255, 230 / 255, 0.28])
+  assert.deepEqual(colorTuple(clones[1]), [45 / 255, 226 / 255, 230 / 255, 1])
   assert.equal(clones.length, 2)
 })

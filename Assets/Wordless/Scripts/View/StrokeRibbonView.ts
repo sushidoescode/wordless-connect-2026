@@ -1,3 +1,4 @@
+import { painterColorNormalizedRgb } from '../Core/Palette'
 import { MAX_STROKE_POINTS } from '../Core/Protocol'
 import type { StrokeColorId, WorldPoint } from '../Core/Protocol'
 import { StrokeRibbonMesh } from './StrokeRibbonMesh'
@@ -11,22 +12,8 @@ const OUTER_WIDTH_CM = 7
 const CORE_WIDTH_CM = 3.6
 const OUTER_ALPHA = 0.28
 const CORE_ALPHA = 1
-const VIOLET_RGB = [139 / 255, 92 / 255, 246 / 255] as const
-const LEMON_RGB = [1, 214 / 255, 90 / 255] as const
-const MINT_RGB = [115 / 255, 230 / 255, 174 / 255] as const
+// Semantic incorrect-feedback override; never part of the painter palette.
 const CORAL_RGB = [1, 120 / 255, 106 / 255] as const
-
-function strokeColorRgb(colorId: StrokeColorId): readonly [
-  red: number,
-  green: number,
-  blue: number,
-] {
-  switch (colorId) {
-    case 'lemon': return LEMON_RGB
-    case 'mint': return MINT_RGB
-    case 'violet': return VIOLET_RGB
-  }
-}
 
 function snapshotPoints(points: readonly WorldPoint[]): WorldPoint[] {
   if (!Array.isArray(points)) return []
@@ -152,7 +139,7 @@ export class StrokeRibbonView extends BaseScriptComponent {
   private applyEffectiveColor(): void {
     const color = this.incorrectFeedbackActive
       ? CORAL_RGB
-      : strokeColorRgb(this.strokeColorId)
+      : painterColorNormalizedRgb(this.strokeColorId)
     for (let index = 0; index < this.ownedMaterials.length; index += 1) {
       const alpha = index === 0 ? OUTER_ALPHA : CORE_ALPHA
       this.ownedMaterials[index].mainPass.baseColor = new vec4(

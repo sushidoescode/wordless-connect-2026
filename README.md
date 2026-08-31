@@ -12,7 +12,16 @@ That is the Connect payoff: one spatial action becomes a live social moment
 for someone with nothing but a browser tab. The browser submits guesses, never
 verdicts — the Lens validates every answer and publishes each result.
 
-**Demo video:** hosted link pending owner authorization.
+**Play it now (hosted guesser):** <https://wordless-relay-connect.vercel.app>
+— open Lens Studio Preview to be the painter, read the `ROOM · ABC123` code
+from the HUD, and enter it in the hosted page (a `?room=` link prefills the
+form; joining is always an explicit click). The page is a static build of
+`web/` on Vercel's free tier; the relay is ordinary hosted Supabase Realtime.
+
+**Demo video:** uploaded separately by the owner for submission (the video
+shows the earlier frozen three-color runtime; the current runtime adds the
+eight-color palette, generated room codes, protocol v3, and the hosted
+browser — see `docs/evidence/hosted-browser.md` for its live proof).
 
 ## Current status
 
@@ -26,8 +35,16 @@ verdicts — the Lens validates every answer and publishes each result.
   unit/policy-proven, not single-run live).
 - The five-second comprehension gate is **OWNER-WAIVED — NOT PASSING**. No
   five-second comprehension pass is claimed anywhere in this project.
-- The repository is private until the owner authorizes publication; the demo
-  video upload, hosted link, and submission remain owner-gated.
+- The owner authorized publication for the hackathon submission on
+  2026-08-30. A post-freeze iteration (owner-approved amendment
+  `docs/superpowers/specs/2026-08-30-wordless-rainbow-room-vercel-amendment.md`)
+  added the eight-color palette, protocol v3, per-Preview generated room
+  codes, and the hosted browser at
+  <https://wordless-relay-connect.vercel.app> with a passing hosted latency
+  gate (`docs/evidence/hosted-browser.md`). The 59-second demo video remains
+  bound to the earlier frozen runtime; a recut for the new runtime is not yet
+  captured, so the video and the current code differ in palette and join
+  flow, as recorded in `docs/prompt-log.md`.
 
 ## What actually happens in a round
 

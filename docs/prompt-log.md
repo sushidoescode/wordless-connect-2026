@@ -4185,3 +4185,16 @@ private handoff filenames on screen) and was deleted without being used;
 no capture was attempted. Nothing was pushed, uploaded, published, made
 public, history-rewritten, or submitted; the sole external publication
 remains the owner-authorized Vercel deployment.
+
+
+## 2026-08-30 — Owner-authorized publication for hackathon submission
+
+The owner directly requested the repository link and submission readiness
+before the hackathon deadline, exercising the publication gate: the local
+commits are pushed to `origin/main` and the repository visibility set to
+public. The README now leads with the hosted guesser URL and an honest note
+that the bound 59-second demo video shows the earlier frozen three-color
+runtime while the current code carries the eight-color/room/hosted iteration
+(recut not captured). The prospective-tree audit passed exit 0 at HEAD this
+session; the demo video is uploaded to Google Drive by the owner personally;
+the contest form is submitted by the owner personally.

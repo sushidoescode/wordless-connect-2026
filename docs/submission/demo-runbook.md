@@ -4,12 +4,18 @@ A repeatable procedure for a clean judged or captured session with one Lens
 Studio Preview painter and one ordinary browser guesser. Every Preview frame is
 simulated Lens Studio Preview output — never hardware footage or a device test.
 
-## Fixed session
+## Generated room
 
-- Use the already-committed six-character capture-session code
-  (`SupabaseRelayTransport.sessionId` in the scene). Do not generate or change
-  another code after the product freeze; the same value must be used in the
-  browser and the Lens so the recording revision stays clean.
+- The Lens generates one fresh six-character room code per Preview lifecycle
+  from the unambiguous alphabet (no `I`, `O`, `0`, `1`) and shows it as the
+  bright `ROOM · ABC123` HUD line. The code stays stable through rounds,
+  replay, and transport reconnects; a full Preview restart creates a new one.
+- Read the room from the Lens HUD (or the `[Wordless] ROOM code=` log line)
+  and enter it into the hosted browser join form. A `?room=` link prefills the
+  form but never auto-joins — Join stays an explicit click. The code is
+  routing and light concealment, not a login and not a security boundary.
+- After a Preview restart, the old browser tab is stranded on the dead room by
+  design; reload the page and enter the newly displayed code.
 - Use **exactly one** ordinary browser tab. A second guesser tab replaces the
   first and tears down the live round (intentional latest-wins single-guesser
   model). Never join a second tab mid-take.
@@ -36,8 +42,10 @@ simulated Lens Studio Preview output — never hardware footage or a device test
 1. Refresh the Lens Preview to establish a fresh painter epoch
    (`r-<nonce>-1`). Wait for the browser to show `PAINTER READY` and an
    `ACTIVE` round with four choices before drawing.
-2. Draw one continuous stroke on the Lens. The browser renders the same path
-   live in the selected colour.
+2. Optionally select one of the eight palette swatches (2×4 grid: red,
+   orange, yellow, green / cyan, blue, violet, magenta; violet is the
+   default). Draw one continuous stroke on the Lens. The browser renders the
+   same path live in the selected colour; the palette locks at stroke begin.
 3. Tap one wrong answer: the guessed card disables and reads `× WORD · TRY
    AGAIN`, the browser result line and both live strokes turn coral, and the
    round stays active. (Video caption for this beat:

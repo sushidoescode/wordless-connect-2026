@@ -70,20 +70,25 @@ project (free tier works) with Realtime enabled and the
    (Spectacles target).
 2. Configure credentials — none are committed, and none should be printed:
    - Browser: copy `web/.env.example` to the ignored `web/.env.local` and fill
-     `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLIC_KEY`, and
-     `VITE_RELAY_SESSION_ID`.
+     `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLIC_KEY`.
+     `VITE_RELAY_SESSION_ID` is an optional development-only join-form
+     prefill; production builds leave it unset.
    - Lens: create the ignored Supabase project asset under `Assets/LocalOnly/`
      pointing at the same project.
-   - The browser session ID must match the session code on the Lens
-     `SupabaseRelayTransport` scene input.
+   - No session code is configured anywhere: each Lens Preview run generates
+     a fresh six-character room code and shows it as the `ROOM · ABC123` HUD
+     line. Type that code into the browser join form (a `?room=` link
+     prefills it without auto-joining).
 3. Install dependencies: `npm install && npm --prefix web install`.
 
 ## Local demo
 
-1. Start the browser client: `npm --prefix web run dev`, then open the printed
-   local URL.
-2. Press play on Lens Studio Preview. The Lens applies a round, both clients
-   subscribe, and the browser flips from waiting to four answer cards.
+1. Press play on Lens Studio Preview and read the generated room code from
+   the `ROOM · ABC123` HUD line.
+2. Start the browser client: `npm --prefix web run dev`, open the printed
+   local URL, enter the displayed room code, and press JOIN ROUND. The Lens
+   applies a round, both clients subscribe, and the browser flips from
+   waiting to four answer cards.
 3. Draw one stroke in Preview; watch it arrive live in the browser. Tap a
    wrong card for the coral response, the right card for the mint reveal and
    the locked glyph, then use `PLAY AGAIN` in Preview to replay.

@@ -68,8 +68,11 @@ committed.
 
 ## Visual contract
 
-- Production palette: ultraviolet violet, warm lemon, mint, coral, warm ivory,
-  and deep plum.
+- Painter palette (owner-approved 2026-08-30): eight fixed selectable colors —
+  scarlet, orange, lemon, lime, cyan, cobalt, violet, magenta — defined
+  canonically in `Assets/Wordless/Scripts/Core/Palette.ts`. Semantic colors
+  stay outside the selectable set: coral (incorrect), mint (correct/connected),
+  warm ivory (type/affordances), deep plum (browser surface).
 - Lens Preview composites additively. Never depend on black cards, dark glass,
   shadows, or subtle transparency to establish contrast.
 - Use bright ivory type and saturated emissive geometry in the Lens.

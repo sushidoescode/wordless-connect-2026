@@ -15,6 +15,7 @@ import {
   MAX_STROKE_ID_LENGTH,
   MAX_STROKE_POINTS,
   MAX_WORD_LENGTH,
+  PAINTER_COLOR_IDS,
   POINT_BATCH_INTERVAL_MS,
   PROTOCOL_VERSION,
   SESSION_ID_LENGTH,
@@ -25,7 +26,7 @@ import {
 } from '../../Assets/Wordless/Scripts/Core/Protocol.ts'
 
 const base = (type, payload, overrides = {}) => ({
-  v: 2,
+  v: 3,
   type,
   sessionId: 'WAVE42',
   roundId: 'round-1',
@@ -37,7 +38,7 @@ const base = (type, payload, overrides = {}) => ({
 })
 
 test('frozen public constants retain the literal wire contract', () => {
-  assert.equal(PROTOCOL_VERSION, 2)
+  assert.equal(PROTOCOL_VERSION, 3)
   assert.equal(BROADCAST_EVENT, 'wordless-message')
   assert.equal(LOBBY_ROUND_ID, 'lobby')
   assert.equal(MAX_BATCH_POINTS, 8)
@@ -55,28 +56,40 @@ test('frozen public constants retain the literal wire contract', () => {
   assert.equal(INSTANCE_NONCE_LENGTH, 8)
 })
 
-test('stroke begin accepts only the v2 painter color tokens', () => {
-  for (const colorId of ['violet', 'lemon', 'mint']) {
+test('stroke begin accepts only the v3 painter color tokens', () => {
+  assert.deepEqual([...PAINTER_COLOR_IDS], [
+    'scarlet', 'orange', 'lemon', 'lime',
+    'cyan', 'cobalt', 'violet', 'magenta',
+  ])
+  for (const colorId of PAINTER_COLOR_IDS) {
     const parsed = parseRelayMessage(base('stroke.begin', {
       strokeId: 'stroke-1', colorId,
-    }, { v: 2 }))
+    }, { v: 3 }))
     assert.equal(parsed?.type, 'stroke.begin')
     assert.equal(parsed?.payload.colorId, colorId)
   }
 
-  for (const colorId of [undefined, 'coral', 'ivory', 'plum', '#8B5CF6',
-    'rgb(139,92,246)', '', 1, null]) {
+  for (const colorId of [undefined, 'mint', 'coral', 'ivory', 'plum',
+    '#8B5CF6', '#FF3B5C', 'rgb(139,92,246)', ['scarlet'], '', 1, null]) {
     assert.equal(parseRelayMessage(base('stroke.begin',
       colorId === undefined
         ? { strokeId: 'stroke-1' }
         : { strokeId: 'stroke-1', colorId },
-      { v: 2 },
+      { v: 3 },
     )), null)
   }
 
-  assert.equal(parseRelayMessage(base('stroke.begin', {
-    strokeId: 'stroke-1', colorId: 'violet',
-  }, { v: PROTOCOL_VERSION - 1 })), null)
+  for (const staleVersion of [
+    PROTOCOL_VERSION - 1,
+    PROTOCOL_VERSION - 2,
+    PROTOCOL_VERSION + 1,
+    '3',
+    null,
+  ]) {
+    assert.equal(parseRelayMessage(base('stroke.begin', {
+      strokeId: 'stroke-1', colorId: 'violet',
+    }, { v: staleVersion })), null)
+  }
 })
 
 test('round start exposes choices but no answer index', () => {
@@ -113,7 +126,7 @@ test('point batches are bounded, ordered, and copied from caller input', () => {
 test('invalid messages are rejected', () => {
   const invalid = [
     null,
-    { v: 2 },
+    { v: PROTOCOL_VERSION - 1 },
     base('guess.submit', { guessId: 'guess-1', choiceIndex: 9 }, {
       sessionId: 'BAD',
     }),
@@ -308,7 +321,7 @@ test('every maximal legal message variant stays under the wire cap', () => {
   const choices = ['A', 'B', 'C', 'D'].map((letter) =>
     letter.repeat(MAX_WORD_LENGTH))
   const common = {
-    v: 2,
+    v: 3,
     sessionId,
     senderId,
     sequence: Number.MAX_SAFE_INTEGER,
@@ -328,7 +341,7 @@ test('every maximal legal message variant stays under the wire cap', () => {
     message('round.start', {
       choices, durationMs: Number.MAX_SAFE_INTEGER, targetConnectionId: connectionId,
     }),
-    message('stroke.begin', { strokeId, colorId: 'violet' }),
+    message('stroke.begin', { strokeId, colorId: 'magenta' }),
     message('stroke.points', {
       strokeId,
       points: Array.from({ length: MAX_BATCH_POINTS }, () => [1000, 1000]),

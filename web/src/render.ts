@@ -1,4 +1,5 @@
 import type { ChoiceIndex, QuantizedPoint, StrokeColorId } from '@wordless/core/Protocol'
+import { PAINTER_COLOR_IDS, painterColorHex } from '@wordless/core/Palette'
 import {
   easeOutCubic,
   interpolatePath,
@@ -10,11 +11,15 @@ const CORAL = '#FF786A'
 const GLYPH_SIZE_PX = 220
 const GLYPH_TRANSITION_MS = 450
 
-const STROKE_COLORS: Readonly<Record<StrokeColorId, string>> = {
-  violet: '#8B5CF6',
-  lemon: '#FFD65A',
-  mint: '#73E6AE',
+function buildStrokeColors(): Readonly<Record<StrokeColorId, string>> {
+  const colors = {} as Record<StrokeColorId, string>
+  for (const colorId of PAINTER_COLOR_IDS) {
+    colors[colorId] = painterColorHex(colorId)
+  }
+  return colors
 }
+
+const STROKE_COLORS: Readonly<Record<StrokeColorId, string>> = buildStrokeColors()
 
 interface ActiveGlyphTransition {
   readonly key: string

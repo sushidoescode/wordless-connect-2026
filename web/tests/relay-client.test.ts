@@ -11,6 +11,7 @@ import {
 import {
   BROADCAST_EVENT,
   LOBBY_ROUND_ID,
+  PROTOCOL_VERSION,
   parseRelayMessage,
   type RelayMessage,
   type RelayMessageDraft,
@@ -367,7 +368,7 @@ function painterMessage<T extends RelayMessage['type']>(
   overrides: Partial<Pick<RelayMessage, 'sessionId' | 'senderId' | 'sentAtMs'>> = {},
 ): Extract<RelayMessage, { type: T }> {
   return {
-    v: 2,
+    v: PROTOCOL_VERSION,
     type,
     sessionId: overrides.sessionId ?? 'WAVE42',
     roundId,

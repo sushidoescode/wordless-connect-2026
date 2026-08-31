@@ -1,4 +1,10 @@
-export const PROTOCOL_VERSION = 2 as const
+import { isStrokeColorId } from './Palette'
+import type { StrokeColorId } from './Palette'
+
+export { PAINTER_COLOR_IDS, isStrokeColorId } from './Palette'
+export type { StrokeColorId } from './Palette'
+
+export const PROTOCOL_VERSION = 3 as const
 export const BROADCAST_EVENT = 'wordless-message' as const
 export const LOBBY_ROUND_ID = 'lobby' as const
 export const MAX_BATCH_POINTS = 8
@@ -17,7 +23,6 @@ export const INSTANCE_NONCE_LENGTH = 8
 
 export type ChoiceIndex = 0 | 1 | 2 | 3
 export type ChoiceTuple = readonly [string, string, string, string]
-export type StrokeColorId = 'violet' | 'lemon' | 'mint'
 export type QuantizedPoint = readonly [number, number]
 export interface WorldPoint { readonly x: number; readonly y: number; readonly z: number }
 export type GlyphNormalizer = (
@@ -56,7 +61,7 @@ export type RoundResultPayload =
     }
 
 interface BaseMessage<T extends string, P> {
-  readonly v: 2
+  readonly v: typeof PROTOCOL_VERSION
   readonly type: T
   readonly sessionId: string
   readonly roundId: string
@@ -173,10 +178,6 @@ export function isProductRoundId(value: unknown): value is string {
 
 function isChoiceIndex(value: unknown): value is ChoiceIndex {
   return value === 0 || value === 1 || value === 2 || value === 3
-}
-
-export function isStrokeColorId(value: unknown): value is StrokeColorId {
-  return value === 'violet' || value === 'lemon' || value === 'mint'
 }
 
 function isTimestamp(value: unknown): value is number {

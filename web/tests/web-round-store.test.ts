@@ -22,7 +22,7 @@ function envelope<T extends RelayMessage['type']>(
   sequence = 1,
 ): MessageOf<T> {
   return {
-    v: 2,
+    v: 3,
     type,
     sessionId: SESSION_ID,
     roundId,
@@ -74,7 +74,7 @@ function begin(
   strokeId = 'stroke-1',
 ): MessageOf<'stroke.begin'> {
   const message = parseRelayMessage({
-    v: 2,
+    v: 3,
     type: 'stroke.begin',
     sessionId: SESSION_ID,
     roundId,
@@ -179,8 +179,8 @@ describe('WebRoundStore', () => {
     expect(colorSnapshot(store).points).toEqual([])
     expect(colorSnapshot(store).strokeColorId).toBeNull()
 
-    store.dispatch(begin('round-1', 'mint', 5))
-    expect(colorSnapshot(store).strokeColorId).toBe('mint')
+    store.dispatch(begin('round-1', 'cyan', 5))
+    expect(colorSnapshot(store).strokeColorId).toBe('cyan')
     store.dispatch(envelope('stroke.points', 'round-1', {
       strokeId: 'other-stroke',
       points: [[100, 200]],
@@ -190,13 +190,13 @@ describe('WebRoundStore', () => {
     expect(colorSnapshot(store).points).toEqual([[100, 200]])
 
     store.dispatch(begin('round-1', 'lemon', 8))
-    expect(colorSnapshot(store).strokeColorId).toBe('mint')
+    expect(colorSnapshot(store).strokeColorId).toBe('cyan')
   })
 
   it('clears the public color and private stroke binding for reconnect, reset, and successor start', () => {
     const { store } = createStore()
     activate(store, false)
-    store.dispatch(begin('round-1', 'mint', 4))
+    store.dispatch(begin('round-1', 'cyan', 4))
     store.dispatch(roundReset('round-1', 'round-2', 5))
     expect(colorSnapshot(store).strokeColorId).toBeNull()
     store.dispatch(roundStart('round-2', 6))
@@ -210,7 +210,7 @@ describe('WebRoundStore', () => {
     store.dispatch(roundStart('round-3', 10))
     store.dispatch(points([[300, 400]], 'round-3', 11))
     expect(colorSnapshot(store).points).toEqual([])
-    store.dispatch(begin('round-3', 'mint', 12, 'successor-stroke'))
+    store.dispatch(begin('round-3', 'cyan', 12, 'successor-stroke'))
     store.dispatch(envelope('stroke.points', 'round-3', {
       strokeId: 'successor-stroke',
       points: [[300, 400]],
@@ -278,14 +278,17 @@ describe('WebRoundStore', () => {
     const { store } = createStore()
     activate(store, false)
     const before = store.getSnapshot()
-    const malformed = {
-      ...begin('round-1', 'mint', 4),
-      payload: { strokeId: 'stroke-1', colorId: 'coral' },
+
+    for (const invalidColorId of ['coral', 'mint']) {
+      const malformed = {
+        ...begin('round-1', 'cyan', 4),
+        payload: { strokeId: 'stroke-1', colorId: invalidColorId },
+      }
+
+      store.dispatch(malformed as unknown as RelayMessage)
+
+      expect(store.getSnapshot()).toEqual(before)
     }
-
-    store.dispatch(malformed as unknown as RelayMessage)
-
-    expect(store.getSnapshot()).toEqual(before)
   })
 
   it('does not call the channel subscription CONNECTED by itself', () => {

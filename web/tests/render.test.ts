@@ -479,9 +479,14 @@ describe('render', () => {
   })
 
   it.each([
-    ['violet', '#8B5CF6'],
+    ['scarlet', '#FF3B5C'],
+    ['orange', '#FF982B'],
     ['lemon', '#FFD65A'],
-    ['mint', '#73E6AE'],
+    ['lime', '#A7F43A'],
+    ['cyan', '#2DE2E6'],
+    ['cobalt', '#3B82F6'],
+    ['violet', '#8B5CF6'],
+    ['magenta', '#F04DD8'],
   ] as const)('renders a %s live path with its fixed production paint', (colorId, color) => {
     const canvas = document.querySelector<HTMLCanvasElement>('#stroke-canvas')!
 
@@ -493,19 +498,19 @@ describe('render', () => {
     expect(canvas.getContext('2d')!.strokeStyle).toBe(color)
   })
 
-  it('uses coral only as the temporary ACTIVE wrong-answer override, then restores mint', () => {
+  it('uses coral only as the temporary ACTIVE wrong-answer override, then restores cyan', () => {
     const canvas = document.querySelector<HTMLCanvasElement>('#stroke-canvas')!
     const observedPaints: string[] = []
 
     render(activeSnapshot({
       points: [[100, 200], [900, 800]],
-      strokeColorId: 'mint',
+      strokeColorId: 'cyan',
     }))
     observedPaints.push(canvas.getContext('2d')!.strokeStyle)
 
     render(activeSnapshot({
       points: [[100, 200], [900, 800]],
-      strokeColorId: 'mint',
+      strokeColorId: 'cyan',
       wrongChoices: [2],
     }))
     observedPaints.push(canvas.getContext('2d')!.strokeStyle)
@@ -518,14 +523,14 @@ describe('render', () => {
       points: [[100, 200], [900, 800]],
       glyph: [[100, 200], [900, 800]],
       remainingMs: 0,
-      strokeColorId: 'mint',
+      strokeColorId: 'cyan',
     }))
     const glyphCanvas = document.querySelector<HTMLCanvasElement>('#glyph-medallion canvas')!
     const transitionCanvas = document.querySelector<HTMLCanvasElement>('#glyph-transition-canvas')!
     observedPaints.push(glyphCanvas.getContext('2d')!.strokeStyle)
 
-    expect(observedPaints).toEqual(['#73E6AE', '#FF786A', '#73E6AE'])
-    expect(transitionCanvas.getContext('2d')!.strokeStyle).toBe('#73E6AE')
+    expect(observedPaints).toEqual(['#2DE2E6', '#FF786A', '#2DE2E6'])
+    expect(transitionCanvas.getContext('2d')!.strokeStyle).toBe('#2DE2E6')
   })
 
   it('does not paint an unsafe ACTIVE path fixture without an authoritative color binding', () => {

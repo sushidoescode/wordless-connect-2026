@@ -41,7 +41,7 @@ function message(
   },
 ) {
   const parsed = parseRelayMessage({
-    v: 2,
+    v: 3,
     type,
     sessionId,
     roundId,

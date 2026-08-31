@@ -3,6 +3,7 @@ import test from 'node:test'
 
 import {
   MAX_STROKE_POINTS,
+  PAINTER_COLOR_IDS,
   POINT_BATCH_INTERVAL_MS,
 } from '../../Assets/Wordless/Scripts/Core/Protocol.ts'
 import { RoundStore } from '../../Assets/Wordless/Scripts/Core/RoundStore.ts'
@@ -87,6 +88,9 @@ test('painter color is selectable only before the first stroke and persists to r
   assert.equal(harness.engine.selectStrokeColor('lemon'), false)
 
   harness.engine.setCounterpartReady(true, 10)
+  assert.equal(harness.engine.selectStrokeColor('mint'), false)
+  assert.equal(harness.engine.selectStrokeColor('coral'), false)
+  assert.equal(harness.store.getSnapshot().strokeColorId, 'violet')
   assert.equal(harness.engine.selectStrokeColor('lemon'), true)
   assert.equal(harness.store.getSnapshot().strokeColorId, 'lemon')
   assert.equal(harness.store.getSnapshot().paletteInputLocked, false)
@@ -100,7 +104,7 @@ test('painter color is selectable only before the first stroke and persists to r
     generation: harness.engine.getRoundGeneration(),
   })
   assert.equal(harness.store.getSnapshot().paletteInputLocked, true)
-  assert.equal(harness.engine.selectStrokeColor('mint'), false)
+  assert.equal(harness.engine.selectStrokeColor('cyan'), false)
   assert.equal(harness.store.getSnapshot().strokeColorId, 'lemon')
 
   harness.engine.appendPoint(worldPoint(0), publicPoint(0), 21)
@@ -116,8 +120,36 @@ test('painter color is selectable only before the first stroke and persists to r
   fresh.engine.applyRound('round-fresh', SNAKE, 0, 20_000)
   assert.equal(fresh.store.getSnapshot().strokeColorId, 'violet')
   assert.equal(fresh.store.getSnapshot().paletteInputLocked, false)
-  assert.equal(fresh.engine.selectStrokeColor('coral'), false)
+  assert.equal(fresh.engine.selectStrokeColor('cyan'), false)
   assert.equal(fresh.store.getSnapshot().strokeColorId, 'violet')
+})
+
+test('stroke color selection accepts exactly the eight palette ids', () => {
+  const harness = makeHarness()
+  activate(harness)
+
+  assert.equal(PAINTER_COLOR_IDS.length, 8)
+  for (const colorId of PAINTER_COLOR_IDS) {
+    assert.equal(harness.engine.selectStrokeColor(colorId), true)
+    assert.equal(harness.store.getSnapshot().strokeColorId, colorId)
+  }
+
+  const lastValid = PAINTER_COLOR_IDS[PAINTER_COLOR_IDS.length - 1]
+  const rejectedIds = [
+    'mint',
+    'coral',
+    'ivory',
+    'plum',
+    '#2DE2E6',
+    'rgb(45,226,230)',
+    '',
+    1,
+    null,
+  ]
+  for (const rejected of rejectedIds) {
+    assert.equal(harness.engine.selectStrokeColor(rejected), false)
+    assert.equal(harness.store.getSnapshot().strokeColorId, lastValid)
+  }
 })
 
 test('throwing store listener cannot abort effects or skip later listeners', () => {

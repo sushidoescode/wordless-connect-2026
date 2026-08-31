@@ -97,8 +97,12 @@ bottom overlay band so no caption/card covers a pane, stroke, or glyph.
   frozen raw capture, not fixable without a recapture.)
 - Hero extracted from the recut at 17.0 s (glyph payoff split-screen):
   `docs/media/wordless-relay-hero.png` (SHA-256 `72664be3…`).
-- Complete-cut panel on the recut (summary/verbatim under the ignored
-  `local-handoff/reviews/task16/recut-review-verbatim.md`):
+- Complete-cut panel on the recut — **operative evidence:** the fresh
+  three-reviewer two-stage panel on the exact final hash `254945f2…`, complete
+  verbatim under the ignored `local-handoff/reviews/task16/final3-reviewer-1.md`,
+  `final3-reviewer-2.md`, and `final3-reviewer-3.md`. (The earlier
+  `local-handoff/reviews/task16/recut-review-verbatim.md` is retained as
+  SUPERSEDED history — an interim recut review, not the operative panel.)
   - **Stage A — 3/3 PASS (comprehension).** Three fresh reviewers each
     self-decoded the actual muted recut and, blind, identified the painter/guesser
     roles, the live shared stroke, bilateral coral on a wrong guess (caption read

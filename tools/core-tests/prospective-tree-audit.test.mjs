@@ -450,3 +450,152 @@ test('CLI: the reproduced NEWLINE-filename case BLOCKS (exit 20), not a false cl
     assert.equal(code, 20, 'a home path in a newline-named file must block, not exit clean')
   } finally { rmSync(dir, { recursive: true, force: true }) }
 })
+
+// --- FAIL-CLOSED explicit-input handling: --sidecars and --root-env/--web-env ---
+
+// A throwaway git repo with the wrapper+auditor and one clean tracked file, so a
+// test can add sidecar dirs / env files and run the wrapper with explicit flags.
+function setupWrapperRepo() {
+  const dir = mkdtempSync(join(tmpdir(), 'wl-audit-io-'))
+  mkdirSync(join(dir, 'tools/security'), { recursive: true })
+  execFileSync('cp', [resolve('tools/security/audit-prospective-tree.mjs'), join(dir, 'tools/security/audit-prospective-tree.mjs')])
+  execFileSync('cp', [resolve('tools/security/audit-release-history.mjs'), join(dir, 'tools/security/audit-release-history.mjs')])
+  writeFileSync(join(dir, 'README.md'), 'clean prose, nothing secret here\n')
+  execFileSync('git', ['init', '-q'], { cwd: dir })
+  execFileSync('git', ['config', 'user.email', 't@t'], { cwd: dir })
+  execFileSync('git', ['config', 'user.name', 't'], { cwd: dir })
+  execFileSync('git', ['add', '-A'], { cwd: dir })
+  return dir
+}
+function runWrapper(dir, extraArgs) {
+  let code = 0
+  try {
+    execFileSync('node', ['tools/security/audit-prospective-tree.mjs', '--tree', 'INDEX', ...extraArgs],
+      { cwd: dir, stdio: 'pipe' })
+  } catch (e) { code = e.status }
+  return code
+}
+
+test('CLI: an explicitly supplied MISSING --sidecars dir exits 30 (no silent skip)', () => {
+  const dir = setupWrapperRepo()
+  try { assert.equal(runWrapper(dir, ['--sidecars', 'does/not/exist']), 30) }
+  finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: --sidecars pointing at a FILE (not a directory) exits 30', () => {
+  const dir = setupWrapperRepo()
+  try { assert.equal(runWrapper(dir, ['--sidecars', 'README.md']), 30) }
+  finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: an explicitly supplied MISSING --root-env exits 30', () => {
+  const dir = setupWrapperRepo()
+  try { assert.equal(runWrapper(dir, ['--root-env', 'nope.env']), 30) }
+  finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: an explicitly supplied MISSING --web-env exits 30', () => {
+  const dir = setupWrapperRepo()
+  try { assert.equal(runWrapper(dir, ['--web-env', 'web/nope.env']), 30) }
+  finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: a --root-env file containing a NUL byte (not UTF-8 text) exits 30', () => {
+  const dir = setupWrapperRepo()
+  try {
+    writeFileSync(join(dir, 'bad.env'), Buffer.from([0x41, 0x00, 0x42])) // "A\0B"
+    assert.equal(runWrapper(dir, ['--root-env', 'bad.env']), 30)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: a --root-env file with invalid UTF-8 (no NUL) exits 30', () => {
+  const dir = setupWrapperRepo()
+  try {
+    writeFileSync(join(dir, 'bad2.env'), Buffer.from([0xff, 0xfe, 0x41])) // invalid UTF-8 lead bytes
+    assert.equal(runWrapper(dir, ['--root-env', 'bad2.env']), 30)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: a valid --root-env / --web-env / --sidecars set still audits clean (exit 0)', () => {
+  const dir = setupWrapperRepo()
+  try {
+    writeFileSync(join(dir, 'root.env'), 'SUPABASE_URL=https://wl-unique-test-abcdefghijk.example\n')
+    mkdirSync(join(dir, 'web'), { recursive: true })
+    writeFileSync(join(dir, 'web/local.env'), 'VITE_X=y\n')
+    mkdirSync(join(dir, 'sc'), { recursive: true })
+    writeFileSync(join(dir, 'sc/note.md'), 'clean sidecar prose\n')
+    assert.equal(runWrapper(dir, ['--root-env', 'root.env', '--web-env', 'web/local.env', '--sidecars', 'sc']), 0)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+// An OMITTED env/sidecar option remains valid — covered by the earlier CLI tests
+// that pass neither and exit 0/20; asserted here directly at the unit level too.
+test('FAIL-CLOSED: collectSidecars on a MISSING dir THROWS (no silent skip)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'wl-missing-'))
+  rmSync(dir, { recursive: true, force: true }) // now guaranteed absent
+  assert.throws(() => collectSidecars([dir]))
+})
+
+test('FAIL-CLOSED: collectSidecars on a non-directory path THROWS', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'wl-sidecar-file-'))
+  try {
+    const f = join(dir, 'afile.txt'); writeFileSync(f, 'x')
+    assert.throws(() => collectSidecars([f]), /not a directory/i)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('FAIL-CLOSED: an unsupported sidecar entry (fifo, neither file nor dir) THROWS', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'wl-sidecar-fifo-'))
+  try {
+    try { execFileSync('mkfifo', [join(dir, 'pipe')]) }
+    catch { t.skip('mkfifo unavailable on this platform'); return }
+    assert.throws(() => collectSidecars([dir]), /unsupported sidecar filesystem entry/i)
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('collectSidecars with NO dirs returns [] (an omitted --sidecars option is valid)', () => {
+  assert.deepEqual(collectSidecars([]), [])
+})
+
+// --- FAIL-CLOSED tree framing: NUL-termination, empty records, headers, gitlinks ---
+
+test('FAIL-CLOSED: ls-tree -z output not NUL-terminated THROWS (truncated)', () => {
+  const buf = Buffer.from(`100644 blob ${OID('e')}\tok.md`, 'latin1') // no trailing NUL
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /NUL-terminated/i)
+})
+
+test('FAIL-CLOSED: an empty ls-tree -z record (stray/double NUL) THROWS', () => {
+  const rec = Buffer.from(`100644 blob ${OID('e')}\tok.md`, 'latin1')
+  const buf = Buffer.concat([Buffer.from([0x00]), rec, Buffer.from([0x00])]) // leading empty record
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /empty ls-tree/i)
+})
+
+test('FAIL-CLOSED: a non-blob terminal entry (gitlink commit) THROWS (no silent skip)', () => {
+  const buf = Buffer.concat([Buffer.from(`160000 commit ${OID('f')}\tsubmod`, 'latin1'), Buffer.from([0x00])])
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /non-blob terminal entry|gitlink/i)
+})
+
+test('FAIL-CLOSED: an unknown ls-tree object type THROWS', () => {
+  const buf = Buffer.concat([Buffer.from(`100644 widget ${OID('f')}\tok.md`, 'latin1'), Buffer.from([0x00])])
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /unknown ls-tree object type/i)
+})
+
+test('FAIL-CLOSED: a header with the wrong field count THROWS', () => {
+  const buf = Buffer.concat([Buffer.from(`100644 blob\tok.md`, 'latin1'), Buffer.from([0x00])]) // missing object-id field
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /record header/i)
+})
+
+test('FAIL-CLOSED: a malformed mode field THROWS', () => {
+  const buf = Buffer.concat([Buffer.from(`XYZ blob ${OID('f')}\tok.md`, 'latin1'), Buffer.from([0x00])])
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /malformed ls-tree mode/i)
+})
+
+test('FAIL-CLOSED: a well-formed multi-record NUL-terminated tree parses every blob', () => {
+  const entries = [
+    { object: OID('a'), path: 'one.md', content: 'first\n' },
+    { object: OID('b'), path: 'dir/two.md', content: 'second\n' },
+  ]
+  const blobs = collectTreeBlobs('T', fakeRun(entries))
+  assert.equal(blobs.length, 2)
+  assert.deepEqual(blobs.map((b) => b.path).sort(), ['dir/two.md', 'one.md'])
+})

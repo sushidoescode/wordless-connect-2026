@@ -15,7 +15,7 @@
 // finding, 30 execution/input error.
 
 import { execFileSync } from 'node:child_process'
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import process from 'node:process'
@@ -129,34 +129,47 @@ export function blobFromBuffer(path, buf) {
 
 // FAIL-CLOSED tree walk. Parses `git ls-tree -r -z <tree>` losslessly: each
 // NUL-terminated record is `<mode> SP <type> SP <object> TAB <path>` where the
-// path is RAW bytes (any byte except NUL — newline/tab/quote/backslash included).
-// Content is retrieved by OBJECT ID, never `tree:path`. Any parse failure, a path
-// that is not valid UTF-8 (cannot be represented safely), or any git failure
-// THROWS — the record is never dropped and text is never silently emptied. `run`
-// is injectable for tests; production uses git().
+// path is RAW bytes (any byte except NUL — newline/tab/quote/backslash included;
+// the FIRST TAB delimits the header from the path, so tabs inside the path are
+// preserved). Content is retrieved by OBJECT ID, never `tree:path`. Output MUST
+// be properly NUL-terminated; an empty interior record, a malformed/unknown
+// header, a non-UTF-8 path, a non-blob terminal entry (gitlink/submodule), or
+// any git failure THROWS — a record is never dropped and text is never silently
+// emptied. `run` is injectable for tests; production uses git().
 export function collectTreeBlobs(tree, run = git) {
   const out = run(['ls-tree', '-r', '-z', tree])
   if (!Buffer.isBuffer(out)) throw new Error('ls-tree did not return a buffer')
   const blobs = []
+  if (out.length === 0) return blobs // empty tree -> no records
+  // `-z` terminates EVERY record with a NUL. If the final byte is not NUL the
+  // output is truncated/garbled; fail closed rather than accept a partial record.
+  if (out[out.length - 1] !== 0x00) throw new Error('ls-tree -z output is not NUL-terminated (truncated?)')
   let start = 0
-  for (let i = 0; i <= out.length; i += 1) {
-    if (i !== out.length && out[i] !== 0x00) continue
-    if (i === start) { start = i + 1; continue } // empty segment (trailing NUL)
+  for (let i = 0; i < out.length; i += 1) {
+    if (out[i] !== 0x00) continue
     const rec = out.subarray(start, i)
     start = i + 1
+    // A zero-length record between NULs (an empty interior record or a stray
+    // leading/double NUL) is never valid `-z` output -> fail closed.
+    if (rec.length === 0) throw new Error('empty ls-tree -z record (unexpected NUL)')
     const tab = rec.indexOf(0x09)
     if (tab < 0) throw new Error('malformed ls-tree -z record: no TAB before path')
     const header = rec.subarray(0, tab).toString('latin1') // mode/type/object are ASCII
     const parts = header.split(' ')
-    if (parts.length < 3) throw new Error(`malformed ls-tree -z record header: ${JSON.stringify(header)}`)
-    const type = parts[1]
-    const object = parts[2]
+    if (parts.length !== 3) throw new Error(`malformed ls-tree -z record header: ${JSON.stringify(header)}`)
+    const [mode, type, object] = parts
+    if (!/^[0-7]{6}$/.test(mode)) throw new Error(`malformed ls-tree mode: ${JSON.stringify(mode)}`)
+    if (type !== 'blob' && type !== 'tree' && type !== 'commit') throw new Error(`unknown ls-tree object type: ${JSON.stringify(type)}`)
     if (!/^[0-9a-f]{40}$|^[0-9a-f]{64}$/.test(object)) throw new Error(`malformed ls-tree object id: ${JSON.stringify(object)}`)
     const pathBuf = rec.subarray(tab + 1)
     let path
     try { path = utf8Strict.decode(pathBuf) } catch { throw new Error('tree path is not valid UTF-8; cannot represent safely (audit fails closed)') }
     if (path.length === 0) throw new Error('empty tree path in ls-tree record')
-    if (type !== 'blob') continue
+    // `-r` recurses fully, so every leaf is a `blob` or a gitlink `commit`; a
+    // `tree` leaf would itself be malformed. A non-blob terminal entry is NOT
+    // silently skipped — no audited policy handles gitlinks/submodules, so its
+    // contents would go unaudited; fail closed instead.
+    if (type !== 'blob') throw new Error(`non-blob terminal entry (type=${type}, ${object}) at ${JSON.stringify(path)}: no audit policy handles gitlinks/submodules (fails closed)`)
     const buf = run(['cat-file', 'blob', object]) // by object ID; throws on any failure — no silent empty
     if (!Buffer.isBuffer(buf)) throw new Error(`cat-file did not return a buffer for ${object}`)
     blobs.push(blobFromBuffer(path, buf))
@@ -164,19 +177,27 @@ export function collectTreeBlobs(tree, run = git) {
   return blobs
 }
 
-// FAIL-CLOSED sidecar walk: any readdir/stat/read failure (missing file, broken
-// symlink, unreadable file) THROWS — sidecars are never silently skipped.
+// FAIL-CLOSED sidecar walk. Every EXPLICITLY supplied --sidecars path must be an
+// existing, readable DIRECTORY; a missing/unreadable path, a non-directory path,
+// or an entry inside it that is neither a regular file nor a directory (a broken
+// symlink, fifo, socket, device, …) THROWS — sidecars are never silently skipped
+// (an omitted --sidecars option is valid and simply supplies no dirs).
 export function collectSidecars(dirs) {
   const out = []
   const walk = (d) => {
     for (const name of readdirSync(d)) {
       const full = join(d, name)
-      const st = statSync(full)
+      const st = statSync(full) // follows symlinks; a broken symlink throws (fail closed)
       if (st.isDirectory()) walk(full)
       else if (st.isFile()) out.push(blobFromBuffer(full, readFileSync(full)))
+      else throw new Error(`unsupported sidecar filesystem entry (not a regular file or directory): ${full}`)
     }
   }
-  for (const d of dirs) { if (existsSync(d)) walk(d) }
+  for (const d of dirs) {
+    const st = statSync(d) // throws if the supplied dir is missing/unreadable -> exit 30
+    if (!st.isDirectory()) throw new Error(`--sidecars path is not a directory: ${d}`)
+    walk(d)
+  }
   return out
 }
 
@@ -213,7 +234,19 @@ async function main() {
 
   const treeBlobs = collectTreeBlobs(tree)
   const sidecars = collectSidecars(a.sidecars)
-  const readEnv = (p) => (p && existsSync(p)) ? { path: p, text: readFileSync(p, 'utf8') } : null
+  // Env files: an OMITTED option is valid (null). If EXPLICITLY supplied, the
+  // path must be a readable regular file that is valid UTF-8 with no NUL byte;
+  // anything else (missing, unreadable, a directory, binary/invalid UTF-8) fails
+  // closed via a throw -> exit 30. Never `readFileSync(p, 'utf8')`, which would
+  // silently substitute U+FFFD for invalid UTF-8.
+  const readEnv = (p) => {
+    if (!p) return null
+    const st = statSync(p) // throws if missing/unreadable
+    if (!st.isFile()) throw new Error(`env path is not a regular file: ${p}`)
+    const buf = readFileSync(p)
+    if (looksBinary(buf)) throw new Error(`env file is not valid UTF-8 text or contains a NUL byte: ${p}`)
+    return { path: p, text: buf.toString('utf8') }
+  }
 
   // Real text for every blob: the env-value-leak comparison must cover all
   // blobs (a real credential pasted into any file — auditor sources included —

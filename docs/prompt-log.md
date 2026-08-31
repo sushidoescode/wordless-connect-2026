@@ -4087,3 +4087,62 @@ One review agent mutation-tested `web/src/room-prefill.ts` in the working
 tree during verification; the mutation was detected and reverted via
 `git checkout --`; the committed state was never wrong. Suites re-verified
 green after all corrections: 453 core, 120 web unit.
+
+## 2026-08-30 — New product freeze, Vercel production deployment, and hosted live proof
+
+Pre-freeze verification at a clean worktree: 454/454 core tests, 120/120 web
+unit tests, 55-module production build, 46/46 Playwright E2E at both
+viewports, Lens typecheck exit 0, `rg -n "v: 2"` sweep exit 1,
+`git diff --check` clean, and the prospective-tree audit exit 0 (a genuine
+audit gap surfaced first: the `forbidden-filename` rule flagged the newly
+tracked `web/.env.production.example`; the rule now excepts exactly the
+`.example` suffix, matching the `.gitignore` whitelist, with regression
+cases — commit `ee88d05`). The product freeze is
+`ee88d050c27770a96368807bdd5035f0c6a57e3c` with runtime/UI manifest
+`cbdc1f4b267ddb96ff88b57d277d05658fa3c93d6d74363621b4ceafd5633477`
+(122 files; exact method recorded in `docs/evidence/hosted-browser.md` and
+the local freeze record).
+
+Deployment: built the exact freeze with `VITE_RELAY_SESSION_ID=` overridden
+empty so no development prefill value enters the bundle (verified by
+searching the dist for the local value in memory, never printing it);
+public-build audit clean (publishable key type, zero JWT-shaped values, zero
+findings); dist content digest `a55086eb…f35746c`; deployed only a staged
+copy of the audited `web/dist` through the authenticated Vercel CLI to the
+free/Hobby project `wordless-relay-connect`. Production URL
+`https://wordless-relay-connect.vercel.app`; served HTML and JS hashes are
+byte-identical to the audited local dist. No repository source, `.env`,
+capture, or handoff content was uploaded; no custom domain or paid resource.
+
+Hosted live proof: recorded in `docs/evidence/hosted-browser.md` — all nine
+amendment observations plus the latency gate. Headlines: one generated room
+per Preview lifecycle (eleven observed values, all in the unambiguous
+alphabet); no fixed prefill in the deployed bundle; `?room=` prefill
+normalized without autojoin and manual entry authoritative; presence-gated
+Lens-authored rounds only; all eight painter colors crossed the hosted relay
+and rendered exactly (three as live strokes in room `XHXW48`, five as
+glyph-locked rounds `r-6FIES4W9-{1,2,3,4,8}` in room `D8LSCJ` with logged
+point counts and path hashes); coral wrong-guess override with restore and
+mint correct/reveal/exact-glyph/replay observed live; reconnect invalidated
+the projection without inventing a round; Preview restarts changed the room
+with stale browsers never attaching; no product-level errors or
+credential/path values in logs. Hosted RTT on the product channel: 50/50
+matched ambient ping/ack pairs, median 76 ms, p95 114 ms, max 314 ms —
+within the 30% ceilings (111.8/137.8 ms) of the local 86/106 baseline and
+all absolute bounds. THE HOSTED LATENCY GATE PASSES.
+
+Honest incidents kept in evidence: an initial observation attempt torn down
+by browser background-throttling (rerun with throttling disabled per the
+runbook's foreground rule); stray injected touches on empty preview space
+orbited the interactive preview camera mid-session (recovered with a camera
+reset; a capture-phase hazard note); several 20-second rounds expired under
+driving-tool latency and were replayed, never promoted. Driving used
+`InjectPreviewGesture` (tap-acquire then touch-drag) on the Lens and one
+in-page auto-resolve click loop on the hosted page, mirroring the accepted
+Task 11/16 methods; RTT observation used a WebSocket wrapper injected before
+page load that timestamps ping/ack pairs on the page clock without importing
+or modifying product code. This entry records simulated Lens Studio Preview
+evidence, not hardware footage or a device test. No competitive or judge
+research entered this entry. Nothing was pushed, made public,
+history-rewritten, or submitted; the sole external publication is the
+owner-authorized Vercel deployment above.

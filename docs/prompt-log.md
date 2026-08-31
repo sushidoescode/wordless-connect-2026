@@ -4146,3 +4146,42 @@ evidence, not hardware footage or a device test. No competitive or judge
 research entered this entry. Nothing was pushed, made public,
 history-rewritten, or submitted; the sole external publication is the
 owner-authorized Vercel deployment above.
+
+## 2026-08-30 — Iteration checkpoint: hosted proof complete; capture chain remains open
+
+Owner time constraint reached before the recapture chain. Completed and
+locally committed in this iteration: the owner-approved design amendment and
+two implementation plans; the eight-color canonical palette registry and
+protocol v3 with strict old-version rejection (fixtures migrated atomically);
+the data-driven eight-swatch Lens palette, ribbon and glyph mappings; the
+Lens-generated room code driving the relay topic and the ivory
+`ROOM · ABC123` HUD line; the browser `?room=` prefill without autojoin; the
+Vercel static build contract; the MCP-authored 2×4 palette scene with eight
+additive painter materials; a pre-freeze adversarial review with all
+confirmed findings fixed; the product freeze `ee88d05` with runtime/UI
+manifest `cbdc1f4b…`; the production deployment
+`https://wordless-relay-connect.vercel.app` (byte-parity verified, audited,
+publishable-key-only); and the complete hosted live proof with the latency
+gate passing (50/50 matched samples, median 76 ms, p95 114 ms against
+ceilings 111.8/137.8 ms) — see `docs/evidence/hosted-browser.md`.
+
+Explicitly NOT done in this iteration and remaining open per the amendment's
+section 7: the fresh split-screen capture from the exact production browser
+and frozen Preview, the new 59-second candidate and its technical checks,
+narration rebinding and the owner's final end-to-end listen-through, the new
+hero and README first-screen render, the rebuilt review bundle and aggregate,
+the visual-craft review and fresh three-reviewer two-stage panel, the full
+judged-document reconciliation (README/EDL/checklist/claim ledger/polish
+ledger/resilience rows), and the final two-pass prospective/history audit.
+Until that chain completes, the old freeze `31123d3` artifacts (candidate
+`254945f2…`, hero `72664be3…`, README render `45b22483…`, aggregate
+`cc47e6e7…`) remain the only bound candidate evidence and are historical for
+the old runtime only; no artifact yet proves the new runtime's submission
+cut, and the judged documents still describe the old candidate. Task 15
+remains PARTIAL (exact-128 and correct-while-points-queued subcases);
+Task 14 remains OWNER-WAIVED — NOT PASSING. A desktop-hygiene probe taken
+for the capture phase showed the working desktop (development windows and
+private handoff filenames on screen) and was deleted without being used;
+no capture was attempted. Nothing was pushed, uploaded, published, made
+public, history-rewritten, or submitted; the sole external publication
+remains the owner-authorized Vercel deployment.

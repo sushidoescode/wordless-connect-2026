@@ -4011,3 +4011,56 @@ host will be substituted). Two implementation plans follow under
 `docs/superpowers/plans/`. This entry records prompts and decisions as they
 happen; no competitive or judge research entered this entry. Nothing was
 pushed, uploaded, published, made public, history-rewritten, or submitted.
+
+## 2026-08-30 — Rainbow palette, protocol v3, generated rooms, and Vercel contract implemented
+
+Executed both 2026-08-30 plans with TDD. RED→GREEN evidence per task; all
+counts fresh at each step. Local commits: `a98138a` (canonical
+`Core/Palette.ts` registry + protocol v3 with strict old-version rejection;
+fixtures migrated atomically; the maximal-message byte-cap re-proven with the
+7-character token; `rg -n "v: 2"` sweep exits 1), `93071d2` (data-driven
+eight-swatch `PainterPaletteController` over ordered arrays failing closed on
+missing/short/duplicate bindings; ribbon derives RGB from the registry;
+glyph medallion validates eight ordered authored materials by count,
+uniqueness, and name), `14f7756` (`Core/RoomCode.ts` generator over
+`ABCDEFGHJKLMNPQRSTUVWXYZ23456789` with injectable random source;
+`RelayPort.assignSessionId`/`getEffectiveSessionId`; assignment after policy
+creation throws `session ID cannot change during a relay instance`; the
+composition root generates once per lifecycle before the first applyRound and
+renders the ivory `ROOM · ABC123` HUD line; browser `?room=` prefill helper
+with single-valid-query > env-fallback > blank precedence and no autojoin),
+`cef358e` (root `vercel.json` build contract, restrictive `.vercelignore`,
+`.vercel/` git-ignored, redacted `web/.env.production.example`), and
+`c5b749e` (Lens Studio MCP scene work).
+
+Scene work observations: the `asset-graphql duplicateAsset` mutation renamed
+the source material in place instead of copying (a tool defect); recovered by
+renaming back and creating the eight `Wordless Painter *` materials natively
+via `createNativeAsset('Material')` + `addPass` on the existing
+`Wordless Additive Unlit` graph, each with exact canonical baseColor and the
+Ribbon Core pass configuration (blendMode Add, no depth write, two-sided).
+Measured HUD anchors before layout (prompt (-20,49,3), timer (69,49,3), phase
+(-72,34,3), connection (-57,-49,3), medallion (55,4,4) outer radius 27,
+brush rest (-60,0,0)); palette root moved (33,34,4)→(30,42,4) with a 14 cm
+2×4 grid (columns ±21/±7, rows ±7): radius-6 hit targets keep 2 cm clear
+space (16.7% of one 12 cm target width ≥ the required 15%), the magenta
+corner clears the medallion frame by 1.7 cm, and the grid clears prompt,
+timer, brush, and result bounds. Old `Palette Mint` subtree deleted; the
+five duplicated subtrees renamed canonically; ordered arrays wired through
+`scene-graphql setProperty` (VirtualScene rejects array-typed script inputs).
+
+Verification: 453/453 core tests, 120/120 web unit, 55-module production
+build, 46/46 Playwright E2E at both viewports, `tools/typecheck/check.sh`
+exit 0, `git diff --check` clean. Preview runtime proof: two consecutive
+Preview lifecycles generated rooms `N7Q6LX` then `89CLD3` (both inside the
+unambiguous alphabet, different across restarts), HUD shows `ROOM · 89CLD3`,
+transport reached SUBSCRIBED against the live Supabase project with presence
+TX at 185 bytes, and the runtime scene query confirms all eight swatches at
+the measured positions with only the selected violet ring enabled. One stale
+first Preview pass after recompile threw a TypeError from old bytecode before
+the fresh compile loaded; the immediately following clean run is the evidence
+of record. Swatch selection under a live round is deliberately deferred to
+the hosted live proof, where all eight colors must cross the relay. This is
+simulated Lens Studio Preview evidence, not hardware footage or a device
+test. Nothing was pushed, uploaded, published, made public, history-rewritten,
+or submitted.

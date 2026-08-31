@@ -354,8 +354,16 @@ test('validates join input without bypassing the six-character code', async ({ p
 })
 
 test('room query prefills the join input without auto-joining', async ({ page }) => {
-  await page.goto('/?room=wave42')
-  await expect(page.getByLabel('Six-character session code')).toHaveValue('WAVE42')
+  // Guard against a tautological pass: the query code must differ from any
+  // environment fallback baked into the build.
+  await page.goto('/')
+  const baseline = await page
+    .getByLabel('Six-character session code')
+    .inputValue()
+  expect(baseline).not.toBe('XYZ789')
+
+  await page.goto('/?room=xyz789')
+  await expect(page.getByLabel('Six-character session code')).toHaveValue('XYZ789')
   await page.waitForTimeout(100)
   expect(await channelCount(page)).toBe(0)
   await expect(page.getByRole('button', { name: 'JOIN ROUND' })).toBeVisible()
@@ -366,7 +374,7 @@ test('room query prefills the join input without auto-joining', async ({ page })
   const joinedSessionId = await page.evaluate(() => (window as unknown as {
     __WORDLESS_RELAY_TEST__: { sent: readonly { sessionId?: string }[] }
   }).__WORDLESS_RELAY_TEST__.sent[0]?.sessionId)
-  expect(joinedSessionId).toBe('WAVE42')
+  expect(joinedSessionId).toBe('XYZ789')
 })
 
 test('malformed and duplicate room queries never reach the join input', async ({ page }) => {
@@ -385,15 +393,15 @@ test('malformed and duplicate room queries never reach the join input', async ({
 })
 
 test('manual entry overrides a room prefill on submit', async ({ page }) => {
-  await page.goto('/?room=wave42')
-  await expect(page.getByLabel('Six-character session code')).toHaveValue('WAVE42')
-  await page.getByLabel('Six-character session code').fill(' xyz789 ')
+  await page.goto('/?room=xyz789')
+  await expect(page.getByLabel('Six-character session code')).toHaveValue('XYZ789')
+  await page.getByLabel('Six-character session code').fill(' abc234 ')
   await page.getByRole('button', { name: 'JOIN ROUND' }).click()
   await expect.poll(() => channelCount(page)).toBe(1)
   const joinedSessionId = await page.evaluate(() => (window as unknown as {
     __WORDLESS_RELAY_TEST__: { sent: readonly { sessionId?: string }[] }
   }).__WORDLESS_RELAY_TEST__.sent[0]?.sessionId)
-  expect(joinedSessionId).toBe('XYZ789')
+  expect(joinedSessionId).toBe('ABC234')
 })
 
 test('has no Axe violations across every public round state', async ({ page }, testInfo) => {

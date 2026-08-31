@@ -4064,3 +4064,26 @@ the hosted live proof, where all eight colors must cross the relay. This is
 simulated Lens Studio Preview evidence, not hardware footage or a device
 test. Nothing was pushed, uploaded, published, made public, history-rewritten,
 or submitted.
+
+## 2026-08-30 — Pre-freeze adversarial review corrections
+
+An adversarial multi-dimension review of the full `d6b709f..HEAD` diff ran
+before the freeze. Confirmed corrections applied: (1) the earlier
+implementation entry's medallion-clearance sentence conflated the visual and
+interaction footprints — precisely: the magenta swatch center sits 31.26 cm
+from the medallion center, so its 2.6 cm visual halo clears the 27 cm frame
+outer radius by 1.66 cm, while the radius-6 interaction collider's region
+would overlap the frame band by 1.74 cm; that overlap is never live because
+swatch colliders are disabled whenever the palette is locked and the medallion
+is only visible in CORRECT/GLYPH_LOCKED phases, where the palette is always
+locked. The visual no-overlap contract holds; the earlier "hit targets ...
+clear the medallion" phrasing is corrected to visual-halo clearance.
+(2) `AGENTS.md`'s visual-contract palette line and the README setup flow
+still described the superseded six-color/fixed-session model and were
+reconciled in `730579c`. (3) `PAINTER_COLOR_IDS` is now `Object.freeze`d for
+parity with the definitions record (`bb74afc`); the reviewer's related
+mutation concern was otherwise refuted (TypeScript already rejects mutation).
+One review agent mutation-tested `web/src/room-prefill.ts` in the working
+tree during verification; the mutation was detected and reverted via
+`git checkout --`; the committed state was never wrong. Suites re-verified
+green after all corrections: 453 core, 120 web unit.

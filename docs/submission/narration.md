@@ -23,20 +23,19 @@ Beat 5 note: the shipped `line-05.mp3` (SHA `71d3c5cc…`) is the regenerated
 reworded line matching both the beat-5 caption and the script row below ("a
 fresh round begins"); a stale `lines.json` record that still held the earlier
 "new stroke color" text/hash was corrected. The spoken words of every line —
-beat 5 included — still require the owner listen-through.
+beat 5 included — were confirmed by the owner listen-through (2026-08-30).
 
 `docs/submission/wordless-relay-en.srt` is the **spoken-narration transcript**:
 its cue text is this eight-beat script (SRT files cannot carry a header
 comment, so the note lives here). It is a DISTINCT artifact from the shorter
-burned lower-third captions in the video (which are editorial summaries — e.g.
-beat 1 burns `One person draws a clue in space — a friend sees the same stroke
-in a browser.`, while the SRT/script reads `One draws a clue in midair — the
-same stroke arrives in a friend's browser.`). The burned lower-thirds are not a
-verbatim transcript of the spoken words, and are not required to be. Because
-audio perception is blocked, whether the SRT matches the actual spoken audio
-word-for-word is UNVERIFIED; the SRT's cue timings are targets from the approved
-59-second timeline and should be re-timed against the audio once a listener can
-confirm the spoken words.
+burned lower-third captions in the recut video (which are editorial summaries —
+e.g. beat 1 burns `One draws in space — a friend guesses in a browser.`, while
+the SRT/script reads `One draws a clue in midair — the same stroke arrives in a
+friend's browser.`). The burned lower-thirds are not a verbatim transcript of
+the spoken words, and are not required to be. No reviewer tool can perceive
+audio, but the owner listen-through confirmed the spoken lines; the SRT's cue
+timings remain nominal targets from the 59-second timeline (the burned captions
+are the authoritative on-screen text).
 
 ## Script
 
@@ -60,8 +59,9 @@ Used for the accepted candidate's narration generation (2026-08-30). The voice
 ID resolved to the named voice and the provider/model/settings below were the
 generation parameters; provider, voice name/ID, model, settings, SDK version,
 generation date, and output hashes are recorded in ignored local metadata, and
-the ElevenLabs key was never exposed. The one remaining open item is the
-spoken-audio verification (blocked; see the status note above).
+the ElevenLabs key was never exposed. The spoken-audio verification is complete:
+the owner listen-through (2026-08-30) confirmed the spoken narration (see the
+status note above).
 
 - Provider: ElevenLabs (the owner's account)
 - Voice: Chris — Charming, Down-to-Earth

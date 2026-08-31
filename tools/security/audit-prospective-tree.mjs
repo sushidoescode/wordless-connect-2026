@@ -21,17 +21,18 @@ import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 import { auditReleaseHistory, KNOWN_ALLOWLIST } from './audit-release-history.mjs'
 
-// Text vs binary is decided by CONTENT, not a file-extension allowlist, so any
-// reviewable text blob is scanned regardless of extension (.toml, Lens .mat /
-// .graphShader resources, extensionless files, …). A blob counts as binary
-// (filename-only, no content scan) if a NUL byte appears in the sniff window or
-// the window is not valid UTF-8; otherwise its full content is scanned.
-const BINARY_SNIFF_BYTES = 65536
+// Text vs binary is decided by CONTENT over the COMPLETE buffer (not a file-
+// extension allowlist and not a prefix window), so any reviewable text blob is
+// scanned regardless of extension (.toml, Lens .mat / .graphShader resources,
+// extensionless files, …), nothing beyond any offset can evade scanning, and a
+// multibyte UTF-8 character straddling a chunk boundary can never be mis-flagged
+// as binary. A blob is binary (filename-only, no content scan) iff a NUL byte
+// appears ANYWHERE or the WHOLE buffer is not valid UTF-8; otherwise its full
+// content is scanned.
 const utf8Strict = new TextDecoder('utf-8', { fatal: true })
-function looksBinary(buf) {
-  const n = Math.min(buf.length, BINARY_SNIFF_BYTES)
-  for (let i = 0; i < n; i += 1) if (buf[i] === 0) return true // NUL -> binary
-  try { utf8Strict.decode(buf.subarray(0, n)); return false } catch { return true }
+export function looksBinary(buf) {
+  if (buf.includes(0)) return true // NUL anywhere in the complete buffer -> binary
+  try { utf8Strict.decode(buf); return false } catch { return true } // validate the WHOLE buffer
 }
 
 // EXPLICITLY ENUMERATED synthetic self-references. Each entry is the EXACT
@@ -75,7 +76,9 @@ export const SYNTHETIC_SELF_REFERENCES = Object.freeze([
   { path: 'tools/security/audit-release-history.mjs', rule: 'encoded-service-role', label: null },
 ])
 
-const selfRefKey = (path, rule, label) => `${path}\u0000${rule}\u0000${label ?? 'null'}`
+// Structured, fully-reviewable tuple key (no control-character sentinel): a
+// path/rule/label collision is impossible because JSON encodes each field.
+const selfRefKey = (path, rule, label) => JSON.stringify([path, rule, label ?? null])
 const SYNTHETIC_SELF_REFERENCE_KEYS = new Set(
   SYNTHETIC_SELF_REFERENCES.map((e) => selfRefKey(e.path, e.rule, e.label)))
 
@@ -112,7 +115,7 @@ function git(args) {
 
 // Decides text vs binary from the blob's own BYTES (content), then returns the
 // scannable blob: text -> full UTF-8 content; binary -> filename-only ('').
-function blobFromBuffer(path, buf) {
+export function blobFromBuffer(path, buf) {
   return looksBinary(buf) ? { path, text: '' } : { path, text: buf.toString('utf8') }
 }
 

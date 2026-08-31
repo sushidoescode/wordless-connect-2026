@@ -8,6 +8,8 @@ import { join, resolve } from 'node:path'
 import {
   SYNTHETIC_SELF_REFERENCES,
   partitionAuditReport,
+  looksBinary,
+  blobFromBuffer,
 } from '../security/audit-prospective-tree.mjs'
 import { auditReleaseHistory } from '../security/audit-release-history.mjs'
 
@@ -280,4 +282,73 @@ test('CONTENT: a BINARY blob (NUL byte) carrying a home-path-shaped string stays
   // the home-path-shaped bytes inside do not trigger a finding.
   const bin = Buffer.concat([Buffer.from([0x00, 0x01, 0x02]), Buffer.from(`${HOME}\n`)])
   assert.equal(runWrapperOnFiles({ 'blob.mesh': bin, 'README.md': 'clean\n' }), 0)
+})
+
+// --- CONTENT detection over the COMPLETE buffer (no prefix window) ---
+
+const HOME_PATH = ['', 'Users', 'someone', 'proj', 'z.txt'].join('/') // matches the home-path rule
+
+// A valid-UTF-8 buffer whose multibyte character (U+20AC '€', 3 bytes) straddles
+// the old 65536-byte sniff boundary (bytes 65535/65536/65537), followed by a
+// home path. Under a prefix-window decode this looked "binary" (truncated char);
+// under whole-buffer validation it is valid text and must be scanned.
+function boundaryStraddleBuffer() {
+  const head = Buffer.alloc(65535, 0x61) // 65535 'a'
+  const euro = Buffer.from('€', 'utf8')  // 0xE2 0x82 0xAC at indices 65535..65537
+  const tail = Buffer.from(` see ${HOME_PATH}\n`, 'utf8')
+  return Buffer.concat([head, euro, tail])
+}
+
+test('looksBinary: valid UTF-8 with a multibyte char across the 64 KiB boundary is TEXT', () => {
+  assert.equal(looksBinary(boundaryStraddleBuffer()), false)
+})
+
+test('looksBinary: a NUL byte anywhere (incl. beyond 64 KiB) is BINARY', () => {
+  const late = Buffer.concat([Buffer.alloc(70000, 0x61), Buffer.from([0x00]), Buffer.from('x')])
+  assert.equal(looksBinary(late), true)
+  assert.equal(looksBinary(Buffer.from([0x00, 0x41])), true)
+})
+
+test('looksBinary: invalid UTF-8 without a NUL is BINARY (filename-only)', () => {
+  // 0xFF is never a valid UTF-8 lead byte; no NUL present.
+  assert.equal(looksBinary(Buffer.from([0xff, 0xfe, 0x41, 0x42])), true)
+})
+
+test('INTEGRATION: a home path in text that straddles the 64 KiB boundary is scanned and BLOCKS', async () => {
+  const blob = blobFromBuffer('notes.md', boundaryStraddleBuffer())
+  assert.ok(blob.text.includes(HOME_PATH), 'boundary-straddling text must be scanned as full content')
+  const { report } = await auditReleaseHistory({ tree: [blob] })
+  const verdict = partitionAuditReport(report)
+  assert.equal(verdict.exitCode, 20)
+  assert.ok(verdict.otherBlocking.some((f) => f.rule === 'absolute-home-path' && f.path === 'notes.md'))
+})
+
+test('INTEGRATION: a home path BEYOND 64 KiB cannot evade scanning (BLOCKS)', async () => {
+  const buf = Buffer.concat([Buffer.alloc(70000, 0x61), Buffer.from(`\n${HOME_PATH}\n`, 'utf8')])
+  const blob = blobFromBuffer('big.md', buf)
+  assert.ok(blob.text.includes(HOME_PATH))
+  const { report } = await auditReleaseHistory({ tree: [blob] })
+  assert.equal(partitionAuditReport(report).exitCode, 20)
+})
+
+test('INTEGRATION: genuine binary (NUL) carrying a home-path-shaped string stays filename-only (exit 0)', async () => {
+  const bin = Buffer.concat([Buffer.from([0x00, 0x01]), Buffer.from(`${HOME_PATH}\n`, 'utf8')])
+  const blob = blobFromBuffer('blob.mesh', bin)
+  assert.equal(blob.text, '')
+  const { report } = await auditReleaseHistory({ tree: [blob] })
+  assert.equal(partitionAuditReport(report).exitCode, 0)
+})
+
+test('selfRefKey (JSON tuple) still exempts enumerated refs and blocks a home path in a machinery file', () => {
+  const finding2 = (rule, path, label = null) => ({ rule, path, label, count: 1, commit: null })
+  const r = partitionAuditReport({
+    blocking: [
+      finding2('supabase-secret-name', 'tools/core-tests/release-history-audit.test.mjs', 'SUPABASE_ACCESS_TOKEN'),
+      finding2('absolute-home-path', 'tools/core-tests/release-history-audit.test.mjs', null),
+    ],
+    allowlisted: [], allowlistedCount: 0,
+  })
+  assert.equal(r.exitCode, 20)
+  assert.equal(r.patternMachinery.length, 1)
+  assert.equal(r.otherBlocking.length, 1)
 })

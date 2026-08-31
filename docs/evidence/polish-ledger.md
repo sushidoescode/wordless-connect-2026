@@ -98,9 +98,10 @@ change or retain rationale, and fresh proof. Captures remain local and ignored.
 - **Recut candidate:** `captures/task16/wordless-relay-final-59s-v2.mp4`, SHA-256
   `254945f2977a69221c30b13e0f6cde7cd9af95d8097b6bc61529688c496050c1`, reproducible
   via `captures/task16/recut.mjs` (deterministic). Bound to the rebuilt review
-  bundle aggregate `f9b3f28a5e1095d0617a8595423f09ffe844fe55ee6ac94910a1a90b24e02188`
+  bundle aggregate `cc47e6e7e339d79fa9d308c77aa252fe5edd541ff68f9f3ed4b23c80e719e79f`
   (19 components: overlay renderer + rendered-overlay hashes + narration
-  provenance, no SRT) and README first-screen `45b22483…`.
+  provenance incl. the owner audio sign-off, no SRT) and README first-screen
+  `45b22483…`.
 - **Smallest changes that clear the blocker:** re-composite panes to 840 px at
   y=60 with a dedicated bottom overlay band; caption/card main text 64 px
   (measured cap height 46–48 px ≥ 42); two-row cards so they clear the held glyph

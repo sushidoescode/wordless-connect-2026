@@ -3924,7 +3924,45 @@ defects were then corrected WITHOUT changing or recutting the MP4:
    (`f9b3f28a…`, 19 components: overlay renderer + rendered-overlay hashes +
    narration provenance, no SRT masquerading as caption source); the fresh
    reviews are bound to that aggregate. The MP4 was not changed.
-6. **Two-pass audit re-run** with all 65 sidecars (content-based detection,
+6. **Two-pass audit re-run** with all 67 sidecars (content-based detection,
    in-memory env comparison): 0 env-value leaks, 0 blocking; committed tree ==
    audited tree. Full verification suite green. Committed locally; stopped before
    every external action. Nothing pushed, uploaded, published, or submitted.
+
+## 2026-08-30 — Audit boundary hardening + final panel on the sign-off bundle
+
+A last evidence/tooling-only pass (MP4 254945f2 unchanged; no recut, no
+narration regen, no ElevenLabs, no external action):
+
+1. **Audit text/binary detection now validates the COMPLETE buffer.** The old
+   `looksBinary` sniffed only the first 65,536 bytes, so a multibyte UTF-8
+   character straddling that boundary decoded as invalid → the valid-UTF-8 file
+   was mis-flagged binary and skipped (false-clean), and a NUL/secret beyond
+   64 KiB could evade the sniff. It now scans the whole buffer for NUL
+   (`buf.includes(0)`) and validates the whole buffer as UTF-8. Added regression
+   tests: a valid multibyte char across the 64 KiB boundary is scanned and blocks
+   a home path; a home path beyond 64 KiB blocks; invalid UTF-8 and genuine
+   binary (NUL) stay filename-only. The `selfRefKey` control-character sentinel
+   (a stray literal U+0001 had crept in) was replaced with a reviewable
+   `JSON.stringify([path, rule, label])` tuple key. Wrapper suite 22 → 29 tests;
+   core 383.
+2. **Fresh three-reviewer two-stage panel** (run as a workflow) on the exact
+   final MP4 + the FINAL bundle: each reviewer verified the SHA, self-decoded the
+   video, recomputed the bundle aggregate, froze Stage A, then ran Stage B, and
+   wrote its COMPLETE verbatim transcript to
+   `local-handoff/reviews/task16/final3-reviewer-{1,2,3}.md`.
+3. **Bundle rebuilt to bind the owner audio sign-off** into the narration
+   provenance → one coherent final bundle, aggregate
+   `cc47e6e7e339d79fa9d308c77aa252fe5edd541ff68f9f3ed4b23c80e719e79f`; the fresh
+   panel is bound to it. Reconciled the judged docs: narration owner-signed-off
+   everywhere (removed "still requires"/"UNVERIFIED"/open-blocker wording and the
+   stale v1 beat-1 caption example); EDL observed columns set to the recut facts
+   (beat-1 caption `One draws in space — a friend guesses in a browser.`, correct
+   onset ~10.3 s, end-card cut at 51.0 s); the ≥12-char env threshold documented;
+   70 sidecars (67 + the 3 fresh panel transcripts); aggregate cc47e6e7 across the
+   package; Task 15 stays PARTIAL.
+4. Full verification (check, E2E, typecheck, links, hygiene), exact candidate
+   verification, bundle hashing, and the two-pass prospective audit re-run; both
+   audit trees equal committed HEAD^{tree}. Committed locally only. Outcome
+   CANDIDATE ASSEMBLED WITH KNOWN RESILIENCE GAPS. Nothing pushed, uploaded,
+   published, made public, history-rewritten, or submitted.

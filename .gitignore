@@ -56,6 +56,9 @@ playwright-report/
 test-results/
 .playwright-mcp/
 
+# Vercel CLI local project linkage (never committed)
+.vercel/
+
 # Local captures and exports
 captures/
 exports/

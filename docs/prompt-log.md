@@ -3966,3 +3966,48 @@ narration regen, no ElevenLabs, no external action):
    audit trees equal committed HEAD^{tree}. Committed locally only. Outcome
    CANDIDATE ASSEMBLED WITH KNOWN RESILIENCE GAPS. Nothing pushed, uploaded,
    published, made public, history-rewritten, or submitted.
+
+## 2026-08-30 — Owner-approved rainbow/room/hosted iteration begins; old candidate invalidated as proof of the new runtime
+
+The owner approved a post-freeze product iteration via a local handoff prompt
+and explicitly accepted that changing the protected runtime/UI invalidates the
+current candidate as proof of the new runtime. Approved decisions: (1) eight
+vivid fixed painter colors; (2) semantic feedback colors stay distinct and
+unselectable; (3) one fresh six-character room code generated once per Lens
+Preview lifecycle, stable through rounds/replay/reconnect/recovery, new code
+per Preview restart; (4) hosting the ordinary-browser guesser at a production
+`*.vercel.app` URL on the free/Hobby tier with manual room entry plus a
+non-autojoining `?room=` prefill; (5) using the hosted production page for the
+new live relay proof and submission capture. The Vercel browser deployment is
+the sole newly authorized external publication; no push, visibility change,
+history rewrite, custom domain, paid resource, video upload, hosted-video URL
+insertion, or contest submission is authorized.
+
+Recorded the binding design amendment
+`docs/superpowers/specs/2026-08-30-wordless-rainbow-room-vercel-amendment.md`
+and linked it from the approved design header. It supersedes the section 15
+three-color palette (mint leaves the selectable enum and becomes an invalid
+`stroke.begin` payload; coral was never selectable), bumps the wire protocol
+to v3 with strict rejection of every other version, replaces the fixed scene
+session code (`EOU4LZ`, coordination value, not a credential) with a
+Lens-generated room code from alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`
+under generate-narrow/validate-wide (`[A-Z0-9]{6}` stays the public
+validation contract), and narrowly opens the review-amendment section 6
+external-action gate for exactly one Vercel Hobby deployment of the audited
+static `web/dist` output.
+
+Candidate invalidation per the 2026-08-29 amendment section 4: freeze
+`31123d3` (manifest `bcb3859a…`), candidate `254945f2…`, hero `72664be3…`,
+README render `45b22483…`, bundle aggregate `cc47e6e7…`, and the final panel
+transcripts remain valid historical evidence for the old frozen runtime only.
+They will be marked superseded where the new candidate becomes authoritative,
+never deleted or relabeled as proof of the new palette/room/hosted runtime.
+
+Baseline verified before any change at HEAD `d6b709f` with a clean worktree:
+`npm run check` green — 424 core tests, 109 web unit tests, 55-module Vite
+production build. Lens Studio MCP reachable. Vercel CLI installed but not
+authenticated (deployment blocks later on `vercel login` only; no alternate
+host will be substituted). Two implementation plans follow under
+`docs/superpowers/plans/`. This entry records prompts and decisions as they
+happen; no competitive or judge research entered this entry. Nothing was
+pushed, uploaded, published, made public, history-rewritten, or submitted.

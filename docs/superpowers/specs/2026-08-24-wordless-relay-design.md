@@ -26,6 +26,18 @@ browser renders that public projection, coral temporarily overrides the live
 path after an authoritative incorrect result, and the selected color returns
 for the correct exact-path glyph. Section 15 is the binding amendment.
 
+**Rainbow/room/hosted amendment — 2026-08-30:** The owner approved an
+eight-color painter palette (superseding the section 15 three-color set),
+protocol v3 with strict rejection of every other version, a Lens-generated
+six-character room code created once per Preview lifecycle (superseding the
+fixed scene session code), a `?room=` browser prefill that never auto-joins,
+and one production Vercel Hobby deployment of the static browser as the sole
+newly authorized external publication. The binding amendment is
+`2026-08-30-wordless-rainbow-room-vercel-amendment.md`; it supersedes
+conflicting palette, protocol-version, session-code, and browser-hosting
+language below and grants the fresh post-freeze authority required by the
+2026-08-29 submission-review amendment.
+
 ## 1. Product sentence
 
 One player paints a clue in midair on Spectacles; a friend watches the stroke

@@ -40,6 +40,7 @@
     resultMarkerVisual: false
     resultText: false
     roleText: false
+    roomText: false
     timerText: false
   ScriptTypesHidden:
     {}
@@ -56,6 +57,7 @@
       timerText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       connectionText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       resultText: !<reference.Text> 00000000-0000-0000-0000-000000000000
+      roomText: !<reference.Text> 00000000-0000-0000-0000-000000000000
       connectionDot: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
       connectionDotVisual: !<reference.RenderMeshVisual> 00000000-0000-0000-0000-000000000000
       resultMarker: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
@@ -73,6 +75,7 @@
     - // @input Component.Text timerText
     - // @input Component.Text connectionText
     - // @input Component.Text resultText
+    - // @input Component.Text roomText
     - // @input SceneObject connectionDot
     - // @input Component.RenderMeshVisual connectionDotVisual
     - // @input SceneObject resultMarker

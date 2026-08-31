@@ -29,13 +29,11 @@
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
     frameVisual: false
+    glyphMaterials: false
     glyphVisual: false
     ivoryFrameMaterial: false
-    lemonGlyphMaterial: false
     medallionRoot: false
-    mintGlyphMaterial: false
     revealedWordLabel: false
-    violetGlyphMaterial: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -50,9 +48,8 @@
       glyphVisual: !<reference.RenderMeshVisual> 00000000-0000-0000-0000-000000000000
       revealedWordLabel: !<reference.Text> 00000000-0000-0000-0000-000000000000
       ivoryFrameMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
-      violetGlyphMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
-      lemonGlyphMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
-      mintGlyphMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      glyphMaterials: !<reference.Material[]>
+        []
   ScriptTypes:
     -
       {}
@@ -62,6 +59,4 @@
     - // @input Component.RenderMeshVisual glyphVisual
     - // @input Component.Text revealedWordLabel
     - // @input Asset.Material ivoryFrameMaterial
-    - // @input Asset.Material violetGlyphMaterial
-    - // @input Asset.Material lemonGlyphMaterial
-    - // @input Asset.Material mintGlyphMaterial
+    - "// @input Asset.Material[] glyphMaterials"

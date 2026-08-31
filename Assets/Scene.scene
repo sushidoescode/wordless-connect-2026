@@ -608,12 +608,33 @@
       glyphVisual: !<reference.RenderMeshVisual> 80d7b866-5ff6-4da0-8607-9da0161f9118
       revealedWordLabel: !<reference.Text> 52c49360-6b96-4a24-9ae1-f740dfd8ca4e
       ivoryFrameMaterial: !<reference.Material> 90a94261-4001-4028-8024-57e405422d93
-      violetGlyphMaterial: !<reference.Material> e6412e69-1877-465a-9d87-bb00663cb1f7
-      lemonGlyphMaterial: !<reference.Material> 5219a386-27aa-4015-8fe4-b61a7ee27131
-      mintGlyphMaterial: !<reference.Material> e1798206-a522-4397-806b-8ea35db9828b
+      glyphMaterials: !<reference.Material[]>
+        - !<reference> 6594ec10-a89d-4feb-b364-068501f31aaf
+        - !<reference> d7cf9f3c-b683-4266-b3bc-36d5fd0f0021
+        - !<reference> 58d9fb19-ee0e-49b7-816a-286cad956de7
+        - !<reference> 7eaf3f4b-94de-47c6-ab1d-a9d37e85527e
+        - !<reference> bdf2aa69-d8df-4c6c-9b32-096ecc856b2c
+        - !<reference> e0277b4b-fc92-431d-9168-718f27246737
+        - !<reference> 67fec4da-502c-4af9-87c7-a6fe762a8d32
+        - !<reference> f881beab-3746-419e-82ab-08cf8f033838
   ScriptTypes:
     "":
       {}
+- !<SceneObject/0cb4949e-ff50-412f-b3f0-a428991b8bd4>
+  PrefabRemaps:
+    []
+  Name: Palette Orange Halo
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 5.200000, y: 5.200000, z: 0.800000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 75798c9b-2894-43ed-be33-e2a0d046c07e
 - !<SceneObject/0cffb60e-73f6-43c5-bb4f-286d39e0f1f6>
   PrefabRemaps:
     []
@@ -647,6 +668,24 @@
   ScriptTypes:
     "":
       {}
+- !<ColliderComponent/0d61db18-89d6-4979-a26a-ef43524c84e0>
+  PrefabRemaps:
+    []
+  Name: Physics Collider
+  Enabled: true
+  Shape: !<Sphere>
+    FitVisual: false
+    Radius: 6.000000
+  Matter: !<reference> 00000000-0000-0000-0000-000000000000
+  Filter: !<reference> 00000000-0000-0000-0000-000000000000
+  OverlapFilter: !<reference> 00000000-0000-0000-0000-000000000000
+  WorldSettings: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableSmoothing: false
+  PositionTension: 30.000000
+  RotationTension: 30.000000
+  ForceCompound: false
+  Intangible: false
+  ShowCollider: false
 - !<SceneObject/0e778a10-bd57-4a2a-b20a-b6f4326e8058>
   PrefabRemaps:
     []
@@ -677,21 +716,6 @@
     - !<own> 9e373d68-993f-4c8f-83a0-6644f1d9fefd
   Components:
     []
-- !<SceneObject/10e59af1-8eef-46de-a614-61e39726c6b9>
-  PrefabRemaps:
-    []
-  Name: Palette Mint Halo
-  Enabled: false
-  Layers: 1
-  LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 5.200000, y: 5.200000, z: 0.800000}
-    HasSegmentScaleCompensation: false
-  Children:
-    []
-  Components:
-    - !<own> 1a637685-3626-46ff-83db-e29d27cd9de2
 - !<SceneObject/10f60da2-2196-40ad-9e72-8a6bc7e86f35>
   PrefabRemaps:
     []
@@ -707,6 +731,42 @@
     - !<own> b54dc8b5-dbcf-4fcc-a310-fb436127cc60
   Components:
     []
+- !<ScriptComponent/1101cb16-a4cf-407f-bfbc-7822d047608b>
+  PrefabRemaps:
+    []
+  Name: Interactable
+  Enabled: true
+  ScriptAsset: !<reference> 652e631a-22d0-4941-9f74-2943df59f34c
+  ScriptInputsDefault:
+    targetingVisual: true
+    keepHoverOnTrigger: true
+    enableInstantDrag: true
+    isScrollable: true
+    allowMultipleInteractors: true
+    enablePokeDirectionality: true
+    acceptableXDirections: true
+    acceptableYDirections: true
+    acceptableZDirections: true
+    useFilteredPinch: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      targetingMode: !<float> 2.000000
+      targetingVisual: !<float> 1.000000
+      ignoreInteractionPlane: true
+      keepHoverOnTrigger: false
+      enableInstantDrag: false
+      isScrollable: false
+      allowMultipleInteractors: true
+      enablePokeDirectionality: false
+      acceptableXDirections: !<float> 0.000000
+      acceptableYDirections: !<float> 0.000000
+      acceptableZDirections: !<float> 1.000000
+      useFilteredPinch: false
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/11626bec-8345-4c96-a80f-29ebc41c9b75>
   PrefabRemaps:
     []
@@ -811,13 +871,30 @@
   ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
   ShadowDensity: 1.000000
   Materials:
-    - !<reference> e6412e69-1877-465a-9d87-bb00663cb1f7
+    - !<reference> 67fec4da-502c-4af9-87c7-a6fe762a8d32
   Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
   Skin: !<reference> 00000000-0000-0000-0000-000000000000
   BlendShapesEnabled: true
   BlendNormals: false
   BlendShapes:
     {}
+- !<SceneObject/1631acd2-f850-4d8d-8e68-fe07790925fe>
+  PrefabRemaps:
+    []
+  Name: Palette Cobalt
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: -7.000000, y: -7.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 72b59ded-a612-42af-bc38-fc1f175953cc
+    - !<own> ab637133-3385-4c4f-9181-8c77d0f97729
+  Components:
+    - !<own> 3fdbe99d-c16c-4f79-96dc-fd5a4f001b59
+    - !<own> 23599f24-8f09-48e7-9b6a-54386aebc649
 - !<SceneObject/181c239f-175e-4912-94fc-d37a2599b2d6>
   PrefabRemaps:
     []
@@ -840,7 +917,7 @@
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Position: {x: 7.000000, y: 7.000000, z: 0.000000}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
     Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
     HasSegmentScaleCompensation: false
@@ -865,7 +942,7 @@
     []
   Components:
     - !<own> 613d4b9f-2138-4b84-b028-0546340d95db
-- !<RenderMeshVisual/1a637685-3626-46ff-83db-e29d27cd9de2>
+- !<RenderMeshVisual/1b1ef317-f304-424a-901a-23e8f0239ffc>
   PrefabRemaps:
     []
   Name: Render Mesh Visual
@@ -900,6 +977,60 @@
       outerMaterial: !<reference.Material> 2c726d49-d4ad-45fa-a4ad-86b5eba7f857
       coreMaterial: !<reference.Material> e6412e69-1877-465a-9d87-bb00663cb1f7
       drawHeadVisual: !<reference.SceneObject> 50df4d19-e6ab-458a-82e4-b91151d9e171
+  ScriptTypes:
+    "":
+      {}
+- !<ColliderComponent/1d3e53a3-9fad-4db7-8abd-e97287b74bcf>
+  PrefabRemaps:
+    []
+  Name: Physics Collider
+  Enabled: true
+  Shape: !<Sphere>
+    FitVisual: false
+    Radius: 6.000000
+  Matter: !<reference> 00000000-0000-0000-0000-000000000000
+  Filter: !<reference> 00000000-0000-0000-0000-000000000000
+  OverlapFilter: !<reference> 00000000-0000-0000-0000-000000000000
+  WorldSettings: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableSmoothing: false
+  PositionTension: 30.000000
+  RotationTension: 30.000000
+  ForceCompound: false
+  Intangible: false
+  ShowCollider: false
+- !<ScriptComponent/1ee85e6a-9394-45f2-a624-a5a0edc1976c>
+  PrefabRemaps:
+    []
+  Name: Interactable
+  Enabled: true
+  ScriptAsset: !<reference> 652e631a-22d0-4941-9f74-2943df59f34c
+  ScriptInputsDefault:
+    targetingVisual: true
+    keepHoverOnTrigger: true
+    enableInstantDrag: true
+    isScrollable: true
+    allowMultipleInteractors: true
+    enablePokeDirectionality: true
+    acceptableXDirections: true
+    acceptableYDirections: true
+    acceptableZDirections: true
+    useFilteredPinch: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      targetingMode: !<float> 2.000000
+      targetingVisual: !<float> 1.000000
+      ignoreInteractionPlane: true
+      keepHoverOnTrigger: false
+      enableInstantDrag: false
+      isScrollable: false
+      allowMultipleInteractors: true
+      enablePokeDirectionality: false
+      acceptableXDirections: !<float> 0.000000
+      acceptableYDirections: !<float> 0.000000
+      acceptableZDirections: !<float> 1.000000
+      useFilteredPinch: false
   ScriptTypes:
     "":
       {}
@@ -953,6 +1084,59 @@
     - !<own> 83ef588c-5040-4344-b15f-0554c739da0b
   Components:
     []
+- !<SceneObject/2301f557-2c9a-436b-a7d9-fa941e1048df>
+  PrefabRemaps:
+    []
+  Name: Palette Scarlet
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: -21.000000, y: 7.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 4863405c-7697-4010-a54c-6f428447df59
+    - !<own> fb078fb2-38b5-4a9c-bb89-e46119a30d4f
+  Components:
+    - !<own> 5f9ae244-5aea-48f2-ac33-2801ab812b5f
+    - !<own> 4aa82198-4750-4c5f-8d44-76b2d4e876de
+- !<ScriptComponent/23599f24-8f09-48e7-9b6a-54386aebc649>
+  PrefabRemaps:
+    []
+  Name: Interactable
+  Enabled: true
+  ScriptAsset: !<reference> 652e631a-22d0-4941-9f74-2943df59f34c
+  ScriptInputsDefault:
+    targetingVisual: true
+    keepHoverOnTrigger: true
+    enableInstantDrag: true
+    isScrollable: true
+    allowMultipleInteractors: true
+    enablePokeDirectionality: true
+    acceptableXDirections: true
+    acceptableYDirections: true
+    acceptableZDirections: true
+    useFilteredPinch: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      targetingMode: !<float> 2.000000
+      targetingVisual: !<float> 1.000000
+      ignoreInteractionPlane: true
+      keepHoverOnTrigger: false
+      enableInstantDrag: false
+      isScrollable: false
+      allowMultipleInteractors: true
+      enablePokeDirectionality: false
+      acceptableXDirections: !<float> 0.000000
+      acceptableYDirections: !<float> 0.000000
+      acceptableZDirections: !<float> 1.000000
+      useFilteredPinch: false
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/23861703-e5d4-4885-be1b-c3358c1877a4>
   PrefabRemaps:
     []
@@ -1053,7 +1237,7 @@
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: -13.000000, y: 0.000000, z: 0.000000}
+    Position: {x: 7.000000, y: -7.000000, z: 0.000000}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
     Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
     HasSegmentScaleCompensation: false
@@ -1063,6 +1247,21 @@
   Components:
     - !<own> 6a4628aa-e4dc-459a-98c1-85c6560a6d9f
     - !<own> 957a7a7c-3488-4fda-a88a-54e1df144f9b
+- !<SceneObject/27f59b48-b8cf-4267-a3ba-ecc7fd72896b>
+  PrefabRemaps:
+    []
+  Name: Palette Orange Fill
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.400000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 4.000000, y: 4.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 5897a1a2-b6c0-4402-afcf-c5e4862c3e78
 - !<Skin/28e05826-1521-46fa-a54c-80f2957ec80c>
   PrefabRemaps:
     []
@@ -1143,10 +1342,26 @@
     - !<own> 156b2d17-e610-480f-9f73-fa97b8b2b69b
     - !<own> b661c4a6-3e10-48d5-8c74-3e5dc8ac75b2
     - !<own> 33746571-32fa-4528-b28b-12a3dd274fb0
+    - !<own> 2c876be8-88f5-42d7-8fbd-8d8ae201b173
   Components:
     - !<own> 1d1aedc6-6d95-43da-bc8a-4cedcf62516b
     - !<own> f4762ea1-a73f-4f8d-affd-82360b508863
     - !<own> 0c4ac087-07c8-489f-8069-c42ff50f70a5
+- !<SceneObject/2c876be8-88f5-42d7-8fbd-8d8ae201b173>
+  PrefabRemaps:
+    []
+  Name: HUD Room
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: -57.000000, y: -41.000000, z: 3.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.950000, y: 1.950000, z: 1.950000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> c6067a15-5d63-4aff-a98b-ee72a54debf3
 - !<SceneObject/2dae2a27-8ce6-466a-8bff-622195c1b3a8>
   PrefabRemaps:
     []
@@ -1210,6 +1425,23 @@
   ForceCompound: false
   Intangible: false
   ShowCollider: false
+- !<SceneObject/3280a150-62be-4357-847d-e815415b2569>
+  PrefabRemaps:
+    []
+  Name: Palette Lime
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 21.000000, y: 7.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 4d220464-8982-4e98-9d71-c8dd5c7901e3
+    - !<own> eb4c050b-7e46-4cbd-b45f-95df1822a89d
+  Components:
+    - !<own> 0d61db18-89d6-4979-a26a-ef43524c84e0
+    - !<own> 9ce531ee-9503-4522-a7ef-edcda6ad53f0
 - !<RenderMeshVisual/335c5f8b-2917-49e8-8af5-220696e9bc09>
   PrefabRemaps:
     []
@@ -1237,14 +1469,19 @@
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: 33.000000, y: 34.000000, z: 4.000000}
+    Position: {x: 30.000000, y: 42.000000, z: 4.000000}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
     Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
     HasSegmentScaleCompensation: false
   Children:
     - !<own> 2799c3bc-9bf4-482a-9994-8f40e85fe2e2
     - !<own> 1894bcc1-812c-4dc8-8868-440335e95652
-    - !<own> d69c5ba9-060e-4ebf-ad07-ca894430f8cb
+    - !<own> 2301f557-2c9a-436b-a7d9-fa941e1048df
+    - !<own> 7845c8af-afee-4ff0-a4c2-5f7ffe93b8c7
+    - !<own> 3280a150-62be-4357-847d-e815415b2569
+    - !<own> d5fea10e-9b54-4842-8309-823b7ad5bd72
+    - !<own> 1631acd2-f850-4d8d-8e68-fe07790925fe
+    - !<own> 6176ffe5-c2f7-4178-b116-dc779a1f8de9
   Components:
     - !<own> 80e9b624-c2c1-4e72-80ce-70ee38c53379
 - !<SceneObject/33893a30-6ba8-432d-8ee7-768642136dd6>
@@ -1457,6 +1694,24 @@
     - !<own> 988c408a-99dc-47e6-b7c4-efbf4bf8dc3c
   Components:
     []
+- !<ColliderComponent/3fdbe99d-c16c-4f79-96dc-fd5a4f001b59>
+  PrefabRemaps:
+    []
+  Name: Physics Collider
+  Enabled: true
+  Shape: !<Sphere>
+    FitVisual: false
+    Radius: 6.000000
+  Matter: !<reference> 00000000-0000-0000-0000-000000000000
+  Filter: !<reference> 00000000-0000-0000-0000-000000000000
+  OverlapFilter: !<reference> 00000000-0000-0000-0000-000000000000
+  WorldSettings: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableSmoothing: false
+  PositionTension: 30.000000
+  RotationTension: 30.000000
+  ForceCompound: false
+  Intangible: false
+  ShowCollider: false
 - !<SceneObject/4051028a-c608-4a97-b3d5-1a3912a7c007>
   PrefabRemaps:
     []
@@ -1472,6 +1727,21 @@
     - !<own> 7aa85bd8-d423-42cd-b190-473711e94929
   Components:
     []
+- !<SceneObject/409ae522-3b00-4c05-9a9b-5b94b64aee50>
+  PrefabRemaps:
+    []
+  Name: Palette Cyan Fill
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.400000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 4.000000, y: 4.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> ed332574-056c-4fa9-bce0-8b6630fed648
 - !<SceneObject/421c3378-3246-429d-bd2f-4ee81f6751a7>
   PrefabRemaps:
     []
@@ -1517,26 +1787,6 @@
     - !<own> 9eeb9f24-5cbc-47c2-83e9-12feb9eb69a6
   Components:
     []
-- !<RenderMeshVisual/46e3778c-afc2-4259-8df2-493c46b27037>
-  PrefabRemaps:
-    []
-  Name: Render Mesh Visual
-  Enabled: true
-  RenderOrder: 0
-  StretchMode: Stretch
-  VerticalAlignment: Center
-  HorizontalAlignment: Center
-  MeshShadowMode: None
-  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
-  ShadowDensity: 1.000000
-  Materials:
-    - !<reference> e1798206-a522-4397-806b-8ea35db9828b
-  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
-  Skin: !<reference> 00000000-0000-0000-0000-000000000000
-  BlendShapesEnabled: true
-  BlendNormals: false
-  BlendShapes:
-    {}
 - !<SceneObject/46ea93d6-d161-4453-9064-6ac11e1d6523>
   PrefabRemaps:
     []
@@ -1552,6 +1802,77 @@
     - !<own> 8fe2a532-9bf3-4cde-b598-04ce5470718d
   Components:
     []
+- !<SceneObject/4863405c-7697-4010-a54c-6f428447df59>
+  PrefabRemaps:
+    []
+  Name: Palette Scarlet Halo
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 5.200000, y: 5.200000, z: 0.800000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 6686dfab-8072-44ee-a5e6-6d224a29df6b
+- !<ScriptComponent/4aa82198-4750-4c5f-8d44-76b2d4e876de>
+  PrefabRemaps:
+    []
+  Name: Interactable
+  Enabled: true
+  ScriptAsset: !<reference> 652e631a-22d0-4941-9f74-2943df59f34c
+  ScriptInputsDefault:
+    targetingVisual: true
+    keepHoverOnTrigger: true
+    enableInstantDrag: true
+    isScrollable: true
+    allowMultipleInteractors: true
+    enablePokeDirectionality: true
+    acceptableXDirections: true
+    acceptableYDirections: true
+    acceptableZDirections: true
+    useFilteredPinch: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      targetingMode: !<float> 2.000000
+      targetingVisual: !<float> 1.000000
+      ignoreInteractionPlane: true
+      keepHoverOnTrigger: false
+      enableInstantDrag: false
+      isScrollable: false
+      allowMultipleInteractors: true
+      enablePokeDirectionality: false
+      acceptableXDirections: !<float> 0.000000
+      acceptableYDirections: !<float> 0.000000
+      acceptableZDirections: !<float> 1.000000
+      useFilteredPinch: false
+  ScriptTypes:
+    "":
+      {}
+- !<RenderMeshVisual/4af6eae8-e7b3-41a1-994b-807a2ae3da6f>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> e0277b4b-fc92-431d-9168-718f27246737
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<SceneObject/4c195c04-c397-454e-bd08-3485f37d84fe>
   PrefabRemaps:
     []
@@ -1582,6 +1903,54 @@
     []
   Components:
     - !<own> 5f153ad7-2baa-4fd9-a298-0dcfad86da3b
+- !<SceneObject/4d220464-8982-4e98-9d71-c8dd5c7901e3>
+  PrefabRemaps:
+    []
+  Name: Palette Lime Halo
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 5.200000, y: 5.200000, z: 0.800000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 1b1ef317-f304-424a-901a-23e8f0239ffc
+- !<ColliderComponent/4fc53a6a-e7c0-4a34-a2c6-78782ffb85a4>
+  PrefabRemaps:
+    []
+  Name: Physics Collider
+  Enabled: true
+  Shape: !<Sphere>
+    FitVisual: false
+    Radius: 6.000000
+  Matter: !<reference> 00000000-0000-0000-0000-000000000000
+  Filter: !<reference> 00000000-0000-0000-0000-000000000000
+  OverlapFilter: !<reference> 00000000-0000-0000-0000-000000000000
+  WorldSettings: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableSmoothing: false
+  PositionTension: 30.000000
+  RotationTension: 30.000000
+  ForceCompound: false
+  Intangible: false
+  ShowCollider: false
+- !<SceneObject/4ffe9aeb-b48a-4760-b4ee-3e5c7f344a7e>
+  PrefabRemaps:
+    []
+  Name: Palette Cyan Halo
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 5.200000, y: 5.200000, z: 0.800000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> f1612862-73c0-4e0e-b61b-0c6b5b74b7ae
 - !<SceneObject/50df4d19-e6ab-458a-82e4-b91151d9e171>
   PrefabRemaps:
     []
@@ -1733,6 +2102,26 @@
     - !<own> 46b79537-a269-46f1-9483-500d7a4170d6
   Components:
     []
+- !<RenderMeshVisual/5897a1a2-b6c0-4402-afcf-c5e4862c3e78>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> d7cf9f3c-b683-4266-b3bc-36d5fd0f0021
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<SceneObject/58b8fde5-db79-42ed-bfe7-874375c6050c>
   PrefabRemaps:
     []
@@ -1763,6 +2152,21 @@
     - !<own> bf2095b6-c6f8-48c8-b840-e0a6cec0dc99
   Components:
     []
+- !<SceneObject/5bee0c34-e816-4bbe-b98b-f1c78292c11b>
+  PrefabRemaps:
+    []
+  Name: Palette Magenta Fill
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.400000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 4.000000, y: 4.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> e7f60bbc-7773-4ef3-a89d-60dc479ba55f
 - !<ScriptComponent/5f153ad7-2baa-4fd9-a298-0dcfad86da3b>
   PrefabRemaps:
     []
@@ -1787,6 +2191,44 @@
   ScriptTypes:
     "":
       {}
+- !<RenderMeshVisual/5f8dd4be-b48b-4249-a053-3d6e95f557ff>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 6594ec10-a89d-4feb-b364-068501f31aaf
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<ColliderComponent/5f9ae244-5aea-48f2-ac33-2801ab812b5f>
+  PrefabRemaps:
+    []
+  Name: Physics Collider
+  Enabled: true
+  Shape: !<Sphere>
+    FitVisual: false
+    Radius: 6.000000
+  Matter: !<reference> 00000000-0000-0000-0000-000000000000
+  Filter: !<reference> 00000000-0000-0000-0000-000000000000
+  OverlapFilter: !<reference> 00000000-0000-0000-0000-000000000000
+  WorldSettings: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableSmoothing: false
+  PositionTension: 30.000000
+  RotationTension: 30.000000
+  ForceCompound: false
+  Intangible: false
+  ShowCollider: false
 - !<Text/613d4b9f-2138-4b84-b028-0546340d95db>
   PrefabRemaps:
     []
@@ -1871,6 +2313,23 @@
     CapitalizationOverride: None
   DepthTest: false
   TwoSided: false
+- !<SceneObject/6176ffe5-c2f7-4178-b116-dc779a1f8de9>
+  PrefabRemaps:
+    []
+  Name: Palette Magenta
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 21.000000, y: -7.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> edc8c715-323f-434a-bcd9-8543b9593599
+    - !<own> 5bee0c34-e816-4bbe-b98b-f1c78292c11b
+  Components:
+    - !<own> 6b1e9a04-d06b-4157-b238-ac49c84a4bd2
+    - !<own> 1ee85e6a-9394-45f2-a624-a5a0edc1976c
 - !<ScriptComponent/62967490-d66e-4479-8829-e5c9da5b5b57>
   PrefabRemaps:
     []
@@ -1997,6 +2456,26 @@
     - !<own> 80574bd1-697b-4bb5-b9ce-13b340146d82
   Components:
     - !<own> ccf4d3bc-d3c2-4580-b9c5-62f164ef7eef
+- !<RenderMeshVisual/6686dfab-8072-44ee-a5e6-6d224a29df6b>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 90a94261-4001-4028-8024-57e405422d93
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<RenderMeshVisual/6824a985-2568-4330-9880-838df769ff00>
   PrefabRemaps:
     []
@@ -2098,6 +2577,24 @@
     - !<own> ca40734c-262f-48d3-affa-9f99cd2940f7
   Components:
     []
+- !<ColliderComponent/6b1e9a04-d06b-4157-b238-ac49c84a4bd2>
+  PrefabRemaps:
+    []
+  Name: Physics Collider
+  Enabled: true
+  Shape: !<Sphere>
+    FitVisual: false
+    Radius: 6.000000
+  Matter: !<reference> 00000000-0000-0000-0000-000000000000
+  Filter: !<reference> 00000000-0000-0000-0000-000000000000
+  OverlapFilter: !<reference> 00000000-0000-0000-0000-000000000000
+  WorldSettings: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableSmoothing: false
+  PositionTension: 30.000000
+  RotationTension: 30.000000
+  ForceCompound: false
+  Intangible: false
+  ShowCollider: false
 - !<SceneObject/6c1f70d7-86d0-4972-b203-29780f8798e6>
   PrefabRemaps:
     []
@@ -2128,42 +2625,6 @@
     - !<own> 4c195c04-c397-454e-bd08-3485f37d84fe
   Components:
     []
-- !<ScriptComponent/6efc1b64-19d1-4af8-949b-68195b9598d2>
-  PrefabRemaps:
-    []
-  Name: Interactable
-  Enabled: true
-  ScriptAsset: !<reference> 652e631a-22d0-4941-9f74-2943df59f34c
-  ScriptInputsDefault:
-    targetingVisual: true
-    keepHoverOnTrigger: true
-    enableInstantDrag: true
-    isScrollable: true
-    allowMultipleInteractors: true
-    enablePokeDirectionality: true
-    acceptableXDirections: true
-    acceptableYDirections: true
-    acceptableZDirections: true
-    useFilteredPinch: true
-  ScriptTypesDefault:
-    {}
-  ScriptInputs:
-    "":
-      targetingMode: !<float> 2.000000
-      targetingVisual: !<float> 1.000000
-      ignoreInteractionPlane: true
-      keepHoverOnTrigger: false
-      enableInstantDrag: false
-      isScrollable: false
-      allowMultipleInteractors: true
-      enablePokeDirectionality: false
-      acceptableXDirections: !<float> 0.000000
-      acceptableYDirections: !<float> 0.000000
-      acceptableZDirections: !<float> 1.000000
-      useFilteredPinch: false
-  ScriptTypes:
-    "":
-      {}
 - !<SceneObject/6fe229ad-9694-4aab-b2a3-139ec1b120b7>
   PrefabRemaps:
     []
@@ -2212,21 +2673,21 @@
     - !<own> 879ce45b-bd5e-40ff-a3fe-d821523427e4
   Components:
     - !<own> 64f27597-c99d-4c59-8a08-05459cc2258d
-- !<SceneObject/72301c2f-744c-4ddf-9097-29705e611c81>
+- !<SceneObject/72b59ded-a612-42af-bc38-fc1f175953cc>
   PrefabRemaps:
     []
-  Name: Palette Mint Fill
+  Name: Palette Cobalt Halo
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.400000}
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
-    Scale: {x: 4.000000, y: 4.000000, z: 1.000000}
+    Scale: {x: 5.200000, y: 5.200000, z: 0.800000}
     HasSegmentScaleCompensation: false
   Children:
     []
   Components:
-    - !<own> 46e3778c-afc2-4259-8df2-493c46b27037
+    - !<own> 89fbee95-8b6b-416d-8085-37944c5e2eb3
 - !<ScriptComponent/73de73b3-54f3-478d-b311-8b3c014b6161>
   PrefabRemaps:
     []
@@ -2275,6 +2736,26 @@
     []
   Components:
     - !<own> 3bb9f948-2f86-4ece-a694-479c76b94a3b
+- !<RenderMeshVisual/75798c9b-2894-43ed-be33-e2a0d046c07e>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 90a94261-4001-4028-8024-57e405422d93
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<SceneObject/7605c62c-4c45-4fc0-b364-2d76d26f2b82>
   PrefabRemaps:
     []
@@ -2320,6 +2801,23 @@
     []
   Components:
     - !<own> c8e031d3-a8a1-468a-a419-427f8556de4c
+- !<SceneObject/7845c8af-afee-4ff0-a4c2-5f7ffe93b8c7>
+  PrefabRemaps:
+    []
+  Name: Palette Orange
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: -7.000000, y: 7.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 0cb4949e-ff50-412f-b3f0-a428991b8bd4
+    - !<own> 27f59b48-b8cf-4267-a3ba-ecc7fd72896b
+  Components:
+    - !<own> 4fc53a6a-e7c0-4a34-a2c6-78782ffb85a4
+    - !<own> 1101cb16-a4cf-407f-bfbc-7822d047608b
 - !<SceneObject/7aa85bd8-d423-42cd-b190-473711e94929>
   PrefabRemaps:
     []
@@ -2446,18 +2944,42 @@
     {}
   ScriptInputs:
     "":
-      violetRoot: !<reference.SceneObject> 2799c3bc-9bf4-482a-9994-8f40e85fe2e2
-      lemonRoot: !<reference.SceneObject> 1894bcc1-812c-4dc8-8868-440335e95652
-      mintRoot: !<reference.SceneObject> d69c5ba9-060e-4ebf-ad07-ca894430f8cb
-      violetRing: !<reference.SceneObject> 30f7da93-d804-4e8e-b93f-ea75352a3cb3
-      lemonRing: !<reference.SceneObject> 04448f4a-8ae6-4590-b0b6-5332664ace12
-      mintRing: !<reference.SceneObject> 10e59af1-8eef-46de-a614-61e39726c6b9
-      violetCollider: !<reference.ColliderComponent> 6a4628aa-e4dc-459a-98c1-85c6560a6d9f
-      lemonCollider: !<reference.ColliderComponent> 31a0a5ed-f61e-4439-bea3-b1166a4a461f
-      mintCollider: !<reference.ColliderComponent> a1680619-6c15-44b1-8b7f-1b399d9bb4bc
-      violetInteractable: !<MappingBased.AssignableType_1> 957a7a7c-3488-4fda-a88a-54e1df144f9b
-      lemonInteractable: !<MappingBased.AssignableType_2> 0acdf1c0-41e7-4b84-a8a8-679d2ee30ffc
-      mintInteractable: !<MappingBased.AssignableType_3> 6efc1b64-19d1-4af8-949b-68195b9598d2
+      swatchRoots: !<reference.SceneObject[]>
+        - !<reference> 2301f557-2c9a-436b-a7d9-fa941e1048df
+        - !<reference> 7845c8af-afee-4ff0-a4c2-5f7ffe93b8c7
+        - !<reference> 1894bcc1-812c-4dc8-8868-440335e95652
+        - !<reference> 3280a150-62be-4357-847d-e815415b2569
+        - !<reference> d5fea10e-9b54-4842-8309-823b7ad5bd72
+        - !<reference> 1631acd2-f850-4d8d-8e68-fe07790925fe
+        - !<reference> 2799c3bc-9bf4-482a-9994-8f40e85fe2e2
+        - !<reference> 6176ffe5-c2f7-4178-b116-dc779a1f8de9
+      swatchRings: !<reference.SceneObject[]>
+        - !<reference> 4863405c-7697-4010-a54c-6f428447df59
+        - !<reference> 0cb4949e-ff50-412f-b3f0-a428991b8bd4
+        - !<reference> 04448f4a-8ae6-4590-b0b6-5332664ace12
+        - !<reference> 4d220464-8982-4e98-9d71-c8dd5c7901e3
+        - !<reference> 4ffe9aeb-b48a-4760-b4ee-3e5c7f344a7e
+        - !<reference> 72b59ded-a612-42af-bc38-fc1f175953cc
+        - !<reference> 30f7da93-d804-4e8e-b93f-ea75352a3cb3
+        - !<reference> edc8c715-323f-434a-bcd9-8543b9593599
+      swatchColliders: !<reference.ColliderComponent[]>
+        - !<reference> 5f9ae244-5aea-48f2-ac33-2801ab812b5f
+        - !<reference> 4fc53a6a-e7c0-4a34-a2c6-78782ffb85a4
+        - !<reference> 31a0a5ed-f61e-4439-bea3-b1166a4a461f
+        - !<reference> 0d61db18-89d6-4979-a26a-ef43524c84e0
+        - !<reference> 1d3e53a3-9fad-4db7-8abd-e97287b74bcf
+        - !<reference> 3fdbe99d-c16c-4f79-96dc-fd5a4f001b59
+        - !<reference> 6a4628aa-e4dc-459a-98c1-85c6560a6d9f
+        - !<reference> 6b1e9a04-d06b-4157-b238-ac49c84a4bd2
+      swatchInteractables: !<MappingBased.AssignableType_1[]>
+        - !<reference> 4aa82198-4750-4c5f-8d44-76b2d4e876de
+        - !<reference> 1101cb16-a4cf-407f-bfbc-7822d047608b
+        - !<reference> 0acdf1c0-41e7-4b84-a8a8-679d2ee30ffc
+        - !<reference> 9ce531ee-9503-4522-a7ef-edcda6ad53f0
+        - !<reference> da658230-a582-41fb-9736-2b9c666f9e4b
+        - !<reference> 23599f24-8f09-48e7-9b6a-54386aebc649
+        - !<reference> 957a7a7c-3488-4fda-a88a-54e1df144f9b
+        - !<reference> 1ee85e6a-9394-45f2-a624-a5a0edc1976c
   ScriptTypes:
     "":
       {}
@@ -2539,6 +3061,26 @@
     - !<own> 1fc7fa3e-6910-4741-b8a7-1b6660a39a9d
   Components:
     - !<own> 28e05826-1521-46fa-a54c-80f2957ec80c
+- !<RenderMeshVisual/89fbee95-8b6b-416d-8085-37944c5e2eb3>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 90a94261-4001-4028-8024-57e405422d93
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<ScriptComponent/8ad65587-4967-40c3-b34f-3884a9ea232b>
   PrefabRemaps:
     []
@@ -2587,6 +3129,26 @@
     []
   Components:
     - !<own> e96fa241-3fac-465c-ad2e-b71442b16bde
+- !<RenderMeshVisual/8be8b507-7aa5-4a1e-ac9b-596ef23e1b72>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 90a94261-4001-4028-8024-57e405422d93
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<RenderMeshVisual/8c3be019-7b67-4fb9-8158-1262f117b8e1>
   PrefabRemaps:
     []
@@ -2789,6 +3351,42 @@
   ScriptTypes:
     "":
       {}
+- !<ScriptComponent/9ce531ee-9503-4522-a7ef-edcda6ad53f0>
+  PrefabRemaps:
+    []
+  Name: Interactable
+  Enabled: true
+  ScriptAsset: !<reference> 652e631a-22d0-4941-9f74-2943df59f34c
+  ScriptInputsDefault:
+    targetingVisual: true
+    keepHoverOnTrigger: true
+    enableInstantDrag: true
+    isScrollable: true
+    allowMultipleInteractors: true
+    enablePokeDirectionality: true
+    acceptableXDirections: true
+    acceptableYDirections: true
+    acceptableZDirections: true
+    useFilteredPinch: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      targetingMode: !<float> 2.000000
+      targetingVisual: !<float> 1.000000
+      ignoreInteractionPlane: true
+      keepHoverOnTrigger: false
+      enableInstantDrag: false
+      isScrollable: false
+      allowMultipleInteractors: true
+      enablePokeDirectionality: false
+      acceptableXDirections: !<float> 0.000000
+      acceptableYDirections: !<float> 0.000000
+      acceptableZDirections: !<float> 1.000000
+      useFilteredPinch: false
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/9e373d68-993f-4c8f-83a0-6644f1d9fefd>
   PrefabRemaps:
     []
@@ -2819,24 +3417,6 @@
     - !<own> 46ea93d6-d161-4453-9064-6ac11e1d6523
   Components:
     []
-- !<ColliderComponent/a1680619-6c15-44b1-8b7f-1b399d9bb4bc>
-  PrefabRemaps:
-    []
-  Name: Physics Collider
-  Enabled: true
-  Shape: !<Sphere>
-    FitVisual: false
-    Radius: 6.000000
-  Matter: !<reference> 00000000-0000-0000-0000-000000000000
-  Filter: !<reference> 00000000-0000-0000-0000-000000000000
-  OverlapFilter: !<reference> 00000000-0000-0000-0000-000000000000
-  WorldSettings: !<reference> 00000000-0000-0000-0000-000000000000
-  EnableSmoothing: false
-  PositionTension: 30.000000
-  RotationTension: 30.000000
-  ForceCompound: false
-  Intangible: false
-  ShowCollider: false
 - !<SceneObject/a4b1ce71-4840-4493-bc52-58f3c13933e1>
   PrefabRemaps:
     []
@@ -2961,6 +3541,21 @@
     []
   Components:
     - !<own> 11c4bb09-7c38-4023-9802-74f9f28709a9
+- !<SceneObject/ab637133-3385-4c4f-9181-8c77d0f97729>
+  PrefabRemaps:
+    []
+  Name: Palette Cobalt Fill
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.400000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 4.000000, y: 4.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 4af6eae8-e7b3-41a1-994b-807a2ae3da6f
 - !<SceneObject/abfa4c71-3560-46f0-9471-90e212f21185>
   PrefabRemaps:
     []
@@ -3459,6 +4054,90 @@
     []
   Components:
     []
+- !<Text/c6067a15-5d63-4aff-a98b-ee72a54debf3>
+  PrefabRemaps:
+    []
+  Name: Text
+  Enabled: true
+  RenderOrder: 20
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Text: WAITING FOR GUESSER
+  Editable: false
+  ShowEditingPreview: true
+  TouchHandler: !<reference> 00000000-0000-0000-0000-000000000000
+  EnableRichText: false
+  SizeToFit: false
+  FontSize: 64.000000
+  FontSource: !<reference> 00000000-0000-0000-0000-000000000000
+  PreferredStyle: Regular
+  LayoutRect:
+    left: -7.500000
+    bottom: -2.250000
+    right: 7.500000
+    top: 2.250000
+  DebugRenderLayoutRect: false
+  OverflowVertical: Overflow
+  OverflowHorizontal: Overflow
+  Fill: !<TextFill>
+    Mode: Solid
+    Color: {x: 1.000000, y: 0.839216, z: 0.352941, w: 1.000000}
+    Texture: !<reference> 00000000-0000-0000-0000-000000000000
+    ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+    TileCount: 5.000000
+    TileZone: Rect
+    TextureStretch: FitWidth
+  BlendMode: PremultipliedAlpha
+  Outline: !<OutlineSettings>
+    Enabled: false
+    Fill: !<TextFill>
+      Mode: Solid
+      Color: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}
+      Texture: !<reference> 00000000-0000-0000-0000-000000000000
+      ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+      TileCount: 5.000000
+      TileZone: Rect
+      TextureStretch: FitWidth
+    Size: 0.250000
+  Dropshadow: !<DropshadowSettings>
+    Enabled: false
+    Fill: !<TextFill>
+      Mode: Solid
+      Color: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}
+      Texture: !<reference> 00000000-0000-0000-0000-000000000000
+      ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+      TileCount: 5.000000
+      TileZone: Rect
+      TextureStretch: FitWidth
+    OffsetX: 0.250000
+    OffsetY: 0.250000
+  Background: !<BackgroundSettings>
+    Enabled: false
+    Fill: !<TextFill>
+      Mode: Solid
+      Color: {x: 0.000000, y: 0.000000, z: 0.000000, w: 1.000000}
+      Texture: !<reference> 00000000-0000-0000-0000-000000000000
+      ColorTint: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+      TileCount: 5.000000
+      TileZone: Rect
+      TextureStretch: FitWidth
+    Margins:
+      left: 0.000000
+      bottom: 0.000000
+      right: 0.000000
+      top: 0.000000
+    CornerRadius: 0.000000
+  AdvancedLayout: !<TextAdvancedLayout>
+    ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+    LetterSpacing: 0.000000
+    LineSpacing: 1.000000
+    CapitalizationOverride: None
+  DepthTest: false
+  TwoSided: false
 - !<ScriptComponent/c8e031d3-a8a1-468a-a419-427f8556de4c>
   PrefabRemaps:
     []
@@ -3751,23 +4430,23 @@
     - !<own> bbcbfc17-8d65-4333-bce1-6f7239f690b8
   Components:
     []
-- !<SceneObject/d69c5ba9-060e-4ebf-ad07-ca894430f8cb>
+- !<SceneObject/d5fea10e-9b54-4842-8309-823b7ad5bd72>
   PrefabRemaps:
     []
-  Name: Palette Mint
+  Name: Palette Cyan
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: 13.000000, y: 0.000000, z: 0.000000}
+    Position: {x: -21.000000, y: -7.000000, z: 0.000000}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
     Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
     HasSegmentScaleCompensation: false
   Children:
-    - !<own> 10e59af1-8eef-46de-a614-61e39726c6b9
-    - !<own> 72301c2f-744c-4ddf-9097-29705e611c81
+    - !<own> 4ffe9aeb-b48a-4760-b4ee-3e5c7f344a7e
+    - !<own> 409ae522-3b00-4c05-9a9b-5b94b64aee50
   Components:
-    - !<own> a1680619-6c15-44b1-8b7f-1b399d9bb4bc
-    - !<own> 6efc1b64-19d1-4af8-949b-68195b9598d2
+    - !<own> 1d3e53a3-9fad-4db7-8abd-e97287b74bcf
+    - !<own> da658230-a582-41fb-9736-2b9c666f9e4b
 - !<RenderMeshVisual/d8a7d42f-80c8-4e44-90a0-571920be612c>
   PrefabRemaps:
     []
@@ -3848,6 +4527,42 @@
     - !<own> f74a6bbb-4fba-4d8b-9b4e-64dd1c3e9ac3
   Components:
     []
+- !<ScriptComponent/da658230-a582-41fb-9736-2b9c666f9e4b>
+  PrefabRemaps:
+    []
+  Name: Interactable
+  Enabled: true
+  ScriptAsset: !<reference> 652e631a-22d0-4941-9f74-2943df59f34c
+  ScriptInputsDefault:
+    targetingVisual: true
+    keepHoverOnTrigger: true
+    enableInstantDrag: true
+    isScrollable: true
+    allowMultipleInteractors: true
+    enablePokeDirectionality: true
+    acceptableXDirections: true
+    acceptableYDirections: true
+    acceptableZDirections: true
+    useFilteredPinch: true
+  ScriptTypesDefault:
+    {}
+  ScriptInputs:
+    "":
+      targetingMode: !<float> 2.000000
+      targetingVisual: !<float> 1.000000
+      ignoreInteractionPlane: true
+      keepHoverOnTrigger: false
+      enableInstantDrag: false
+      isScrollable: false
+      allowMultipleInteractors: true
+      enablePokeDirectionality: false
+      acceptableXDirections: !<float> 0.000000
+      acceptableYDirections: !<float> 0.000000
+      acceptableZDirections: !<float> 1.000000
+      useFilteredPinch: false
+  ScriptTypes:
+    "":
+      {}
 - !<SceneObject/dcc36a33-e23d-48f3-8e96-f9c9fd3cd030>
   PrefabRemaps:
     []
@@ -3911,7 +4626,7 @@
   ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
   ShadowDensity: 1.000000
   Materials:
-    - !<reference> 5219a386-27aa-4015-8fe4-b61a7ee27131
+    - !<reference> 58d9fb19-ee0e-49b7-816a-286cad956de7
   Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
   Skin: !<reference> 00000000-0000-0000-0000-000000000000
   BlendShapesEnabled: true
@@ -3973,6 +4688,26 @@
     - !<own> 0f983d21-20bc-4d89-a991-fbb95bacbd64
   Components:
     []
+- !<RenderMeshVisual/e7f60bbc-7773-4ef3-a89d-60dc479ba55f>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> f881beab-3746-419e-82ab-08cf8f033838
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<SceneObject/e81d6440-5b7c-45b5-9382-c5e382da9bbc>
   PrefabRemaps:
     []
@@ -4026,6 +4761,76 @@
     Fingers_length: 0.000000
     Thumb_inflate: 0.000000
     Thumb_length: 0.000000
+- !<RenderMeshVisual/e9aff984-121d-49f1-8ae5-39bfa6909fdd>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 7eaf3f4b-94de-47c6-ab1d-a9d37e85527e
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/eb4c050b-7e46-4cbd-b45f-95df1822a89d>
+  PrefabRemaps:
+    []
+  Name: Palette Lime Fill
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.400000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 4.000000, y: 4.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> e9aff984-121d-49f1-8ae5-39bfa6909fdd
+- !<RenderMeshVisual/ed332574-056c-4fa9-bce0-8b6630fed648>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> bdf2aa69-d8df-4c6c-9b32-096ecc856b2c
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/edc8c715-323f-434a-bcd9-8543b9593599>
+  PrefabRemaps:
+    []
+  Name: Palette Magenta Halo
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 5.200000, y: 5.200000, z: 0.800000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 8be8b507-7aa5-4a1e-ac9b-596ef23e1b72
 - !<SceneObject/f0394c5d-4c44-4c65-a77c-e1c7e05ca905>
   PrefabRemaps:
     []
@@ -4041,6 +4846,26 @@
     []
   Components:
     []
+- !<RenderMeshVisual/f1612862-73c0-4e0e-b61b-0c6b5b74b7ae>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 90a94261-4001-4028-8024-57e405422d93
+  Mesh: !<reference> 86b791d1-0645-4578-b928-1199354634b1
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<RenderMeshVisual/f18a8dfc-a133-45ea-b6e4-2b2f57323951>
   PrefabRemaps:
     []
@@ -4095,6 +4920,7 @@
       timerText: !<reference.Text> fd49fd56-3a02-4607-818c-017a8ca7fcf6
       connectionText: !<reference.Text> bcf81dcf-e3e0-4e6a-bf4a-c4a5615b7593
       resultText: !<reference.Text> 613d4b9f-2138-4b84-b028-0546340d95db
+      roomText: !<reference.Text> c6067a15-5d63-4aff-a98b-ee72a54debf3
       connectionDot: !<reference.SceneObject> bec9168a-e992-4321-ac7e-e1a114ac9cb2
       connectionDotVisual: !<reference.RenderMeshVisual> bcc200d8-6cc4-4284-8301-ccfc71e94268
       resultMarker: !<reference.SceneObject> 9284ea66-b037-49ac-9eb7-3796f327dde6
@@ -4311,6 +5137,21 @@
     []
   Components:
     - !<own> 0afab3ab-27a1-40d9-acb8-168e6ba85fdb
+- !<SceneObject/fb078fb2-38b5-4a9c-bb89-e46119a30d4f>
+  PrefabRemaps:
+    []
+  Name: Palette Scarlet Fill
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.400000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 4.000000, y: 4.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 5f8dd4be-b48b-4249-a053-3d6e95f557ff
 - !<SceneObject/fcc185fc-4e88-4e9e-9c71-40bd83b1b0ed>
   PrefabRemaps:
     []

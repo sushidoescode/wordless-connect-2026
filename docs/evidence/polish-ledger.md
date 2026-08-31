@@ -115,11 +115,14 @@ change or retain rationale, and fresh proof. Captures remain local and ignored.
   coral 7.1 / mint 11.9 / lemon 12.9:1; title-safe on every overlay; transitions
   (correct ~10.3 s, medallions before 20, split 0–51, disclosure all segments,
   exact `WRONG · BOTH STROKES GO CORAL`); 1440×810 + 390 px legible.
-- **Fresh Stage A panel:** 3/3 comprehension PASS on the recut; all three
-  confirmed captions no longer obscure the panels/stroke/glyph. Stage B verified
-  parts PASS; spoken audio is tool-unperceivable and was cleared by the owner
-  listen-through. Review: `local-handoff/reviews/task16/recut-review-verbatim.md`
-  (the fresh final-hash panel is in `final-panel-verbatim.md`).
+- **Fresh two-stage panel (authoritative):** 3/3 Stage A comprehension PASS +
+  3/3 STAGE B: PASS on the exact `254945f2` + final bundle; all three confirmed
+  captions no longer obscure the panels/stroke/glyph and independently recomputed
+  the bundle aggregate. Spoken audio is tool-unperceivable and was cleared by the
+  owner listen-through. Complete verbatim:
+  `local-handoff/reviews/task16/final3-reviewer-1.md`,
+  `final3-reviewer-2.md`, `final3-reviewer-3.md` (earlier panels retained but
+  superseded: `final-panel-verbatim.md`, `recut-review-verbatim.md`).
 - **Hero:** re-extracted from the recut @ 17.0 s (`docs/media/wordless-relay-hero.png`,
   SHA `72664be3…`).
 - **Outcome:** both media blockers CLEARED — the caption-legibility blocker by

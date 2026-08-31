@@ -113,13 +113,19 @@ bottom overlay band so no caption/card covers a pane, stroke, or glyph.
     spoken lines, the Chris voice, delivery, timing, and no clipping/defects,
     clearing the audio blocker.
 
-### Shipped-caption reconciliation
+### Shipped-caption reconciliation — SUPERSEDED (v1 `18f7ce9a` history)
 
-The planned caption/card column records the approved plan; the shipped cut
-deviated in the ways below (recorded for honesty; the claim ledger was never
-weakened to fit the cut). All deviations are wording/placement — no story
-obligation is missing, no beat is reordered, and every numeric claim on screen
-still matches its ledger row and scope.
+> **SUPERSEDED.** This section documents the FIRST candidate (`18f7ce9a…`, e.g.
+> the beat-1 caption "One person draws a clue in space…" and the ~19 s / seg-5
+> timing). It is retained as history only. The authoritative facts for the
+> shipped recut (`254945f2…`) are in "Recut reconciliation" below and the
+> Observed columns of the segment table above.
+
+The planned caption/card column records the approved plan; the v1 cut deviated in
+the ways below (recorded for honesty; the claim ledger was never weakened to fit
+the cut). All deviations are wording/placement — no story obligation is missing,
+no beat is reordered, and every numeric claim on screen still matches its ledger
+row and scope.
 
 - **Segments 1–4 caption wording.** The shipped burned lower-thirds are full
   sentences rather than the planned short all-caps lines: seg 1 `One person

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 
@@ -10,6 +10,8 @@ import {
   partitionAuditReport,
   looksBinary,
   blobFromBuffer,
+  collectTreeBlobs,
+  collectSidecars,
 } from '../security/audit-prospective-tree.mjs'
 import { auditReleaseHistory } from '../security/audit-release-history.mjs'
 
@@ -351,4 +353,100 @@ test('selfRefKey (JSON tuple) still exempts enumerated refs and blocks a home pa
   assert.equal(r.exitCode, 20)
   assert.equal(r.patternMachinery.length, 1)
   assert.equal(r.otherBlocking.length, 1)
+})
+
+// --- FAIL-CLOSED tree/sidecar handling (ls-tree -z, object-id retrieval) ---
+
+const HOMEPATH = ['', 'Users', 'nobody', 'p', 'x.txt'].join('/') // matches the home-path rule
+const OID = (c) => c.repeat(40) // fake 40-hex object id
+
+// Build a `git ls-tree -r -z` buffer from [{object, path(str|Buffer), content(str|Buffer)}].
+function lsTreeZ(entries) {
+  const parts = []
+  for (const e of entries) {
+    parts.push(Buffer.from(`100644 blob ${e.object}\t`, 'latin1'))
+    parts.push(Buffer.isBuffer(e.path) ? e.path : Buffer.from(e.path, 'utf8'))
+    parts.push(Buffer.from([0x00]))
+  }
+  return Buffer.concat(parts)
+}
+// Injectable git runner: serves ls-tree from entries, cat-file by object id.
+function fakeRun(entries, { failCatFile = false, lsTreeBuf = null } = {}) {
+  const byId = new Map(entries.map((e) => [e.object, Buffer.isBuffer(e.content) ? e.content : Buffer.from(e.content ?? '', 'utf8')]))
+  return (args) => {
+    if (args[0] === 'ls-tree') return lsTreeBuf ?? lsTreeZ(entries)
+    if (args[0] === 'cat-file') {
+      if (failCatFile) throw new Error('injected cat-file failure')
+      const b = byId.get(args[2])
+      if (!b) throw new Error('unknown object ' + args[2])
+      return b
+    }
+    throw new Error('unexpected git call: ' + args.join(' '))
+  }
+}
+
+for (const [name, path] of [
+  ['newline', 'a\nb.txt'],
+  ['tab', 'a\tb.txt'],
+  ['double-quote', 'a"b.txt'],
+  ['backslash', 'a\\b.txt'],
+]) {
+  test(`FAIL-CLOSED: a ${name} filename with a home path is parsed (by object id) and BLOCKS`, async () => {
+    const blobs = collectTreeBlobs('T', fakeRun([{ object: OID('a'), path, content: `x ${HOMEPATH}\n` }]))
+    assert.equal(blobs.length, 1)
+    assert.equal(blobs[0].path, path, 'path preserved losslessly')
+    assert.ok(blobs[0].text.includes(HOMEPATH), 'content scanned (retrieved by object id)')
+    const { report } = await auditReleaseHistory({ tree: blobs })
+    assert.equal(partitionAuditReport(report).exitCode, 20)
+  })
+}
+
+test('FAIL-CLOSED: an injected cat-file read failure THROWS (no silent empty text)', () => {
+  assert.throws(
+    () => collectTreeBlobs('T', fakeRun([{ object: OID('b'), path: 'ok.md', content: 'hi' }], { failCatFile: true })),
+    /cat-file/i)
+})
+
+test('FAIL-CLOSED: a non-UTF-8 tree path THROWS (cannot represent safely → exit 30)', () => {
+  const badPath = Buffer.from([0xff, 0xfe, 0x2e, 0x74, 0x78, 0x74]) // invalid UTF-8 lead bytes
+  assert.throws(() => collectTreeBlobs('T', fakeRun([{ object: OID('c'), path: badPath, content: 'x' }])),
+    /valid UTF-8|cannot represent/i)
+})
+
+test('FAIL-CLOSED: a malformed ls-tree record (no TAB) THROWS', () => {
+  const buf = Buffer.concat([Buffer.from('100644 blob ' + OID('d'), 'latin1'), Buffer.from([0x00])]) // no TAB/path
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /no TAB/i)
+})
+
+test('FAIL-CLOSED: a malformed object id THROWS', () => {
+  const buf = Buffer.concat([Buffer.from('100644 blob NOTAHASH\tok.md', 'latin1'), Buffer.from([0x00])])
+  assert.throws(() => collectTreeBlobs('T', fakeRun([], { lsTreeBuf: buf })), /object id/i)
+})
+
+test('FAIL-CLOSED: a broken symlink in a sidecar dir THROWS (no silent skip → exit 30)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'wl-sidecar-fail-'))
+  try {
+    symlinkSync(join(dir, 'does-not-exist-target'), join(dir, 'broken-link'))
+    assert.throws(() => collectSidecars([dir]))
+  } finally { rmSync(dir, { recursive: true, force: true }) }
+})
+
+test('CLI: the reproduced NEWLINE-filename case BLOCKS (exit 20), not a false clean', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'wl-audit-nl-'))
+  try {
+    mkdirSync(join(dir, 'tools/security'), { recursive: true })
+    execFileSync('cp', [resolve('tools/security/audit-prospective-tree.mjs'), join(dir, 'tools/security/audit-prospective-tree.mjs')])
+    execFileSync('cp', [resolve('tools/security/audit-release-history.mjs'), join(dir, 'tools/security/audit-release-history.mjs')])
+    // a real file whose NAME contains a newline, carrying a home path
+    writeFileSync(join(dir, 'a\nb.txt'), `see ${HOMEPATH}\n`)
+    writeFileSync(join(dir, 'README.md'), 'clean\n')
+    execFileSync('git', ['init', '-q'], { cwd: dir })
+    execFileSync('git', ['config', 'user.email', 't@t'], { cwd: dir })
+    execFileSync('git', ['config', 'user.name', 't'], { cwd: dir })
+    execFileSync('git', ['add', '-A'], { cwd: dir })
+    let code = 0
+    try { execFileSync('node', ['tools/security/audit-prospective-tree.mjs', '--tree', 'INDEX'], { cwd: dir, stdio: 'pipe' }) }
+    catch (e) { code = e.status }
+    assert.equal(code, 20, 'a home path in a newline-named file must block, not exit clean')
+  } finally { rmSync(dir, { recursive: true, force: true }) }
 })

@@ -109,8 +109,16 @@ export function partitionAuditReport(report, exemptKeys = SYNTHETIC_SELF_REFEREN
   }
 }
 
+// Runs git and returns its stdout Buffer; any non-zero exit / spawn failure
+// throws a typed error so the caller (main) exits 30 — never a silent fallback.
 function git(args) {
-  return execFileSync('git', args, { maxBuffer: 256 * 1024 * 1024 })
+  try {
+    const out = execFileSync('git', args, { maxBuffer: 256 * 1024 * 1024 })
+    if (!Buffer.isBuffer(out)) throw new Error('git did not return a buffer')
+    return out
+  } catch (e) {
+    throw new Error(`git ${args.join(' ')} failed: ${e.message}`)
+  }
 }
 
 // Decides text vs binary from the blob's own BYTES (content), then returns the
@@ -119,33 +127,53 @@ export function blobFromBuffer(path, buf) {
   return looksBinary(buf) ? { path, text: '' } : { path, text: buf.toString('utf8') }
 }
 
-function collectTreeBlobs(tree) {
-  const listing = git(['ls-tree', '-r', '--format=%(objecttype) %(path)', tree]).toString()
+// FAIL-CLOSED tree walk. Parses `git ls-tree -r -z <tree>` losslessly: each
+// NUL-terminated record is `<mode> SP <type> SP <object> TAB <path>` where the
+// path is RAW bytes (any byte except NUL — newline/tab/quote/backslash included).
+// Content is retrieved by OBJECT ID, never `tree:path`. Any parse failure, a path
+// that is not valid UTF-8 (cannot be represented safely), or any git failure
+// THROWS — the record is never dropped and text is never silently emptied. `run`
+// is injectable for tests; production uses git().
+export function collectTreeBlobs(tree, run = git) {
+  const out = run(['ls-tree', '-r', '-z', tree])
+  if (!Buffer.isBuffer(out)) throw new Error('ls-tree did not return a buffer')
   const blobs = []
-  for (const line of listing.split('\n')) {
-    if (!line) continue
-    const sp = line.indexOf(' ')
-    const type = line.slice(0, sp)
-    const path = line.slice(sp + 1)
+  let start = 0
+  for (let i = 0; i <= out.length; i += 1) {
+    if (i !== out.length && out[i] !== 0x00) continue
+    if (i === start) { start = i + 1; continue } // empty segment (trailing NUL)
+    const rec = out.subarray(start, i)
+    start = i + 1
+    const tab = rec.indexOf(0x09)
+    if (tab < 0) throw new Error('malformed ls-tree -z record: no TAB before path')
+    const header = rec.subarray(0, tab).toString('latin1') // mode/type/object are ASCII
+    const parts = header.split(' ')
+    if (parts.length < 3) throw new Error(`malformed ls-tree -z record header: ${JSON.stringify(header)}`)
+    const type = parts[1]
+    const object = parts[2]
+    if (!/^[0-9a-f]{40}$|^[0-9a-f]{64}$/.test(object)) throw new Error(`malformed ls-tree object id: ${JSON.stringify(object)}`)
+    const pathBuf = rec.subarray(tab + 1)
+    let path
+    try { path = utf8Strict.decode(pathBuf) } catch { throw new Error('tree path is not valid UTF-8; cannot represent safely (audit fails closed)') }
+    if (path.length === 0) throw new Error('empty tree path in ls-tree record')
     if (type !== 'blob') continue
-    let buf
-    try { buf = git(['cat-file', 'blob', `${tree}:${path}`]) } // Buffer
-    catch { blobs.push({ path, text: '' }); continue }
+    const buf = run(['cat-file', 'blob', object]) // by object ID; throws on any failure — no silent empty
+    if (!Buffer.isBuffer(buf)) throw new Error(`cat-file did not return a buffer for ${object}`)
     blobs.push(blobFromBuffer(path, buf))
   }
   return blobs
 }
 
-function collectSidecars(dirs) {
+// FAIL-CLOSED sidecar walk: any readdir/stat/read failure (missing file, broken
+// symlink, unreadable file) THROWS — sidecars are never silently skipped.
+export function collectSidecars(dirs) {
   const out = []
   const walk = (d) => {
     for (const name of readdirSync(d)) {
       const full = join(d, name)
       const st = statSync(full)
       if (st.isDirectory()) walk(full)
-      else if (st.isFile()) {
-        try { out.push(blobFromBuffer(full, readFileSync(full))) } catch { /* skip */ }
-      }
+      else if (st.isFile()) out.push(blobFromBuffer(full, readFileSync(full)))
     }
   }
   for (const d of dirs) { if (existsSync(d)) walk(d) }

@@ -25,11 +25,13 @@ export interface LensHudResourceCounts {
 }
 
 const HUD_RESOURCE_COUNTS: LensHudResourceCounts = Object.freeze({
-  sceneObjects: 8,
+  sceneObjects: 9,
   materials: 3,
 })
 
 const WORD_PATTERN = /^[A-Z]{1,12}$/
+const ROOM_CODE_TEXT_PATTERN = /^[A-Z0-9]{6}$/
+const ROOM_PLACEHOLDER = '——'
 
 function phaseText(phase: RoundPhase, strokeComplete: boolean): string {
   switch (phase) {
@@ -132,6 +134,7 @@ export class LensHudView extends BaseScriptComponent {
   @input timerText: Text
   @input connectionText: Text
   @input resultText: Text
+  @input roomText: Text
 
   @input connectionDot: SceneObject
   @input connectionDotVisual: RenderMeshVisual
@@ -184,6 +187,20 @@ export class LensHudView extends BaseScriptComponent {
     }
   }
 
+  /**
+   * Renders the composition-supplied room line. Routing state never enters
+   * RoundStore, so this is deliberately separate from render(snapshot); an
+   * out-of-contract value renders a placeholder rather than the raw input.
+   */
+  renderRoom(roomCode: string): void {
+    this.assertBindings()
+    const display = typeof roomCode === 'string' &&
+      ROOM_CODE_TEXT_PATTERN.test(roomCode)
+      ? roomCode
+      : ROOM_PLACEHOLDER
+    this.writeText(this.roomText, `ROOM · ${display}`, 'ivory', true)
+  }
+
   getOwnedResourceCounts(): LensHudResourceCounts {
     return HUD_RESOURCE_COUNTS
   }
@@ -211,11 +228,12 @@ export class LensHudView extends BaseScriptComponent {
   private assertBindings(): void {
     if (!this.roleText || !this.phaseText || !this.promptText ||
         !this.timerText || !this.connectionText || !this.resultText ||
+        !this.roomText ||
         !this.connectionDot || !this.connectionDotVisual ||
         !this.resultMarker || !this.resultMarkerVisual ||
         !this.lemonMaterial || !this.mintMaterial || !this.coralMaterial) {
       throw new Error(
-        'LensHudView requires 6 Text, 2 marker, and 3 material bindings',
+        'LensHudView requires 7 Text, 2 marker, and 3 material bindings',
       )
     }
   }

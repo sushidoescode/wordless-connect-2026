@@ -24,6 +24,7 @@ async function loadWordlessApp() {
   for (const relativeImport of [
     './Core/Protocol',
     './Core/RecoveryCoordinator',
+    './Core/RoomCode',
     './Core/RoundStore',
     './Core/StrokeGeometry',
     './Core/WordDeck',
@@ -108,11 +109,26 @@ class FakeRelay {
     this.closeDeferred = null
     this.sendDeferreds = []
     this.beforeSend = null
+    this.assignedSessionIds = []
+    this.assignedBeforeFirstRound = null
     this.diagnostics = {
       activeChannels: 1,
       activeTimers: 2,
       messageListeners: 1,
     }
+  }
+
+  assignSessionId(sessionId) {
+    if (this.assignedSessionIds.length > 0) {
+      throw new Error('session ID cannot change during a relay instance')
+    }
+    this.assignedBeforeFirstRound = this.localRounds.length === 0
+    this.assignedSessionIds.push(sessionId)
+  }
+
+  getEffectiveSessionId() {
+    return this.assignedSessionIds[this.assignedSessionIds.length - 1] ??
+      'WAVE42'
   }
 
   async connect() {
@@ -299,14 +315,19 @@ class FakeRibbon {
 class FakeHud {
   constructor() {
     this.renders = []
+    this.rooms = []
   }
 
   render(snapshot) {
     this.renders.push(snapshot)
   }
 
+  renderRoom(roomCode) {
+    this.rooms.push(roomCode)
+  }
+
   getOwnedResourceCounts() {
-    return { sceneObjects: 8, materials: 3 }
+    return { sceneObjects: 9, materials: 3 }
   }
 }
 
@@ -374,7 +395,7 @@ class FakePalette {
 
 function message(type, roundId, payload, overrides = {}) {
   return {
-    v: 2,
+    v: 3,
     type,
     sessionId: 'WAVE42',
     roundId,
@@ -417,6 +438,7 @@ function makeHarness(relay = new FakeRelay()) {
   const palette = new FakePalette()
   const logs = []
   const clock = { nowMs: 1_000 }
+  const roomCodeCalls = { count: 0 }
   const app = new WordlessAppController({
     relay,
     brush,
@@ -427,6 +449,10 @@ function makeHarness(relay = new FakeRelay()) {
     palette,
     nowMs: () => clock.nowMs,
     createNonce: () => 'APP00001',
+    createRoomCode: () => {
+      roomCodeCalls.count += 1
+      return 'AB23CD'
+    },
     log: (line) => logs.push(line),
   })
   return {
@@ -440,6 +466,7 @@ function makeHarness(relay = new FakeRelay()) {
     palette,
     logs,
     clock,
+    roomCodeCalls,
   }
 }
 
@@ -744,7 +771,7 @@ test('routes palette intent through engine snapshots and locks before stroke sen
 
   assert.equal(beginObserved, true)
   assert.equal(harness.app.getSnapshot().paletteInputLocked, true)
-  harness.palette.emit('mint')
+  harness.palette.emit('cyan')
   assert.equal(harness.app.getSnapshot().strokeColorId, 'lemon')
 
   await harness.app.destroy()
@@ -1647,7 +1674,7 @@ test('diagnostics use stable ownership counters and logs remain secret-safe', as
 
   assert.equal(
     harness.app.diagnosticSnapshot(),
-    '[WordlessDiag] round=r-APP00001-1 listeners=1 timers=2 channels=1 sceneObjects=14 materials=7',
+    '[WordlessDiag] round=r-APP00001-1 listeners=1 timers=2 channels=1 sceneObjects=15 materials=7',
   )
   assert.equal(harness.logs.some((line) =>
     /publicToken|auth|SUPABASE|raw message|SNAKE/.test(line)), false)
@@ -1679,4 +1706,48 @@ test('decorated runtime component binds authored dependencies and delegates life
   component.events.get('OnDestroyEvent')()
   await settle()
   assert.equal(harness.relay.closeCalls, 1)
+})
+
+test('start generates one room code, assigns it before any round, and renders the HUD room line', async () => {
+  const harness = makeHarness()
+  await harness.app.start()
+
+  assert.equal(harness.roomCodeCalls.count, 1)
+  assert.deepEqual(harness.relay.assignedSessionIds, ['AB23CD'])
+  assert.equal(harness.relay.assignedBeforeFirstRound, true)
+  assert.deepEqual(harness.hud.rooms, ['AB23CD'])
+  assert.equal(harness.relay.localRounds.length, 1)
+  assert.equal(harness.relay.connectCalls, 1)
+})
+
+test('replay, reconnect, and recovery never regenerate or reassign the room', async () => {
+  const harness = makeHarness()
+  await startAndBind(harness)
+  await finishCorrectRound(harness)
+
+  harness.replay.request(ROUND_ONE)
+  await settle()
+
+  harness.relay.emitStatus('CHANNEL_ERROR', 'CHANNEL_ERROR')
+  await settle()
+  harness.relay.emitStatus('SUBSCRIBED', 'SUBSCRIBED · TRANSPORT ONLY')
+  harness.relay.emitMessage(presenceAck({ sequence: 9 }))
+  await settle()
+
+  assert.equal(harness.roomCodeCalls.count, 1)
+  assert.deepEqual(harness.relay.assignedSessionIds, ['AB23CD'])
+  assert.deepEqual(harness.hud.rooms, ['AB23CD'])
+})
+
+test('a fresh controller lifecycle asks its source for a fresh room code', async () => {
+  const first = makeHarness()
+  await first.app.start()
+  await first.app.destroy()
+
+  const second = makeHarness()
+  await second.app.start()
+
+  assert.equal(first.roomCodeCalls.count, 1)
+  assert.equal(second.roomCodeCalls.count, 1)
+  assert.deepEqual(second.relay.assignedSessionIds, ['AB23CD'])
 })

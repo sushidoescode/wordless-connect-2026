@@ -212,6 +212,7 @@ function makeBoundView() {
   view.connectionDotVisual = { mainMaterial: null }
   view.resultMarker = { enabled: true }
   view.resultMarkerVisual = { mainMaterial: null }
+  view.roomText = makeText()
   view.lemonMaterial = { name: 'lemon' }
   view.mintMaterial = { name: 'mint' }
   view.coralMaterial = { name: 'coral' }
@@ -263,7 +264,7 @@ test('clears hidden result resources and exposes stable authored-resource counts
   view.onAwake()
 
   assert.deepEqual(view.getOwnedResourceCounts(), {
-    sceneObjects: 8,
+    sceneObjects: 9,
     materials: 3,
   })
   view.render(snapshot())
@@ -271,7 +272,7 @@ test('clears hidden result resources and exposes stable authored-resource counts
   assert.equal(view.resultText.enabled, false)
   assert.equal(view.resultMarker.enabled, false)
   assert.deepEqual(view.getOwnedResourceCounts(), {
-    sceneObjects: 8,
+    sceneObjects: 9,
     materials: 3,
   })
 })
@@ -282,6 +283,40 @@ test('rejects an incompletely authored HUD binding set', () => {
 
   assert.throws(
     () => view.onAwake(),
-    /LensHudView requires 6 Text, 2 marker, and 3 material bindings/,
+    /LensHudView requires 7 Text, 2 marker, and 3 material bindings/,
+  )
+})
+
+test('renders the dedicated room line in bright ivory', () => {
+  const view = makeBoundView()
+  view.onAwake()
+  view.renderRoom('AB23CD')
+
+  assert.equal(view.roomText.text, 'ROOM · AB23CD')
+  assert.equal(view.roomText.enabled, true)
+  assert.equal(view.roomText.textFill.mode, 'solid')
+  assert.deepEqual(
+    colorTuple(view.roomText.textFill.color),
+    [1, 246 / 255, 232 / 255, 1],
+  )
+})
+
+test('an invalid room value renders a placeholder, never the raw value', () => {
+  const view = makeBoundView()
+  view.onAwake()
+  for (const invalid of ['abc123', 'ABC1234', 'AB CD1', '', 'AB<CD1']) {
+    view.renderRoom(invalid)
+    assert.equal(view.roomText.text, 'ROOM · ——')
+    assert.equal(view.roomText.enabled, true)
+  }
+})
+
+test('the room text binding is mandatory', () => {
+  const view = makeBoundView()
+  view.roomText = null
+
+  assert.throws(
+    () => view.onAwake(),
+    /LensHudView requires 7 Text, 2 marker, and 3 material bindings/,
   )
 })

@@ -17,6 +17,7 @@ import type {
   RecoveryAction,
   RecoveryResetTransition,
 } from './Core/RecoveryCoordinator'
+import { generateRoomCode } from './Core/RoomCode'
 import { RoundStore } from './Core/RoundStore'
 import type { LensRoundState } from './Core/RoundStore'
 import {
@@ -77,6 +78,7 @@ interface RibbonPort {
 
 interface HudPort {
   render(snapshot: LensRoundState): void
+  renderRoom(roomCode: string): void
   getOwnedResourceCounts(): {
     readonly sceneObjects: number
     readonly materials: number
@@ -117,6 +119,7 @@ export interface WordlessAppDependencies {
   readonly palette: PalettePort
   readonly nowMs: () => number
   readonly createNonce: () => string
+  readonly createRoomCode: () => string
   readonly log: (line: string) => void
 }
 
@@ -282,6 +285,7 @@ export class WordlessAppController
   private readonly palette: PalettePort
   private readonly nowSource: () => number
   private readonly nonceSource: () => string
+  private readonly roomCodeSource: () => string
   private readonly logLine: (line: string) => void
   private readonly store = new RoundStore()
   private readonly engine = new WordlessEngine(
@@ -323,6 +327,7 @@ export class WordlessAppController
     this.palette = dependencies.palette
     this.nowSource = dependencies.nowMs
     this.nonceSource = dependencies.createNonce
+    this.roomCodeSource = dependencies.createRoomCode
     this.logLine = dependencies.log
   }
 
@@ -341,6 +346,15 @@ export class WordlessAppController
     this.brush.setListener(this)
     this.replay.setListener(this)
     this.palette.setListener(this)
+
+    // One room per composition lifecycle: generated before the first
+    // applyRound so the transport's receive policy binds to it, then never
+    // touched again — reconnects and recovery reuse the same room, and only
+    // a full Preview restart reaches this line again.
+    const roomCode = this.roomCodeSource()
+    this.relay.assignSessionId(roomCode)
+    this.hud.renderRoom(roomCode)
+    this.logLine(`[Wordless] ROOM code=${safeLogId(roomCode)}`)
 
     this.instanceNonce = this.nonceSource()
     this.roundCounter = 1
@@ -1112,6 +1126,7 @@ export class WordlessApp extends BaseScriptComponent {
       palette: this.palette,
       nowMs: () => Date.now(),
       createNonce: () => createInstanceNonce(),
+      createRoomCode: () => generateRoomCode(),
       log: (line) => print(line),
     })
     this.createEvent('OnStartEvent').bind(() => {

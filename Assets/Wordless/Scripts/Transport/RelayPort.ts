@@ -37,6 +37,8 @@ export type RelayControlEvent =
     }
 
 export interface RelayPort {
+  assignSessionId(sessionId: string): void
+  getEffectiveSessionId(): string
   connect(): Promise<void>
   send(draft: RelayMessageDraft): Promise<void>
   invalidateApplicationGeneration(): void

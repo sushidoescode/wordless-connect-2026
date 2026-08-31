@@ -91,7 +91,7 @@ function settle() {
 
 function guesserMessage(type, sequence, roundId, payload, overrides = {}) {
   return {
-    v: 2,
+    v: 3,
     type,
     sessionId: overrides.sessionId ?? 'WAVE42',
     roundId,
@@ -569,4 +569,53 @@ test('Lens named resync advances only the requested peer after the root reset se
 
   assert.equal(painterConnectionId.length, 8)
   assert.equal(harness.received.at(-1)?.payload.guessId, 'guess-after-reset')
+})
+
+test('Lens assigned session ID drives the topic and locks at policy creation', async () => {
+  lensNowMs = 0
+  lensLogs.length = 0
+  const supabase = new FakeSupabaseClient()
+  globalThis.__wordlessLensCreateClient = () => supabase
+  const transport = new SupabaseRelayTransport()
+  transport.supabaseProject = {
+    url: 'https://example.supabase.co',
+    publicToken: 'client-safe-public-key',
+  }
+  transport.sessionId = 'WAVE42'
+  transport.connectOnStart = false
+  transport.onAwake()
+
+  assert.throws(() => transport.assignSessionId('bad'), /invalid session ID/)
+  assert.throws(() => transport.assignSessionId('abc123'), /invalid session ID/)
+  assert.throws(() => transport.assignSessionId(''), /invalid session ID/)
+  transport.assignSessionId('AB23CD')
+  assert.equal(transport.getEffectiveSessionId(), 'AB23CD')
+
+  await transport.connect()
+  const channel = supabase.channels[0]
+  channel.emitStatus('SUBSCRIBED')
+  await settle()
+
+  assert.deepEqual(supabase.topics, ['wordless-relay:AB23CD'])
+  const readyMessage = messagesOfType(channel, 'presence.ready')[0]
+  assert.equal(readyMessage.sessionId, 'AB23CD')
+
+  assert.throws(
+    () => transport.assignSessionId('CD23AB'),
+    /session ID cannot change during a relay instance/,
+  )
+  assert.throws(
+    () => transport.assignSessionId('AB23CD'),
+    /session ID cannot change during a relay instance/,
+  )
+  assert.equal(transport.getEffectiveSessionId(), 'AB23CD')
+
+  await transport.close()
+  assert.throws(
+    () => transport.assignSessionId('CD23AB'),
+    /session ID cannot change during a relay instance/,
+  )
+  await transport.connect()
+  assert.equal(supabase.topics.length, 2)
+  assert.equal(supabase.topics[1], 'wordless-relay:AB23CD')
 })

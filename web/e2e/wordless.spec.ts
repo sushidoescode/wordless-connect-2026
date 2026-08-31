@@ -231,7 +231,7 @@ function message(
   connectionId = PAINTER_CONNECTION_ID,
 ) {
   return {
-    v: 2,
+    v: 3,
     type,
     sessionId: SESSION_ID,
     roundId,
@@ -351,6 +351,49 @@ test('validates join input without bypassing the six-character code', async ({ p
     broadcast: 1,
     status: 1,
   })
+})
+
+test('room query prefills the join input without auto-joining', async ({ page }) => {
+  await page.goto('/?room=wave42')
+  await expect(page.getByLabel('Six-character session code')).toHaveValue('WAVE42')
+  await page.waitForTimeout(100)
+  expect(await channelCount(page)).toBe(0)
+  await expect(page.getByRole('button', { name: 'JOIN ROUND' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'JOIN ROUND' }).click()
+  await expect(page.getByRole('status')).toContainText('WAITING FOR PAINTER')
+  await expect.poll(() => channelCount(page)).toBe(1)
+  const joinedSessionId = await page.evaluate(() => (window as unknown as {
+    __WORDLESS_RELAY_TEST__: { sent: readonly { sessionId?: string }[] }
+  }).__WORDLESS_RELAY_TEST__.sent[0]?.sessionId)
+  expect(joinedSessionId).toBe('WAVE42')
+})
+
+test('malformed and duplicate room queries never reach the join input', async ({ page }) => {
+  await page.goto('/')
+  const baseline = await page
+    .getByLabel('Six-character session code')
+    .inputValue()
+
+  await page.goto('/?room=bad%21%21')
+  await expect(page.getByLabel('Six-character session code')).toHaveValue(baseline)
+  expect(await page.content()).not.toContain('bad!!')
+
+  await page.goto('/?room=ABC123&room=XYZ789')
+  await expect(page.getByLabel('Six-character session code')).toHaveValue(baseline)
+  expect(await channelCount(page)).toBe(0)
+})
+
+test('manual entry overrides a room prefill on submit', async ({ page }) => {
+  await page.goto('/?room=wave42')
+  await expect(page.getByLabel('Six-character session code')).toHaveValue('WAVE42')
+  await page.getByLabel('Six-character session code').fill(' xyz789 ')
+  await page.getByRole('button', { name: 'JOIN ROUND' }).click()
+  await expect.poll(() => channelCount(page)).toBe(1)
+  const joinedSessionId = await page.evaluate(() => (window as unknown as {
+    __WORDLESS_RELAY_TEST__: { sent: readonly { sessionId?: string }[] }
+  }).__WORDLESS_RELAY_TEST__.sent[0]?.sessionId)
+  expect(joinedSessionId).toBe('XYZ789')
 })
 
 test('has no Axe violations across every public round state', async ({ page }, testInfo) => {
@@ -1045,7 +1088,7 @@ test('wrong result renders coral TRY AGAIN inside the viewport while correct sta
   await emitStroke(page, message('stroke.points', 'round-1', 3, {
     strokeId: 'stroke-1',
     points: [[100, 200], [300, 400]],
-  }), 'mint')
+  }), 'cyan')
   await emit(page, message('round.result', 'round-1', 4, {
     outcome: 'incorrect',
     guessId: 'guess-authoritative',

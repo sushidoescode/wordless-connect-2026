@@ -374,6 +374,27 @@ export class SupabaseRelayTransport extends BaseScriptComponent
     })
   }
 
+  /**
+   * Binds the composition-generated room code as the effective session ID.
+   * Fails closed on any assignment once the receive policy exists, so the
+   * room can never change after the first applied round, a reconnect, or a
+   * recovery cycle — only a full component lifecycle gets a new room.
+   */
+  assignSessionId(sessionId: string): void {
+    if (this.policy) {
+      throw new Error('session ID cannot change during a relay instance')
+    }
+    if (typeof sessionId !== 'string' ||
+        !SESSION_ID_PATTERN.test(sessionId)) {
+      throw new Error('invalid session ID')
+    }
+    this.sessionId = sessionId
+  }
+
+  getEffectiveSessionId(): string {
+    return this.sessionId
+  }
+
   private ensurePolicy(): ReceivePolicy {
     if (!SESSION_ID_PATTERN.test(this.sessionId)) {
       throw new Error('invalid session ID')

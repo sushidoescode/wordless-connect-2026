@@ -8,6 +8,7 @@ import {
   type BrowserTimerFactory,
 } from './relay-client'
 import { render } from './render'
+import { resolveRoomPrefill } from './room-prefill'
 import {
   WebRoundStore,
   type WebRoundIntent,
@@ -236,8 +237,10 @@ function startJoinView(): void {
   const form = requiredElement<HTMLFormElement>('join-form')
   const input = requiredElement<HTMLInputElement>('session-code')
   const error = requiredElement<HTMLElement>('join-error')
-  const prefill = import.meta.env.VITE_RELAY_SESSION_ID
-  if (typeof prefill === 'string') input.value = prefill.trim().toUpperCase()
+  input.value = resolveRoomPrefill(
+    window.location.search,
+    import.meta.env.VITE_RELAY_SESSION_ID,
+  )
 
   let joined = false
   form.addEventListener('submit', (event) => {

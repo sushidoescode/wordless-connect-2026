@@ -5,7 +5,7 @@
  * approved contract; do not add, remove, or reorder entries without a new
  * owner-approved design amendment.
  */
-export const PAINTER_COLOR_IDS = [
+export const PAINTER_COLOR_IDS = Object.freeze([
   'scarlet',
   'orange',
   'lemon',
@@ -14,7 +14,7 @@ export const PAINTER_COLOR_IDS = [
   'cobalt',
   'violet',
   'magenta',
-] as const
+] as const)
 
 export type StrokeColorId = (typeof PAINTER_COLOR_IDS)[number]
 
